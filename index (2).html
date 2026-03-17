@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gráficos de Controle · CEP</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0b0e13;
+      --surface:  #111520;
+      --surface2: #161b27;
+      --border:   #1e2535;
+      --border2:  #252d40;
+      --accent:   #3ecfcf;
+      --accent2:  #f0a500;
+      --danger:   #e05565;
+      --success:  #3ecfcf;
+      --text:     #dce4f0;
+      --muted:    #5a677f;
+      --muted2:   #8090aa;
+      --sidebar-w: 220px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar ─── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 1.4rem 1.2rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo .logo-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+    }
+
+    .sidebar-section {
+      padding: 1rem 0.8rem 0.4rem;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      padding: 0 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.7rem;
+      border-radius: 5px;
+      cursor: pointer;
+      color: var(--muted2);
+      font-size: 0.82rem;
+      font-weight: 400;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(62, 207, 207, 0.08);
+      border-color: rgba(62, 207, 207, 0.2);
+      color: var(--accent);
+    }
+
+    .nav-item .nav-icon {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      min-width: 38px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      padding: 2px 5px;
+      border-radius: 3px;
+      text-align: center;
+      color: inherit;
+    }
+
+    .nav-item.active .nav-icon {
+      background: rgba(62, 207, 207, 0.12);
+      border-color: rgba(62, 207, 207, 0.3);
+    }
+
+    .nav-item.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .nav-item.coming-soon::after {
+      content: 'em breve';
+      font-size: 0.58rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      margin-left: auto;
+      letter-spacing: 0.04em;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1rem 1.2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      line-height: 1.6;
+    }
+
+    /* ─── Main ─── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: 1100px;
+    }
+
+    /* ─── Pages ─── */
+    .page { display: none; }
+    .page.active { display: block; animation: fadein 0.25s ease; }
+
+    @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ─── Page header ─── */
+    .page-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .page-header h1 {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+
+    .page-header h1 em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    .page-header p {
+      font-size: 0.78rem;
+      color: var(--muted2);
+      margin-top: 0.3rem;
+      letter-spacing: 0.02em;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 3px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .tag-var { background: rgba(62,207,207,0.1); color: var(--accent); border: 1px solid rgba(62,207,207,0.25); }
+    .tag-ind { background: rgba(240,165,0,0.1); color: var(--accent2); border: 1px solid rgba(240,165,0,0.25); }
+
+    /* ─── Data section ─── */
+    .data-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .data-section h3 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    textarea.data-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.7rem;
+      border-radius: 4px;
+      resize: vertical;
+      min-height: 54px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.7;
+    }
+
+    textarea.data-input:focus { border-color: var(--accent); }
+
+    .data-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.5rem; }
+
+    /* ─── Controls ─── */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-end;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .ctrl-group label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .ctrl-group input[type="number"],
+    .ctrl-group select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.48rem 0.7rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 130px;
+    }
+
+    .ctrl-group input:focus, .ctrl-group select:focus { border-color: var(--accent); }
+
+    .ctrl-group input[type="range"] {
+      accent-color: var(--accent);
+      width: 150px;
+      cursor: pointer;
+    }
+
+    .range-val {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0b0e13;
+      border: none;
+      padding: 0.52rem 1.1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      height: 34px;
+      align-self: flex-end;
+    }
+
+    .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+    }
+
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+    /* ─── Chart cards ─── */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .chart-header h2 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .chart-header h2 em { color: var(--accent); font-style: normal; }
+
+    .chart-stats {
+      display: flex;
+      gap: 1.2rem;
+    }
+
+    .stat { text-align: right; }
+    .stat-label { font-size: 0.62rem; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+    .stat-val { font-family: 'DM Mono', monospace; font-size: 0.84rem; font-weight: 500; }
+    .stat-val.ucl { color: var(--danger); }
+    .stat-val.cl  { color: var(--accent); }
+    .stat-val.lcl { color: var(--accent2); }
+
+    .chart-body { padding: 0.5rem 0.5rem 0.5rem 0; }
+    canvas { display: block; width: 100%; }
+
+    /* ─── Violations ─── */
+    .violations {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .violations h3 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+    }
+
+    .viol-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.76rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted2);
+    }
+
+    .viol-item:last-child { border-bottom: none; }
+
+    .vdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .vdot.red { background: var(--danger); }
+    .vdot.ok  { background: var(--accent); }
+
+    .no-viol { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+
+    /* ─── Formulas ─── */
+    .formulas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .formula-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 1.1rem;
+    }
+
+    .formula-card h4 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .fline {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+      line-height: 1.5;
+    }
+
+    .fline em { color: var(--muted2); font-style: normal; }
+    .fline.note { color: var(--muted2); font-size: 0.72rem; }
+
+    /* ─── Subgroup input (Xbar-S) ─── */
+    .sg-hint {
+      font-size: 0.72rem;
+      color: var(--muted2);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 700px) {
+      :root { --sidebar-w: 0px; }
+      #sidebar { display: none; }
+      #main { margin-left: 0; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">CEP · SPC</div>
+    <div class="logo-sub">Controle Estatístico de Processo</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Variáveis</div>
+    <div class="nav-item active" onclick="showPage('imr')">
+      <span class="nav-icon">I-MR</span> Indivíduos
+    </div>
+    <div class="nav-item" onclick="showPage('xbars')">
+      <span class="nav-icon">X̄-S</span> Média e Desvio
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Análise</div>
+    <div class="nav-item disabled coming-soon">
+      <span class="nav-icon">BoxCox</span> Transformação
+    </div>
+    <div class="nav-item disabled coming-soon">
+      <span class="nav-icon">Cp/Cpk</span> Capacidade
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    d₂ = 1,128 · D₄ = 3,267<br>
+    c₄(n) · B₃/B₄ variáveis
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<main id="main">
+
+  <!-- ─────────────── PAGE: I-MR ─────────────── -->
+  <div id="page-imr" class="page active">
+    <div class="page-header">
+      <div>
+        <h1>Gráfico <em>I-MR</em></h1>
+        <p>Valores Individuais e Amplitude Móvel · subgrupo n = 1</p>
+      </div>
+      <span class="tag tag-ind">Medições Individuais</span>
+    </div>
+
+    <div class="data-section">
+      <h3>Dados de Entrada</h3>
+      <textarea id="imr-input" class="data-input" rows="2"
+        placeholder="Cole seus dados (separados por vírgula, ponto e vírgula ou espaço)..."></textarea>
+      <div class="data-hint">Ex: 23.1, 24.5, 22.8, 25.0, 23.7 · ou use "Gerar Dados" para um exemplo automático</div>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>Nº de Pontos</label>
+        <input type="range" id="imr-n" min="15" max="60" value="25"
+               oninput="document.getElementById('imr-nval').textContent=this.value">
+        <span class="range-val" id="imr-nval">25</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Média (μ)</label>
+        <input type="number" id="imr-mu" value="50" step="0.5">
+      </div>
+      <div class="ctrl-group">
+        <label>Desvio (σ)</label>
+        <input type="number" id="imr-sigma" value="3" step="0.1" min="0.1">
+      </div>
+      <div class="ctrl-group">
+        <label>Regras de Nelson</label>
+        <select id="imr-rule">
+          <option value="1">Regra 1 — fora dos limites</option>
+          <option value="2">Regras 1 + 2 (8 do mesmo lado)</option>
+        </select>
+      </div>
+      <button class="btn" onclick="imrGenerate()">⟳ Gerar Dados</button>
+      <button class="btn btn-ghost" onclick="imrApply()">▶ Aplicar</button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2>Gráfico <em>I</em> — Valores Individuais</h2>
+        <div class="chart-stats">
+          <div class="stat"><div class="stat-label">LCS</div><div class="stat-val ucl" id="i-ucl">—</div></div>
+          <div class="stat"><div class="stat-label">LC</div><div class="stat-val cl"  id="i-cl">—</div></div>
+          <div class="stat"><div class="stat-label">LCI</div><div class="stat-val lcl" id="i-lcl">—</div></div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="chart-i" height="220"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2>Gráfico <em>MR</em> — Amplitude Móvel</h2>
+        <div class="chart-stats">
+          <div class="stat"><div class="stat-label">LCS</div><div class="stat-val ucl" id="mr-ucl">—</div></div>
+          <div class="stat"><div class="stat-label">MR̄</div><div class="stat-val cl"  id="mr-cl">—</div></div>
+          <div class="stat"><div class="stat-label">LCI</div><div class="stat-val lcl">0,000</div></div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="chart-mr" height="180"></canvas></div>
+    </div>
+
+    <div class="violations" id="imr-viols">
+      <h3>Sinais de Fora de Controle</h3>
+      <div id="imr-viol-list"><span class="no-viol">Nenhuma violação detectada.</span></div>
+    </div>
+
+    <div class="formulas">
+      <div class="formula-card">
+        <h4>Gráfico I — Limites</h4>
+        <div class="fline">LC  = x̄</div>
+        <div class="fline">LCS = x̄ + 3 × (MR̄ / d₂)</div>
+        <div class="fline">LCI = x̄ − 3 × (MR̄ / d₂)</div>
+        <div class="fline note" style="margin-top:0.5rem;">d₂ = 1,128 &nbsp;(para n = 2)</div>
+      </div>
+      <div class="formula-card">
+        <h4>Gráfico MR — Limites</h4>
+        <div class="fline">MRᵢ = |xᵢ − xᵢ₋₁|</div>
+        <div class="fline">LC  = MR̄</div>
+        <div class="fline">LCS = D₄ × MR̄</div>
+        <div class="fline">LCI = 0 <em>(convenção)</em></div>
+        <div class="fline note" style="margin-top:0.5rem;">D₄ = 3,267 &nbsp;(para n = 2)</div>
+      </div>
+      <div class="formula-card">
+        <h4>Quando Usar</h4>
+        <div class="fline" style="color:var(--text);line-height:1.8;">
+          • Subgrupo de tamanho n = 1<br>
+          • Medições individuais no tempo<br>
+          • Processos lentos ou de alto custo<br>
+          • Dados administrativos em série
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── PAGE: X̄-S ─────────────── -->
+  <div id="page-xbars" class="page">
+    <div class="page-header">
+      <div>
+        <h1>Gráfico <em>X̄-S</em></h1>
+        <p>Média e Desvio Padrão por Subgrupo · subgrupo n ≥ 2</p>
+      </div>
+      <span class="tag tag-var">Subgrupos</span>
+    </div>
+
+    <div class="data-section">
+      <h3>Dados de Entrada</h3>
+      <div class="sg-hint">Insira as observações de cada subgrupo em linhas separadas (ou cole uma linha por subgrupo separada por vírgula):</div>
+      <textarea id="xbs-input" class="data-input" rows="5"
+        placeholder="Subgrupo 1: 50.1, 49.8, 50.3, 50.0&#10;Subgrupo 2: 49.5, 50.2, 50.1, 49.9&#10;..."></textarea>
+      <div class="data-hint">Cada linha = um subgrupo. Valores separados por vírgula ou espaço. Todos os subgrupos devem ter o mesmo tamanho n.</div>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>Nº de Subgrupos</label>
+        <input type="range" id="xbs-k" min="10" max="40" value="20"
+               oninput="document.getElementById('xbs-kval').textContent=this.value">
+        <span class="range-val" id="xbs-kval">20</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Tamanho n</label>
+        <input type="number" id="xbs-n" value="5" min="2" max="25" step="1">
+      </div>
+      <div class="ctrl-group">
+        <label>Média (μ)</label>
+        <input type="number" id="xbs-mu" value="100" step="0.5">
+      </div>
+      <div class="ctrl-group">
+        <label>Desvio (σ)</label>
+        <input type="number" id="xbs-sigma" value="4" step="0.1" min="0.1">
+      </div>
+      <button class="btn" onclick="xbsGenerate()">⟳ Gerar Dados</button>
+      <button class="btn btn-ghost" onclick="xbsApply()">▶ Aplicar</button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2>Gráfico <em>X̄</em> — Médias dos Subgrupos</h2>
+        <div class="chart-stats">
+          <div class="stat"><div class="stat-label">LCS</div><div class="stat-val ucl" id="xb-ucl">—</div></div>
+          <div class="stat"><div class="stat-label">X̄̄</div><div class="stat-val cl"  id="xb-cl">—</div></div>
+          <div class="stat"><div class="stat-label">LCI</div><div class="stat-val lcl" id="xb-lcl">—</div></div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="chart-xb" height="220"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2>Gráfico <em>S</em> — Desvio Padrão por Subgrupo</h2>
+        <div class="chart-stats">
+          <div class="stat"><div class="stat-label">LCS</div><div class="stat-val ucl" id="s-ucl">—</div></div>
+          <div class="stat"><div class="stat-label">S̄</div><div class="stat-val cl"  id="s-cl">—</div></div>
+          <div class="stat"><div class="stat-label">LCI</div><div class="stat-val lcl" id="s-lcl">—</div></div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="chart-s" height="180"></canvas></div>
+    </div>
+
+    <div class="violations">
+      <h3>Sinais de Fora de Controle</h3>
+      <div id="xbs-viol-list"><span class="no-viol">Nenhuma violação detectada.</span></div>
+    </div>
+
+    <div class="formulas">
+      <div class="formula-card">
+        <h4>Gráfico X̄ — Limites</h4>
+        <div class="fline">X̄̄ = média das médias</div>
+        <div class="fline">LCS = X̄̄ + A₃ × S̄</div>
+        <div class="fline">LCI = X̄̄ − A₃ × S̄</div>
+        <div class="fline note" style="margin-top:0.5rem;">A₃ depende de n (tabela)</div>
+      </div>
+      <div class="formula-card">
+        <h4>Gráfico S — Limites</h4>
+        <div class="fline">Sᵢ = desvio padrão do subgrupo i</div>
+        <div class="fline">S̄ = média dos Sᵢ</div>
+        <div class="fline">LCS = B₄ × S̄</div>
+        <div class="fline">LCI = B₃ × S̄</div>
+        <div class="fline note" style="margin-top:0.5rem;">B₃, B₄ dependem de n (tabela)</div>
+      </div>
+      <div class="formula-card">
+        <h4>Constantes por n</h4>
+        <div class="fline" style="color:var(--text);font-size:0.72rem;line-height:1.9;">
+          n=2: A₃=2,659  B₃=0  B₄=3,267<br>
+          n=3: A₃=1,954  B₃=0  B₄=2,568<br>
+          n=4: A₃=1,628  B₃=0  B₄=2,266<br>
+          n=5: A₃=1,427  B₃=0  B₄=2,089<br>
+          n=6: A₃=1,287  B₃=0,030  B₄=1,970<br>
+          n=8: A₃=1,099  B₃=0,185  B₄=1,815<br>
+          n=10: A₃=0,975  B₃=0,284  B₄=1,716
+        </div>
+      </div>
+      <div class="formula-card">
+        <h4>Quando Usar</h4>
+        <div class="fline" style="color:var(--text);line-height:1.8;">
+          • Subgrupos racionais n ≥ 2<br>
+          • Preferível ao X̄-R para n ≥ 9<br>
+          • Melhor estimativa da variação<br>
+          • Processos com coleta em lote
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════ CONSTANTS ═══════════════════════
+const d2 = 1.128, D4 = 3.267;
+
+// A3, B3, B4 indexed by n (n=2 → index 0)
+const A3 = [2.659, 1.954, 1.628, 1.427, 1.287, 1.182, 1.099, 1.032, 0.975];
+const B3 = [0,     0,     0,     0,     0.030, 0.118, 0.185, 0.239, 0.284];
+const B4 = [3.267, 2.568, 2.266, 2.089, 1.970, 1.882, 1.815, 1.761, 1.716];
+
+function getConst(arr, n) {
+  const i = Math.min(Math.max(n - 2, 0), arr.length - 1);
+  return arr[i];
+}
+
+// ═══════════════════════ NAVIGATION ═══════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ═══════════════════════ UTILITIES ═══════════════════════
+function randn() {
+  let u = 0, v = 0;
+  while (!u) u = Math.random();
+  while (!v) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function fmt(v) { return v.toFixed(3); }
+
+function mean(arr) { return arr.reduce((a,b) => a+b, 0) / arr.length; }
+
+function std(arr) {
+  const m = mean(arr);
+  return Math.sqrt(arr.reduce((a,b) => a + (b-m)**2, 0) / (arr.length - 1));
+}
+
+// ═══════════════════════ DRAW CHART ═══════════════════════
+function drawChart(canvasId, labels, values, cl, ucl, lcl, color, violPtsSet) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || canvas.parentElement.offsetWidth;
+  const H = parseInt(canvas.getAttribute('height')) || 200;
+  canvas.style.height = H + 'px';
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 18, right: 18, bottom: 28, left: 55 };
+  const pw = W - pad.left - pad.right;
+  const ph = H - pad.top - pad.bottom;
+
+  const n = values.length;
+
+  const allVals = [...values, ucl, lcl].filter(v => isFinite(v));
+  let yMin = Math.min(...allVals);
+  let yMax = Math.max(...allVals);
+  const mg = (yMax - yMin) * 0.18 || 1;
+  yMin -= mg; yMax += mg;
+
+  const toX = i => pad.left + (n > 1 ? i / (n - 1) : 0.5) * pw;
+  const toY = v => pad.top + (1 - (v - yMin) / (yMax - yMin)) * ph;
+
+  // Grid
+  ctx.strokeStyle = '#1a2030';
+  ctx.lineWidth = 1;
+  for (let t = 0; t <= 5; t++) {
+    const y = pad.top + (t / 5) * ph;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pw, y); ctx.stroke();
+  }
+
+  // Zone bands
+  const sigma3 = (ucl - cl);
+  if (isFinite(sigma3) && sigma3 > 0) {
+    const band = (f1, f2, alpha) => {
+      ctx.fillStyle = `rgba(62,207,207,${alpha})`;
+      const y1 = toY(cl + f1 * sigma3);
+      const y2 = toY(cl + f2 * sigma3);
+      ctx.fillRect(pad.left, Math.min(y1,y2), pw, Math.abs(y2-y1));
+    };
+    band(-1/3, 1/3, 0.04);
+    band(-2/3, -1/3, 0.022);
+    band( 1/3,  2/3, 0.022);
+  }
+
+  // Limit lines
+  const hline = (yv, col, dash, lbl) => {
+    if (!isFinite(yv)) return;
+    const y = toY(yv);
+    ctx.save();
+    ctx.strokeStyle = col; ctx.lineWidth = 1.3; ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pw, y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = col; ctx.font = '500 9.5px DM Mono, monospace';
+    ctx.fillText(lbl, 4, y + 4);
+    ctx.restore();
+  };
+
+  hline(ucl, '#e05565', [4,3], 'LCS');
+  hline(cl,  '#3ecfcf', [],    'LC');
+  if (lcl > yMin + mg * 0.3) hline(lcl, '#f0a500', [4,3], 'LCI');
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  values.forEach((v, i) => {
+    const x = toX(i), y = toY(v);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Dots
+  values.forEach((v, i) => {
+    const x = toX(i), y = toY(v);
+    const isViol = violPtsSet && violPtsSet.has(i);
+    ctx.beginPath();
+    ctx.arc(x, y, isViol ? 5.5 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = isViol ? '#e05565' : color;
+    ctx.fill();
+    if (isViol) {
+      ctx.strokeStyle = '#ff8899'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+  });
+
+  // X axis labels
+  ctx.fillStyle = '#5a677f'; ctx.font = '9.5px DM Mono, monospace'; ctx.textAlign = 'center';
+  const step = Math.ceil(n / 10);
+  labels.forEach((lbl, i) => {
+    if (i % step === 0 || i === n - 1)
+      ctx.fillText(lbl, toX(i), H - pad.bottom + 14);
+  });
+
+  // Y axis labels
+  ctx.textAlign = 'right';
+  for (let t = 0; t <= 5; t++) {
+    const frac = t / 5;
+    const yv = yMin + (1 - frac) * (yMax - yMin);
+    ctx.fillText(yv.toFixed(1), pad.left - 5, pad.top + frac * ph + 4);
+  }
+}
+
+// ═══════════════════════════════════════════
+// I-MR
+// ═══════════════════════════════════════════
+let imrData = [];
+
+function imrGenerate() {
+  const n   = parseInt(document.getElementById('imr-n').value);
+  const mu  = parseFloat(document.getElementById('imr-mu').value);
+  const sig = parseFloat(document.getElementById('imr-sigma').value);
+  const data = Array.from({ length: n }, (_, i) => {
+    let v = mu + sig * randn();
+    if (i === Math.floor(n * 0.62)) v = mu + sig * 4.1;
+    return parseFloat(v.toFixed(3));
+  });
+  imrData = data;
+  document.getElementById('imr-input').value = data.join(', ');
+  imrRender(data);
+}
+
+function imrApply() {
+  const raw = document.getElementById('imr-input').value;
+  const vals = raw.split(/[\s,;]+/).map(Number).filter((v, _, a) => !isNaN(v));
+  if (vals.length < 4) { alert('Insira pelo menos 4 valores.'); return; }
+  imrData = vals;
+  imrRender(vals);
+}
+
+function imrRender(data) {
+  const n = data.length;
+  const xbar = mean(data);
+  const mr = data.slice(1).map((v, i) => Math.abs(v - data[i]));
+  const mrbar = mean(mr);
+  const sigma_est = mrbar / d2;
+  const i_ucl = xbar + 3 * sigma_est;
+  const i_lcl = xbar - 3 * sigma_est;
+  const mr_ucl = D4 * mrbar;
+
+  document.getElementById('i-ucl').textContent = fmt(i_ucl);
+  document.getElementById('i-cl').textContent  = fmt(xbar);
+  document.getElementById('i-lcl').textContent = fmt(i_lcl);
+  document.getElementById('mr-ucl').textContent = fmt(mr_ucl);
+  document.getElementById('mr-cl').textContent  = fmt(mrbar);
+
+  const rule = parseInt(document.getElementById('imr-rule').value);
+  const viols = [];
+
+  data.forEach((v, i) => {
+    if (v > i_ucl) viols.push({ idx: i, chart: 'I', msg: `Pto ${i+1} (I): ${fmt(v)} > LCS ${fmt(i_ucl)}` });
+    if (v < i_lcl) viols.push({ idx: i, chart: 'I', msg: `Pto ${i+1} (I): ${fmt(v)} < LCI ${fmt(i_lcl)}` });
+  });
+  mr.forEach((v, i) => {
+    if (v > mr_ucl) viols.push({ idx: i+1, chart: 'MR', msg: `Pto ${i+2} (MR): ${fmt(v)} > LCS ${fmt(mr_ucl)}` });
+  });
+  if (rule >= 2) {
+    for (let i = 7; i < n; i++) {
+      const seg = data.slice(i-7, i+1);
+      if (seg.every(v => v > xbar)) viols.push({ idx: i, chart: 'I', msg: `Ptos ${i-6}–${i+1} (I): 8 acima da LC` });
+      if (seg.every(v => v < xbar)) viols.push({ idx: i, chart: 'I', msg: `Ptos ${i-6}–${i+1} (I): 8 abaixo da LC` });
+    }
+  }
+
+  const iViols  = new Set(viols.filter(v => v.chart === 'I').map(v => v.idx));
+  const mrViols = new Set(viols.filter(v => v.chart === 'MR').map(v => v.idx));
+  const labels  = data.map((_, i) => String(i+1));
+  const mrLabels = mr.map((_, i) => String(i+2));
+
+  drawChart('chart-i',  labels,   data, xbar,  i_ucl,  i_lcl,  '#3ecfcf', iViols);
+  drawChart('chart-mr', mrLabels, mr,   mrbar, mr_ucl, 0,      '#f0a500', mrViols);
+
+  const list = document.getElementById('imr-viol-list');
+  list.innerHTML = viols.length
+    ? viols.map(v => `<div class="viol-item"><div class="vdot red"></div>${v.msg}</div>`).join('')
+    : '<span class="no-viol">✓ Nenhuma violação — processo aparenta estar sob controle.</span>';
+}
+
+// ═══════════════════════════════════════════
+// X̄-S
+// ═══════════════════════════════════════════
+let xbsSubgroups = [];
+
+function xbsGenerate() {
+  const k   = parseInt(document.getElementById('xbs-k').value);
+  const n   = parseInt(document.getElementById('xbs-n').value);
+  const mu  = parseFloat(document.getElementById('xbs-mu').value);
+  const sig = parseFloat(document.getElementById('xbs-sigma').value);
+
+  const groups = Array.from({ length: k }, (_, gi) => {
+    return Array.from({ length: n }, (_, j) => {
+      let v = mu + sig * randn();
+      if (gi === Math.floor(k * 0.65) && j === 0) v = mu + sig * 4.0;
+      return parseFloat(v.toFixed(3));
+    });
+  });
+
+  xbsSubgroups = groups;
+  document.getElementById('xbs-input').value = groups.map(g => g.join(', ')).join('\n');
+  xbsRender(groups);
+}
+
+function xbsApply() {
+  const raw = document.getElementById('xbs-input').value.trim();
+  const groups = raw.split('\n')
+    .map(line => line.split(/[\s,;]+/).map(Number).filter(v => !isNaN(v) && String(v).length > 0))
+    .filter(g => g.length >= 2);
+
+  if (groups.length < 4) { alert('Insira pelo menos 4 subgrupos (linhas).'); return; }
+  const n0 = groups[0].length;
+  if (!groups.every(g => g.length === n0)) { alert('Todos os subgrupos devem ter o mesmo tamanho n.'); return; }
+  xbsSubgroups = groups;
+  xbsRender(groups);
+}
+
+function xbsRender(groups) {
+  const n   = groups[0].length;
+  const k   = groups.length;
+  const xbars = groups.map(mean);
+  const ss    = groups.map(g => n > 1 ? std(g) : 0);
+  const xdbar = mean(xbars);
+  const sbar  = mean(ss);
+
+  const a3 = getConst(A3, n);
+  const b3 = getConst(B3, n);
+  const b4 = getConst(B4, n);
+
+  const xb_ucl = xdbar + a3 * sbar;
+  const xb_lcl = xdbar - a3 * sbar;
+  const s_ucl  = b4 * sbar;
+  const s_lcl  = b3 * sbar;
+
+  document.getElementById('xb-ucl').textContent = fmt(xb_ucl);
+  document.getElementById('xb-cl').textContent  = fmt(xdbar);
+  document.getElementById('xb-lcl').textContent = fmt(xb_lcl);
+  document.getElementById('s-ucl').textContent  = fmt(s_ucl);
+  document.getElementById('s-cl').textContent   = fmt(sbar);
+  document.getElementById('s-lcl').textContent  = fmt(s_lcl);
+
+  const viols = [];
+
+  xbars.forEach((v, i) => {
+    if (v > xb_ucl) viols.push({ idx: i, chart: 'XB', msg: `Subgrupo ${i+1} (X̄): ${fmt(v)} > LCS ${fmt(xb_ucl)}` });
+    if (v < xb_lcl) viols.push({ idx: i, chart: 'XB', msg: `Subgrupo ${i+1} (X̄): ${fmt(v)} < LCI ${fmt(xb_lcl)}` });
+  });
+  ss.forEach((v, i) => {
+    if (v > s_ucl) viols.push({ idx: i, chart: 'S', msg: `Subgrupo ${i+1} (S): ${fmt(v)} > LCS ${fmt(s_ucl)}` });
+    if (s_lcl > 0 && v < s_lcl) viols.push({ idx: i, chart: 'S', msg: `Subgrupo ${i+1} (S): ${fmt(v)} < LCI ${fmt(s_lcl)}` });
+  });
+
+  // Rule 2: 8 consecutive on same side
+  for (let i = 7; i < k; i++) {
+    const seg = xbars.slice(i-7, i+1);
+    if (seg.every(v => v > xdbar)) viols.push({ idx: i, chart: 'XB', msg: `Subgrupos ${i-6}–${i+1} (X̄): 8 acima da LC` });
+    if (seg.every(v => v < xdbar)) viols.push({ idx: i, chart: 'XB', msg: `Subgrupos ${i-6}–${i+1} (X̄): 8 abaixo da LC` });
+  }
+
+  const xbViols = new Set(viols.filter(v => v.chart === 'XB').map(v => v.idx));
+  const sViols  = new Set(viols.filter(v => v.chart === 'S').map(v => v.idx));
+  const labels  = xbars.map((_, i) => String(i+1));
+
+  drawChart('chart-xb', labels, xbars, xdbar, xb_ucl, xb_lcl, '#3ecfcf', xbViols);
+  drawChart('chart-s',  labels, ss,    sbar,  s_ucl,  s_lcl,  '#f0a500', sViols);
+
+  const list = document.getElementById('xbs-viol-list');
+  list.innerHTML = viols.length
+    ? viols.map(v => `<div class="viol-item"><div class="vdot red"></div>${v.msg}</div>`).join('')
+    : '<span class="no-viol">✓ Nenhuma violação — processo aparenta estar sob controle.</span>';
+}
+
+// ═══════════════════════ INIT ═══════════════════════
+window.addEventListener('load', () => setTimeout(imrGenerate, 60));
+window.addEventListener('resize', () => {
+  if (imrData.length) imrRender(imrData);
+  if (xbsSubgroups.length) xbsRender(xbsSubgroups);
+});
+</script>
+</body>
+</html>
