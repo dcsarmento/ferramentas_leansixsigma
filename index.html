@@ -11,96 +11,138 @@
     body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;min-height:100vh;font-size:14px;}
     #sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
     .sidebar-logo{padding:1.4rem 1.2rem 1rem;border-bottom:1px solid var(--border);}
-    .sidebar-logo .logo-text{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);letter-spacing:-0.02em;}
+    .sidebar-logo .logo-text{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);}
     .sidebar-logo .logo-sub{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:0.2rem;}
     .sidebar-section{padding:1rem 0.8rem 0.4rem;}
     .sidebar-section-label{font-size:0.65rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;font-family:'DM Mono',monospace;padding:0 0.4rem;margin-bottom:0.4rem;}
     .nav-item{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.7rem;border-radius:5px;cursor:pointer;color:var(--muted2);font-size:0.82rem;transition:all 0.15s;border:1px solid transparent;margin-bottom:2px;}
     .nav-item:hover{background:var(--surface2);color:var(--text);}
     .nav-item.active{background:rgba(62,207,207,0.08);border-color:rgba(62,207,207,0.2);color:var(--accent);}
-    .nav-item .nav-icon{font-family:'DM Mono',monospace;font-size:0.72rem;font-weight:500;min-width:38px;background:var(--surface2);border:1px solid var(--border2);padding:2px 5px;border-radius:3px;text-align:center;color:inherit;}
+    .nav-item .nav-icon{font-family:'DM Mono',monospace;font-size:0.72rem;min-width:38px;background:var(--surface2);border:1px solid var(--border2);padding:2px 5px;border-radius:3px;text-align:center;color:inherit;}
     .nav-item.active .nav-icon{background:rgba(62,207,207,0.12);border-color:rgba(62,207,207,0.3);}
     .nav-item.disabled{opacity:0.35;cursor:not-allowed;}
-    .nav-item.coming-soon::after{content:'em breve';font-size:0.58rem;color:var(--muted);font-family:'DM Mono',monospace;margin-left:auto;letter-spacing:0.04em;}
+    .nav-item.coming-soon::after{content:'em breve';font-size:0.58rem;color:var(--muted);font-family:'DM Mono',monospace;margin-left:auto;}
     .sidebar-footer{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid var(--border);font-size:0.68rem;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.6;}
     #main{margin-left:var(--sidebar-w);flex:1;padding:2rem 2.5rem;max-width:1100px;}
     .page{display:none;}.page.active{display:block;animation:fadein 0.25s ease;}
     @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-    .page-header{margin-bottom:2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
-    .page-header h1{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:500;letter-spacing:-0.03em;}
+    .page-header{margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+    .page-header h1{font-family:'DM Mono',monospace;font-size:1.4rem;font-weight:500;letter-spacing:-0.03em;}
     .page-header h1 em{color:var(--accent);font-style:normal;}
-    .page-header p{font-size:0.78rem;color:var(--muted2);margin-top:0.3rem;}
+    .page-header p{font-size:0.76rem;color:var(--muted2);margin-top:0.3rem;}
     .tag{font-family:'DM Mono',monospace;font-size:0.65rem;padding:0.25rem 0.6rem;border-radius:3px;letter-spacing:0.06em;text-transform:uppercase;}
     .tag-var{background:rgba(62,207,207,0.1);color:var(--accent);border:1px solid rgba(62,207,207,0.25);}
     .tag-ind{background:rgba(240,165,0,0.1);color:var(--accent2);border:1px solid rgba(240,165,0,0.25);}
     .tag-ana{background:rgba(160,100,255,0.1);color:#b07aff;border:1px solid rgba(160,100,255,0.25);}
-    .data-section{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.2rem;margin-bottom:1.5rem;}
-    .data-section h3{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8rem;}
-    textarea.data-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:0.8rem;padding:0.7rem;border-radius:4px;resize:vertical;min-height:70px;outline:none;transition:border-color 0.2s;line-height:1.7;}
+
+    /* ── Data Section ── */
+    .data-section{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.2rem;margin-bottom:1.2rem;}
+    .data-section-title{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;}
+
+    /* Mode selector */
+    .mode-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .mode-label{font-size:0.68rem;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-right:.3rem;}
+    .imt{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);font-family:'DM Mono',monospace;font-size:0.7rem;padding:0.3rem 0.75rem;border-radius:4px;cursor:pointer;transition:all 0.15s;}
+    .imt.active{background:rgba(62,207,207,0.1);border-color:rgba(62,207,207,0.35);color:var(--accent);}
+
+    /* XY dual input */
+    .xy-inputs{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;}
+    .xy-inputs.single{grid-template-columns:1fr;}
+    .xy-field{display:flex;flex-direction:column;gap:0.3rem;}
+    .xy-label{font-size:0.68rem;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;gap:.4rem;}
+    .xy-label span{background:var(--surface2);border:1px solid var(--border2);padding:1px 6px;border-radius:3px;font-size:.65rem;}
+    textarea.data-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:0.79rem;padding:0.65rem;border-radius:4px;resize:vertical;outline:none;transition:border-color 0.2s;line-height:1.7;}
     textarea.data-input:focus{border-color:var(--accent);}
-    .data-hint{font-size:0.7rem;color:var(--muted);margin-top:0.5rem;line-height:1.6;}
+    textarea.axis-x{color:var(--accent2);}
+    .data-hint{font-size:0.68rem;color:var(--muted);margin-top:0.4rem;line-height:1.6;}
     .data-hint code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;color:var(--accent2);}
-    .input-mode-tabs{display:flex;gap:0.3rem;margin-bottom:0.8rem;}
-    .imt{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);font-family:'DM Mono',monospace;font-size:0.7rem;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;transition:all 0.15s;}
-    .imt.active{background:rgba(62,207,207,0.1);border-color:rgba(62,207,207,0.3);color:var(--accent);}
-    .controls{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;align-items:flex-end;}
-    .ctrl-group{display:flex;flex-direction:column;gap:0.35rem;}
-    .ctrl-group label{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-family:'DM Mono',monospace;}
-    .ctrl-group input[type="number"],.ctrl-group select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.48rem 0.7rem;font-family:'DM Mono',monospace;font-size:0.82rem;border-radius:4px;outline:none;transition:border-color 0.2s;width:130px;}
+
+    /* groups input */
+    .groups-input-wrap{display:flex;flex-direction:column;gap:0.6rem;}
+    .group-row{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.7rem;}
+    .group-row-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+    .group-name-input{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;font-size:.78rem;padding:.28rem .6rem;border-radius:4px;outline:none;width:160px;}
+    .group-name-input:focus{border-color:var(--accent);}
+    .group-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .group-xy{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    .group-xy.single{grid-template-columns:1fr;}
+    .btn-add-group{background:transparent;border:1px dashed var(--border2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:.72rem;padding:.38rem .9rem;border-radius:4px;cursor:pointer;transition:all .15s;width:100%;}
+    .btn-add-group:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-rm{background:transparent;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;padding:0 .3rem;margin-left:auto;}
+    .btn-rm:hover{color:var(--danger);}
+
+    /* Options checkboxes */
+    .options-row{display:flex;gap:1.2rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--surface2);border-radius:6px;margin-bottom:1.2rem;border:1px solid var(--border);}
+    .opt-check{display:flex;align-items:center;gap:.45rem;cursor:pointer;user-select:none;}
+    .opt-check input[type=checkbox]{appearance:none;width:14px;height:14px;background:var(--bg);border:1px solid var(--border2);border-radius:3px;cursor:pointer;flex-shrink:0;transition:all .15s;position:relative;}
+    .opt-check input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent);}
+    .opt-check input[type=checkbox]:checked::after{content:'✓';position:absolute;font-size:10px;color:#0b0e13;top:-1px;left:1px;font-weight:700;}
+    .opt-check span{font-size:.73rem;color:var(--muted2);font-family:'DM Mono',monospace;}
+
+    /* Controls */
+    .controls{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1.2rem;align-items:flex-end;}
+    .ctrl-group{display:flex;flex-direction:column;gap:.35rem;}
+    .ctrl-group label{font-size:.67rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+    .ctrl-group input[type=number],.ctrl-group select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.45rem .7rem;font-family:'DM Mono',monospace;font-size:.8rem;border-radius:4px;outline:none;transition:border-color .2s;width:130px;}
     .ctrl-group input:focus,.ctrl-group select:focus{border-color:var(--accent);}
-    .ctrl-group input[type="range"]{accent-color:var(--accent);width:150px;cursor:pointer;}
-    .range-val{font-size:0.72rem;color:var(--accent);font-family:'DM Mono',monospace;}
-    .btn{background:var(--accent);color:#0b0e13;border:none;padding:0.52rem 1.1rem;font-family:'DM Mono',monospace;font-size:0.78rem;font-weight:500;letter-spacing:0.04em;border-radius:4px;cursor:pointer;transition:opacity 0.15s,transform 0.1s;height:34px;align-self:flex-end;}
-    .btn:hover{opacity:0.85;transform:translateY(-1px);}.btn:active{transform:translateY(0);}
+    .ctrl-group input[type=range]{accent-color:var(--accent);width:150px;cursor:pointer;}
+    .range-val{font-size:.72rem;color:var(--accent);font-family:'DM Mono',monospace;}
+    .btn{background:var(--accent);color:#0b0e13;border:none;padding:.5rem 1.1rem;font-family:'DM Mono',monospace;font-size:.77rem;font-weight:500;letter-spacing:.04em;border-radius:4px;cursor:pointer;transition:opacity .15s,transform .1s;height:34px;align-self:flex-end;}
+    .btn:hover{opacity:.85;transform:translateY(-1px);}
     .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted2);}
     .btn-ghost:hover{border-color:var(--accent);color:var(--accent);opacity:1;}
-    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:1.5rem;}
-    .chart-header{display:flex;justify-content:space-between;align-items:center;padding:0.9rem 1.2rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.8rem;}
-    .chart-header h2{font-family:'DM Mono',monospace;font-size:0.82rem;font-weight:500;letter-spacing:0.04em;}
+
+    /* Chart */
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:1.2rem;}
+    .chart-header{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.2rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.8rem;}
+    .chart-header h2{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;letter-spacing:.04em;}
     .chart-header h2 em{color:var(--accent);font-style:normal;}
     .chart-stats{display:flex;gap:1.2rem;}
-    .stat{text-align:right;}.stat-label{font-size:0.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.06em;text-transform:uppercase;}
-    .stat-val{font-family:'DM Mono',monospace;font-size:0.84rem;font-weight:500;}
+    .stat{text-align:right;}
+    .stat-label{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;}
+    .stat-val{font-family:'DM Mono',monospace;font-size:.84rem;font-weight:500;}
     .stat-val.ucl{color:var(--danger);}.stat-val.cl{color:var(--accent);}.stat-val.lcl{color:var(--accent2);}
-    .chart-body{padding:0.5rem 0.5rem 0.5rem 0;}
+    .chart-body{padding:.4rem .4rem .4rem 0;}
     canvas{display:block;width:100%;}
-    .violations{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.2rem;margin-bottom:1.5rem;}
-    .violations h3{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.9rem;}
-    .viol-item{display:flex;align-items:center;gap:0.7rem;font-family:'DM Mono',monospace;font-size:0.76rem;padding:0.35rem 0;border-bottom:1px solid var(--border);color:var(--muted2);}
-    .viol-item:last-child{border-bottom:none;}
-    .vdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-    .vdot.red{background:var(--danger);}
-    .no-viol{color:var(--accent);font-family:'DM Mono',monospace;font-size:0.78rem;}
-    .formulas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:2rem;}
-    .formula-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.1rem;}
-    .formula-card h4{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;}
-    .fline{font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--accent);margin-bottom:0.35rem;line-height:1.5;}
-    .fline em{color:var(--muted2);font-style:normal;}
-    .fline.note{color:var(--muted2);font-size:0.72rem;}
-    /* legend */
-    .legend{display:flex;gap:1rem;flex-wrap:wrap;padding:0.6rem 1.2rem;border-top:1px solid var(--border);}
-    .legend-item{display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;font-family:'DM Mono',monospace;color:var(--muted2);}
+    .legend{display:flex;gap:1rem;flex-wrap:wrap;padding:.55rem 1.2rem;border-top:1px solid var(--border);}
+    .legend-item{display:flex;align-items:center;gap:.4rem;font-size:.71rem;font-family:'DM Mono',monospace;color:var(--muted2);}
     .legend-dot{width:10px;height:10px;border-radius:50%;}
-    /* trend */
-    .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
-    .result-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.2rem;}
-    .result-card h3{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;}
-    .ad-row{display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0;border-bottom:1px solid var(--border);}
+
+    /* Violations */
+    .violations{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.1rem;margin-bottom:1.2rem;}
+    .violations h3{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.8rem;}
+    .viol-item{display:flex;align-items:center;gap:.7rem;font-family:'DM Mono',monospace;font-size:.75rem;padding:.32rem 0;border-bottom:1px solid var(--border);color:var(--muted2);}
+    .viol-item:last-child{border-bottom:none;}
+    .vdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--danger);}
+    .no-viol{color:var(--accent);font-family:'DM Mono',monospace;font-size:.77rem;}
+
+    /* Formulas */
+    .formulas{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem;margin-bottom:1.5rem;}
+    .formula-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1rem;}
+    .formula-card h4{font-family:'DM Mono',monospace;font-size:.67rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.7rem;}
+    .fline{font-family:'DM Mono',monospace;font-size:.77rem;color:var(--accent);margin-bottom:.32rem;line-height:1.5;}
+    .fline.note{color:var(--muted2);font-size:.71rem;}
+
+    /* Trend panels */
+    .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;}
+    .result-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.1rem;}
+    .result-card h3{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.9rem;}
+    .ad-row{display:flex;justify-content:space-between;align-items:center;padding:.42rem 0;border-bottom:1px solid var(--border);}
     .ad-row:last-child{border-bottom:none;}
-    .ad-label{font-size:0.78rem;color:var(--muted2);}
-    .ad-value{font-family:'DM Mono',monospace;font-size:0.86rem;font-weight:500;}
+    .ad-label{font-size:.77rem;color:var(--muted2);}
+    .ad-value{font-family:'DM Mono',monospace;font-size:.85rem;font-weight:500;}
     .ad-value.pass{color:var(--accent);}.ad-value.fail{color:var(--danger);}.ad-value.neutral{color:var(--text);}
-    .verdict-box{margin-top:1rem;padding:0.8rem 1rem;border-radius:5px;font-family:'DM Mono',monospace;font-size:0.78rem;font-weight:500;text-align:center;line-height:1.5;}
+    .verdict-box{margin-top:.9rem;padding:.75rem 1rem;border-radius:5px;font-family:'DM Mono',monospace;font-size:.77rem;font-weight:500;text-align:center;line-height:1.5;}
     .verdict-box.normal{background:rgba(62,207,207,0.08);border:1px solid rgba(62,207,207,0.3);color:var(--accent);}
     .verdict-box.nonnormal{background:rgba(224,85,101,0.08);border:1px solid rgba(224,85,101,0.3);color:var(--danger);}
-    .trend-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
-    .trend-stat{background:var(--surface2);border-radius:5px;padding:0.6rem 0.8rem;}
-    .trend-stat-label{font-size:0.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.2rem;}
-    .trend-stat-val{font-family:'DM Mono',monospace;font-size:0.86rem;font-weight:500;color:var(--text);}
+    .trend-stats{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    .trend-stat{background:var(--surface2);border-radius:5px;padding:.55rem .75rem;}
+    .trend-stat-label{font-size:.61rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.18rem;}
+    .trend-stat-val{font-family:'DM Mono',monospace;font-size:.85rem;font-weight:500;color:var(--text);}
     .trend-stat-val.pos{color:var(--accent);}.trend-stat-val.neg{color:var(--danger);}
-    /* group AD panels */
-    .ad-panels{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;}
-    @media(max-width:700px){:root{--sidebar-w:0px;}#sidebar{display:none;}#main{margin-left:0;padding:1rem;}.trend-grid{grid-template-columns:1fr;}}
+    .ad-panels{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.2rem;}
+
+    @media(max-width:700px){:root{--sidebar-w:0px;}#sidebar{display:none;}#main{margin-left:0;padding:1rem;}.trend-grid{grid-template-columns:1fr;}.xy-inputs{grid-template-columns:1fr;}.group-xy{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
@@ -120,32 +162,39 @@
     <div class="nav-item disabled coming-soon"><span class="nav-icon">BoxCox</span> Transformação</div>
     <div class="nav-item disabled coming-soon"><span class="nav-icon">Cp/Cpk</span> Capacidade</div>
   </div>
-  <div class="sidebar-footer">d₂ = 1,128 · D₄ = 3,267<br>c₄(n) · B₃/B₄ variáveis</div>
+  <div class="sidebar-footer">d₂=1,128 · D₄=3,267<br>c₄(n) · B₃/B₄ variáveis</div>
 </nav>
 <main id="main">
 
-<!-- ═══ IMR ═══ -->
+<!-- ══════════ IMR ══════════ -->
 <div id="page-imr" class="page active">
-  <div class="page-header"><div><h1>Gráfico <em>I-MR</em></h1><p>Valores Individuais e Amplitude Móvel · subgrupo n = 1</p></div><span class="tag tag-ind">Medições Individuais</span></div>
+  <div class="page-header">
+    <div><h1>Gráfico <em>I-MR</em></h1><p>Valores Individuais e Amplitude Móvel · subgrupo n = 1</p></div>
+    <span class="tag tag-ind">Medições Individuais</span>
+  </div>
 
   <div class="data-section">
-    <h3>Dados de Entrada</h3>
-    <div class="input-mode-tabs">
-      <div class="imt active" onclick="setImrMode('simple',this)">Valores simples</div>
-      <div class="imt" onclick="setImrMode('xy',this)">X, Y (eixo X personalizado)</div>
-      <div class="imt" onclick="setImrMode('groups',this)">Múltiplos grupos</div>
+    <div class="data-section-title">Dados de Entrada</div>
+    <div class="mode-row">
+      <span class="mode-label">Modo:</span>
+      <div class="imt active" onclick="setMode('imr','simple',this)">Valores simples</div>
+      <div class="imt" onclick="setMode('imr','xy',this)">Eixo X + Y separados</div>
+      <div class="imt" onclick="setMode('imr','groups',this)">Múltiplos grupos</div>
     </div>
-    <textarea id="imr-input" class="data-input" rows="3" placeholder="Cole seus dados aqui..."></textarea>
-    <div class="data-hint" id="imr-hint">
-      Modo simples: <code>23.1, 24.5, 22.8, 25.0</code> separados por vírgula, espaço ou ponto e vírgula.
-    </div>
+    <div id="imr-input-area"></div>
+  </div>
+
+  <div class="options-row">
+    <label class="opt-check"><input type="checkbox" id="imr-show-limits" checked onchange="imrRerender()"><span>Limites de controle (LCS / LC / LCI)</span></label>
+    <label class="opt-check"><input type="checkbox" id="imr-show-zones" checked onchange="imrRerender()"><span>Zonas ±1σ / ±2σ</span></label>
+    <label class="opt-check"><input type="checkbox" id="imr-show-regline" onchange="imrRerender()"><span>Linha de tendência</span></label>
   </div>
 
   <div class="controls">
     <div class="ctrl-group"><label>Nº de Pontos</label><input type="range" id="imr-n" min="15" max="60" value="25" oninput="document.getElementById('imr-nval').textContent=this.value"><span class="range-val" id="imr-nval">25</span></div>
     <div class="ctrl-group"><label>Média (μ)</label><input type="number" id="imr-mu" value="50" step="0.5"></div>
     <div class="ctrl-group"><label>Desvio (σ)</label><input type="number" id="imr-sigma" value="3" step="0.1" min="0.1"></div>
-    <div class="ctrl-group"><label>Regras de Nelson</label><select id="imr-rule"><option value="1">Regra 1</option><option value="2">Regras 1+2</option></select></div>
+    <div class="ctrl-group"><label>Regras Nelson</label><select id="imr-rule"><option value="1">Regra 1</option><option value="2">Regras 1+2</option></select></div>
     <button class="btn" onclick="imrGenerate()">⟳ Gerar</button>
     <button class="btn btn-ghost" onclick="imrApply()">▶ Aplicar</button>
   </div>
@@ -170,36 +219,36 @@
         <div class="stat"><div class="stat-label">LCI</div><div class="stat-val lcl">0,000</div></div>
       </div>
     </div>
-    <div class="chart-body"><canvas id="chart-mr" height="180"></canvas></div>
+    <div class="chart-body"><canvas id="chart-mr" height="170"></canvas></div>
   </div>
 
-  <div class="violations"><h3>Sinais de Fora de Controle</h3><div id="imr-viol-list"><span class="no-viol">Nenhuma violação detectada.</span></div></div>
-
+  <div class="violations"><h3>Sinais de Fora de Controle</h3><div id="imr-viol-list"><span class="no-viol">Nenhuma violação.</span></div></div>
   <div class="formulas">
-    <div class="formula-card"><h4>Gráfico I</h4><div class="fline">LCS = x̄ + 3×(MR̄/d₂)</div><div class="fline">LCI = x̄ − 3×(MR̄/d₂)</div><div class="fline note" style="margin-top:.4rem">d₂=1,128 · D₄=3,267</div></div>
-    <div class="formula-card"><h4>Formatos de entrada</h4>
-      <div class="fline" style="color:var(--text);font-size:.75rem;line-height:1.9">
-        Simples: <span style="color:var(--accent2)">23.1, 24.5, 22.8</span><br>
-        X,Y: <span style="color:var(--accent2)">1;129 / 6;114 / 7;142</span><br>
-        Grupos: <span style="color:var(--accent2)">Grupo:Nome / valores</span>
-      </div>
-    </div>
+    <div class="formula-card"><h4>Gráfico I</h4><div class="fline">LCS = x̄ + 3×(MR̄/d₂)</div><div class="fline">LCI = x̄ − 3×(MR̄/d₂)</div><div class="fline note">d₂=1,128 · D₄=3,267</div></div>
     <div class="formula-card"><h4>Quando Usar</h4><div class="fline" style="color:var(--text);line-height:1.8">• n=1 por amostragem<br>• Medições no tempo<br>• Dados administrativos</div></div>
   </div>
 </div>
 
-<!-- ═══ XBS ═══ -->
+<!-- ══════════ XBS ══════════ -->
 <div id="page-xbars" class="page">
-  <div class="page-header"><div><h1>Gráfico <em>X̄-S</em></h1><p>Média e Desvio Padrão por Subgrupo · n ≥ 2</p></div><span class="tag tag-var">Subgrupos</span></div>
+  <div class="page-header">
+    <div><h1>Gráfico <em>X̄-S</em></h1><p>Média e Desvio Padrão por Subgrupo · n ≥ 2</p></div>
+    <span class="tag tag-var">Subgrupos</span>
+  </div>
 
   <div class="data-section">
-    <h3>Dados de Entrada</h3>
-    <div class="input-mode-tabs">
-      <div class="imt active" onclick="setXbsMode('simple',this)">Subgrupos por linha</div>
-      <div class="imt" onclick="setXbsMode('xy',this)">X; val1, val2... (eixo X personalizado)</div>
+    <div class="data-section-title">Dados de Entrada</div>
+    <div class="mode-row">
+      <span class="mode-label">Modo:</span>
+      <div class="imt active" onclick="setMode('xbs','simple',this)">Subgrupos por linha</div>
+      <div class="imt" onclick="setMode('xbs','xy',this)">Eixo X + Subgrupo separados</div>
     </div>
-    <textarea id="xbs-input" class="data-input" rows="5" placeholder="Cada linha = um subgrupo&#10;50.1, 49.8, 50.3, 50.0&#10;49.5, 50.2, 50.1, 49.9"></textarea>
-    <div class="data-hint" id="xbs-hint">Modo simples: cada linha é um subgrupo com valores separados por vírgula.</div>
+    <div id="xbs-input-area"></div>
+  </div>
+
+  <div class="options-row">
+    <label class="opt-check"><input type="checkbox" id="xbs-show-limits" checked onchange="xbsRerender()"><span>Limites de controle (LCS / LC / LCI)</span></label>
+    <label class="opt-check"><input type="checkbox" id="xbs-show-zones" checked onchange="xbsRerender()"><span>Zonas ±1σ / ±2σ</span></label>
   </div>
 
   <div class="controls">
@@ -221,7 +270,6 @@
     </div>
     <div class="chart-body"><canvas id="chart-xb" height="220"></canvas></div>
   </div>
-
   <div class="chart-card">
     <div class="chart-header"><h2>Gráfico <em>S</em> — Desvio Padrão</h2>
       <div class="chart-stats">
@@ -230,36 +278,43 @@
         <div class="stat"><div class="stat-label">LCI</div><div class="stat-val lcl" id="s-lcl">—</div></div>
       </div>
     </div>
-    <div class="chart-body"><canvas id="chart-s" height="180"></canvas></div>
+    <div class="chart-body"><canvas id="chart-s" height="170"></canvas></div>
   </div>
-
-  <div class="violations"><h3>Sinais de Fora de Controle</h3><div id="xbs-viol-list"><span class="no-viol">Nenhuma violação detectada.</span></div></div>
-
+  <div class="violations"><h3>Sinais de Fora de Controle</h3><div id="xbs-viol-list"><span class="no-viol">Nenhuma violação.</span></div></div>
   <div class="formulas">
-    <div class="formula-card"><h4>Gráfico X̄</h4><div class="fline">LCS = X̄̄ + A₃×S̄</div><div class="fline">LCI = X̄̄ − A₃×S̄</div></div>
-    <div class="formula-card"><h4>Gráfico S</h4><div class="fline">LCS = B₄×S̄</div><div class="fline">LCI = B₃×S̄</div></div>
-    <div class="formula-card"><h4>Formato X personalizado</h4><div class="fline" style="color:var(--text);font-size:.75rem;line-height:1.9">X;v1,v2,v3<br><span style="color:var(--accent2)">1;50.1,49.8,50.3</span><br><span style="color:var(--accent2)">6;49.5,50.2,50.1</span></div></div>
-    <div class="formula-card"><h4>Constantes</h4><div class="fline" style="color:var(--text);font-size:.72rem;line-height:1.9">n=2: A₃=2,659 B₃=0 B₄=3,267<br>n=5: A₃=1,427 B₃=0 B₄=2,089<br>n=10: A₃=0,975 B₃=0,284 B₄=1,716</div></div>
+    <div class="formula-card"><h4>X̄</h4><div class="fline">LCS = X̄̄ + A₃×S̄</div><div class="fline">LCI = X̄̄ − A₃×S̄</div></div>
+    <div class="formula-card"><h4>S</h4><div class="fline">LCS = B₄×S̄</div><div class="fline">LCI = B₃×S̄</div></div>
+    <div class="formula-card"><h4>Constantes</h4><div class="fline" style="color:var(--text);font-size:.72rem;line-height:1.9">n=2: A₃=2,659 B₄=3,267<br>n=5: A₃=1,427 B₄=2,089<br>n=10: A₃=0,975 B₄=1,716</div></div>
   </div>
 </div>
 
-<!-- ═══ TREND ═══ -->
+<!-- ══════════ TREND ══════════ -->
 <div id="page-trend" class="page">
-  <div class="page-header"><div><h1>Análise de <em>Tendência</em></h1><p>Regressão Linear · Anderson-Darling · Histograma · Múltiplos Grupos</p></div><span class="tag tag-ana">Análise</span></div>
+  <div class="page-header">
+    <div><h1>Análise de <em>Tendência</em></h1><p>Regressão Linear · Anderson-Darling · Histograma · Múltiplos Grupos</p></div>
+    <span class="tag tag-ana">Análise</span>
+  </div>
 
   <div class="data-section">
-    <h3>Dados de Entrada</h3>
-    <div class="input-mode-tabs">
-      <div class="imt active" onclick="setTrendMode('simple',this)">Valores simples</div>
-      <div class="imt" onclick="setTrendMode('xy',this)">X, Y (eixo X personalizado)</div>
-      <div class="imt" onclick="setTrendMode('groups',this)">Múltiplos grupos</div>
+    <div class="data-section-title">Dados de Entrada</div>
+    <div class="mode-row">
+      <span class="mode-label">Modo:</span>
+      <div class="imt active" onclick="setMode('trend','simple',this)">Valores simples</div>
+      <div class="imt" onclick="setMode('trend','xy',this)">Eixo X + Y separados</div>
+      <div class="imt" onclick="setMode('trend','groups',this)">Múltiplos grupos</div>
     </div>
-    <textarea id="trend-input" class="data-input" rows="5" placeholder="Cole seus dados aqui..."></textarea>
-    <div class="data-hint" id="trend-hint">Modo simples: valores separados por vírgula ou espaço.</div>
+    <div id="trend-input-area"></div>
+  </div>
+
+  <div class="options-row">
+    <label class="opt-check"><input type="checkbox" id="trend-show-limits" checked onchange="trendRerender()"><span>Limites ±3σ</span></label>
+    <label class="opt-check"><input type="checkbox" id="trend-show-zones" checked onchange="trendRerender()"><span>Zonas ±1σ / ±2σ</span></label>
+    <label class="opt-check"><input type="checkbox" id="trend-show-reg" checked onchange="trendRerender()"><span>Linha de regressão</span></label>
+    <label class="opt-check"><input type="checkbox" id="trend-show-ci" checked onchange="trendRerender()"><span>Intervalo de confiança 95%</span></label>
   </div>
 
   <div class="controls">
-    <div class="ctrl-group"><label>Nº de Pontos</label><input type="range" id="trend-n" min="15" max="80" value="30" oninput="document.getElementById('trend-nval').textContent=this.value"><span class="range-val" id="trend-nval">30</span></div>
+    <div class="ctrl-group"><label>Nº Pontos</label><input type="range" id="trend-n" min="15" max="80" value="30" oninput="document.getElementById('trend-nval').textContent=this.value"><span class="range-val" id="trend-nval">30</span></div>
     <div class="ctrl-group"><label>Média (μ)</label><input type="number" id="trend-mu" value="50" step="0.5"></div>
     <div class="ctrl-group"><label>Desvio (σ)</label><input type="number" id="trend-sigma" value="3" step="0.1" min="0.1"></div>
     <div class="ctrl-group"><label>Simulação</label><select id="trend-type"><option value="normal">Normal (estável)</option><option value="trend">Tendência crescente</option><option value="shift">Deslocamento</option><option value="skew">Assimétrico</option><option value="groups">Dois grupos (demo)</option></select></div>
@@ -268,11 +323,10 @@
   </div>
 
   <div class="chart-card">
-    <div class="chart-header">
-      <h2>Gráfico de <em>Tendência</em> — Regressão Linear com IC 95%</h2>
+    <div class="chart-header"><h2>Gráfico de <em>Tendência</em> — Regressão com IC 95%</h2>
       <div class="chart-stats">
-        <div class="stat"><div class="stat-label">Inclinação (b₁)</div><div class="stat-val cl" id="trend-slope">—</div></div>
-        <div class="stat"><div class="stat-label">Intercepto (b₀)</div><div class="stat-val" style="color:var(--muted2)" id="trend-intercept">—</div></div>
+        <div class="stat"><div class="stat-label">Inclinação b₁</div><div class="stat-val cl" id="trend-slope">—</div></div>
+        <div class="stat"><div class="stat-label">Intercepto b₀</div><div class="stat-val" style="color:var(--muted2)" id="trend-intercept">—</div></div>
         <div class="stat"><div class="stat-label">R²</div><div class="stat-val lcl" id="trend-r2">—</div></div>
       </div>
     </div>
@@ -283,8 +337,7 @@
   <div class="ad-panels" id="ad-panels"></div>
 
   <div class="chart-card">
-    <div class="chart-header">
-      <h2><em>Histograma</em> com Curva Normal Sobreposta</h2>
+    <div class="chart-header"><h2><em>Histograma</em> com Curva Normal</h2>
       <div class="chart-stats">
         <div class="stat"><div class="stat-label">Média</div><div class="stat-val cl" id="hist-mean">—</div></div>
         <div class="stat"><div class="stat-label">Desvio</div><div class="stat-val lcl" id="hist-sd">—</div></div>
@@ -296,18 +349,9 @@
   </div>
 
   <div class="formulas">
-    <div class="formula-card"><h4>Anderson-Darling</h4><div class="fline">A² adj = A²×(1+0,75/n+2,25/n²)</div><div class="fline note" style="margin-top:.4rem">H₀: normal · rejeita se p &lt; 0,05</div></div>
-    <div class="formula-card"><h4>Regressão Linear</h4><div class="fline">ŷ = b₀ + b₁×x</div><div class="fline">R² = 1 − SSres/SStot</div><div class="fline note" style="margin-top:.4rem">IC 95% via t-Student (n−2 g.l.)</div></div>
-    <div class="formula-card"><h4>Formatos aceitos</h4><div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
-      Simples: <span style="color:var(--accent2)">129, 114, 142</span><br>
-      X,Y: <span style="color:var(--accent2)">1;129 / 6;114 / 7;142</span><br>
-      Grupos:<br>
-      <span style="color:var(--accent2)">Grupo:Perecível</span><br>
-      <span style="color:var(--accent2)">1;105 / 6;98</span><br>
-      <span style="color:var(--accent2)">Grupo:Não Perecível</span><br>
-      <span style="color:var(--accent2)">1;129 / 6;114</span>
-    </div></div>
-    <div class="formula-card"><h4>Interpretação</h4><div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">b₁ > 0 → crescente<br>b₁ &lt; 0 → decrescente<br>b₁ ≈ 0 → estável<br>p &lt; 0,05 → não normal<br>R² > 0,7 → tendência forte</div></div>
+    <div class="formula-card"><h4>Anderson-Darling</h4><div class="fline">A²adj = A²×(1+0,75/n+2,25/n²)</div><div class="fline note">H₀: normal · rejeita se p &lt; 0,05</div></div>
+    <div class="formula-card"><h4>Regressão</h4><div class="fline">ŷ = b₀ + b₁×x</div><div class="fline">R²=1−SSres/SStot</div><div class="fline note">IC 95% via t-Student</div></div>
+    <div class="formula-card"><h4>Interpretação</h4><div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">b₁>0 → crescente<br>b₁&lt;0 → decrescente<br>b₁≈0 → estável<br>p&lt;0,05 → não normal</div></div>
   </div>
 </div>
 
@@ -319,9 +363,12 @@ const A3c=[2.659,1.954,1.628,1.427,1.287,1.182,1.099,1.032,0.975];
 const B3c=[0,0,0,0,0.030,0.118,0.185,0.239,0.284];
 const B4c=[3.267,2.568,2.266,2.089,1.970,1.882,1.815,1.761,1.716];
 function getC(a,n){return a[Math.min(Math.max(n-2,0),a.length-1)];}
-
-// Group colors
 const GRP_COLORS=['#3ecfcf','#ff6b4a','#a78bfa','#34d399','#f472b6','#fbbf24','#60a5fa'];
+
+// ══ STATE ══
+const modes={imr:'simple',xbs:'simple',trend:'simple'};
+const groupDefs={imr:[{name:'Série 1'}],trend:[{name:'Série 1'},{name:'Série 2'}]};
+let imrGroups=[],xbsSubs=[],trendGroups=[];
 
 // ══ NAV ══
 function showPage(id,el){
@@ -332,6 +379,135 @@ function showPage(id,el){
   if(id==='trend'&&trendGroups.length===0)trendGenerate();
 }
 
+// ══ INPUT AREA BUILDERS ══
+function buildInputArea(chart){
+  const m=modes[chart];
+  const container=document.getElementById(chart+'-input-area');
+  if(!container)return;
+
+  if(m==='simple'){
+    const isXbs=chart==='xbs';
+    container.innerHTML=`
+      <div class="xy-inputs single">
+        <div class="xy-field">
+          <div class="xy-label"><span>Y</span> ${isXbs?'Subgrupos (uma linha por subgrupo)':'Valores'}</div>
+          <textarea class="data-input" id="${chart}-y" rows="${isXbs?5:2}" placeholder="${isXbs?'50.1, 49.8, 50.3\n49.5, 50.2, 50.1':'23.1, 24.5, 22.8, 25.0'}"></textarea>
+          <div class="data-hint">${isXbs?'Cada linha = um subgrupo. Valores separados por vírgula.':'Valores separados por vírgula, espaço ou ponto e vírgula.'}</div>
+        </div>
+      </div>`;
+  } else if(m==='xy'){
+    const isXbs=chart==='xbs';
+    container.innerHTML=`
+      <div class="xy-inputs">
+        <div class="xy-field">
+          <div class="xy-label"><span>X</span> Rótulos do Eixo X</div>
+          <textarea class="data-input axis-x" id="${chart}-x" rows="${isXbs?5:2}" placeholder="${isXbs?'1\n6\n7\n8\n10':'1, 6, 7, 8, 10, 11'}"></textarea>
+          <div class="data-hint">Um valor por linha <em>ou</em> separados por vírgula.<br>Deve ter o mesmo número de entradas que o Eixo Y.</div>
+        </div>
+        <div class="xy-field">
+          <div class="xy-label"><span>Y</span> ${isXbs?'Subgrupos':'Valores'}</div>
+          <textarea class="data-input" id="${chart}-y" rows="${isXbs?5:2}" placeholder="${isXbs?'50.1, 49.8, 50.3\n49.5, 50.2, 50.1':'129, 114, 142, 251'}"></textarea>
+          <div class="data-hint">${isXbs?'Cada linha = um subgrupo.':'Valores correspondentes ao Eixo X.'}</div>
+        </div>
+      </div>`;
+  } else {
+    // groups mode
+    const defs=groupDefs[chart]||[{name:'Série 1'},{name:'Série 2'}];
+    const showX=true;
+    let html=`<div class="groups-input-wrap" id="${chart}-groups-wrap">`;
+    defs.forEach((g,i)=>{
+      const col=GRP_COLORS[i%GRP_COLORS.length];
+      html+=`<div class="group-row" id="${chart}-grp-${i}">
+        <div class="group-row-header">
+          <div class="group-color-dot" style="background:${col}"></div>
+          <input class="group-name-input" value="${g.name}" placeholder="Nome do grupo" oninput="groupDefs['${chart}'][${i}].name=this.value">
+          <button class="btn-rm" onclick="removeGroup('${chart}',${i})" title="Remover grupo">✕</button>
+        </div>
+        <div class="group-xy">
+          <div class="xy-field">
+            <div class="xy-label"><span>X</span> Rótulos do Eixo X</div>
+            <textarea class="data-input axis-x" id="${chart}-grp${i}-x" rows="3" placeholder="1, 6, 7, 8, 10"></textarea>
+          </div>
+          <div class="xy-field">
+            <div class="xy-label"><span>Y</span> Valores</div>
+            <textarea class="data-input" id="${chart}-grp${i}-y" rows="3" placeholder="129, 114, 142, 251"></textarea>
+          </div>
+        </div>
+      </div>`;
+    });
+    html+=`</div><button class="btn-add-group" onclick="addGroup('${chart}')">+ Adicionar grupo</button>`;
+    container.innerHTML=html;
+  }
+}
+
+function addGroup(chart){
+  if(!groupDefs[chart])groupDefs[chart]=[];
+  groupDefs[chart].push({name:`Série ${groupDefs[chart].length+1}`});
+  buildInputArea(chart);
+}
+function removeGroup(chart,i){
+  if(groupDefs[chart].length<=1)return;
+  groupDefs[chart].splice(i,1);
+  buildInputArea(chart);
+}
+
+function setMode(chart,m,el){
+  modes[chart]=m;
+  const page=document.getElementById('page-'+chart);
+  if(page)page.querySelectorAll('.imt').forEach(e=>e.classList.remove('active'));
+  if(el)el.classList.add('active');
+  buildInputArea(chart);
+}
+
+// ══ PARSE ══
+function parseVals(str){return str.split(/[\n,;\s]+/).map(Number).filter(v=>!isNaN(v)&&v!==null);}
+function parseLabels(str){return str.split(/[\n,;\s]+/).map(s=>s.trim()).filter(s=>s!=='');}
+
+function getGroupsFromUI(chart){
+  const m=modes[chart];
+  if(m==='groups'){
+    const defs=groupDefs[chart]||[];
+    return defs.map((g,i)=>{
+      const xRaw=document.getElementById(`${chart}-grp${i}-x`)?.value||'';
+      const yRaw=document.getElementById(`${chart}-grp${i}-y`)?.value||'';
+      const yVals=parseVals(yRaw);
+      const xVals=xRaw.trim()?parseLabels(xRaw).map(Number):yVals.map((_,j)=>j+1);
+      const pts=yVals.map((y,j)=>({x:xVals[j]??j+1,y})).filter(p=>isFinite(p.x));
+      return{name:g.name,pts};
+    }).filter(g=>g.pts.length>0);
+  } else if(m==='xy'){
+    const xRaw=document.getElementById(`${chart}-x`)?.value||'';
+    const yRaw=document.getElementById(`${chart}-y`)?.value||'';
+    const yVals=parseVals(yRaw);
+    const xVals=xRaw.trim()?parseLabels(xRaw).map(Number):yVals.map((_,i)=>i+1);
+    const pts=yVals.map((y,i)=>({x:xVals[i]??i+1,y})).filter(p=>isFinite(p.x));
+    return[{name:'Série 1',pts}];
+  } else {
+    const yRaw=document.getElementById(`${chart}-y`)?.value||'';
+    const yVals=parseVals(yRaw);
+    return[{name:'Série 1',pts:yVals.map((y,i)=>({x:i+1,y}))}];
+  }
+}
+
+function getXbsFromUI(){
+  const m=modes['xbs'];
+  if(m==='xy'){
+    const xRaw=document.getElementById('xbs-x')?.value||'';
+    const yRaw=document.getElementById('xbs-y')?.value||'';
+    const xLines=xRaw.split('\n').map(s=>s.trim()).filter(s=>s);
+    const yLines=yRaw.split('\n').map(s=>s.trim()).filter(s=>s);
+    const count=Math.min(xLines.length,yLines.length)||yLines.length;
+    return yLines.slice(0,count).map((line,i)=>{
+      const vals=parseVals(line);
+      const x=xLines[i]?parseFloat(xLines[i]):i+1;
+      return{x:isFinite(x)?x:i+1,vals};
+    }).filter(s=>s.vals.length>=2);
+  } else {
+    const yRaw=document.getElementById('xbs-y')?.value||'';
+    return yRaw.split('\n').map((line,i)=>{const vals=parseVals(line);return{x:i+1,vals};}).filter(s=>s.vals.length>=2);
+  }
+}
+
 // ══ MATH ══
 function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
@@ -340,329 +516,21 @@ function fmt(v,d=3){return isFinite(v)?v.toFixed(d):'—';}
 function normCDF(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;const sg=x<0?-1:1;x=Math.abs(x)/Math.sqrt(2);const t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return 0.5*(1+sg*y);}
 function tCrit(n){return n<=10?2.228:n<=20?2.086:n<=30?2.042:1.96;}
 
-// ══ PARSE HELPERS ══
-// Parse "simple": returns [{x:1,y:v},{x:2,y:v}...]
-function parseSimple(raw){
-  return raw.split(/[\s,;]+/).map(Number).filter(v=>!isNaN(v)&&String(v).trim()!=='').map((v,i)=>({x:i+1,y:v}));
-}
-// Parse "xy": "x;y" or "x,y" pairs, one per line or separated by /
-function parseXY(raw){
-  const lines=raw.replace(/\//g,'\n').split('\n').map(l=>l.trim()).filter(l=>l);
-  const pts=[];
-  for(const l of lines){
-    const parts=l.split(/[;,]/).map(s=>parseFloat(s.trim()));
-    if(parts.length>=2&&!isNaN(parts[0])&&!isNaN(parts[1]))pts.push({x:parts[0],y:parts[1]});
-  }
-  return pts;
-}
-// Parse "groups": returns [{name,pts:[{x,y}]}]
-function parseGroups(raw,xyMode){
-  const lines=raw.replace(/\//g,'\n').split('\n').map(l=>l.trim()).filter(l=>l);
-  const groups=[];
-  let cur=null;
-  for(const l of lines){
-    if(/^grupo\s*:/i.test(l)||/^group\s*:/i.test(l)){
-      const name=l.replace(/^(grupo|group)\s*:\s*/i,'').trim()||`Grupo ${groups.length+1}`;
-      cur={name,pts:[]};groups.push(cur);
-    } else {
-      if(!cur){cur={name:`Grupo 1`,pts:[]};groups.push(cur);}
-      if(xyMode){
-        const parts=l.split(/[;,]/).map(s=>parseFloat(s.trim()));
-        if(parts.length>=2&&!isNaN(parts[0])&&!isNaN(parts[1]))cur.pts.push({x:parts[0],y:parts[1]});
-      } else {
-        l.split(/[\s,;]+/).map(Number).filter(v=>!isNaN(v)).forEach((v,i)=>cur.pts.push({x:cur.pts.length+1,y:v}));
-      }
-    }
-  }
-  return groups.filter(g=>g.pts.length>0);
-}
-
-// ══ DRAW ENGINE ══
-function setupCanvas(cid,H){
-  const cv=document.getElementById(cid);if(!cv)return null;
-  const ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1;
-  const W=cv.offsetWidth||cv.parentElement.offsetWidth;
-  cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;
-  ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  return{ctx,W,H,dpr};
-}
-
-function drawMultiSeries(cid,H,groups,showLimits,limitsOverride){
-  const r=setupCanvas(cid,H);if(!r)return;
-  const{ctx,W}=r;
-  const pad={top:22,right:20,bottom:32,left:58};
-  const pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
-
-  // collect all x values and compute global y range
-  const allX=[],allY=[];
-  groups.forEach(g=>g.pts.forEach(p=>{allX.push(p.x);allY.push(p.y);}));
-  if(limitsOverride){allY.push(limitsOverride.ucl,limitsOverride.lcl);}
-  const xMin=Math.min(...allX),xMax=Math.max(...allX);
-  let yMin=Math.min(...allY),yMax=Math.max(...allY);
-  const yMg=(yMax-yMin)*0.15||5;yMin-=yMg;yMax+=yMg;
-
-  const toX=x=>(xMin===xMax)?pad.left+pw/2:pad.left+(x-xMin)/(xMax-xMin)*pw;
-  const toY=v=>pad.top+(1-(v-yMin)/(yMax-yMin))*ph;
-
-  // grid
-  ctx.strokeStyle='#1a2030';ctx.lineWidth=1;
-  for(let t=0;t<=5;t++){const y=pad.top+(t/5)*ph;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();}
-
-  // limit lines
-  if(showLimits&&limitsOverride){
-    const hl=(yv,col,dash,lbl)=>{if(!isFinite(yv))return;const y=toY(yv);ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.3;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col;ctx.font='500 9.5px DM Mono,monospace';ctx.fillText(lbl,4,y+4);ctx.restore();};
-    hl(limitsOverride.ucl,'#e05565',[4,3],'LCS');
-    hl(limitsOverride.cl,'rgba(255,255,255,0.15)',[],'LC');
-    hl(limitsOverride.lcl,'#f0a500',[4,3],'LCI');
-  }
-
-  // series
-  groups.forEach((g,gi)=>{
-    const col=GRP_COLORS[gi%GRP_COLORS.length];
-    if(g.pts.length<2){return;}
-    const sorted=[...g.pts].sort((a,b)=>a.x-b.x);
-
-    // extra lines (regression etc)
-    if(g.extras){g.extras.forEach(el=>{ctx.save();ctx.strokeStyle=el.color;ctx.lineWidth=el.width||1.5;ctx.setLineDash(el.dash||[]);ctx.beginPath();el.pts.forEach((p,i)=>{const x=toX(p.x),y=toY(p.y);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();ctx.setLineDash([]);ctx.restore();});}
-
-    // line
-    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2;
-    sorted.forEach((p,i)=>{const x=toX(p.x),y=toY(p.y);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-    ctx.stroke();
-
-    // dots
-    sorted.forEach(p=>{
-      const x=toX(p.x),y=toY(p.y),viol=g.viols&&g.viols.has(p.x);
-      ctx.beginPath();ctx.arc(x,y,viol?5.5:3.5,0,Math.PI*2);
-      ctx.fillStyle=viol?'#e05565':col;ctx.fill();
-      if(viol){ctx.strokeStyle='#ff8899';ctx.lineWidth=1.5;ctx.stroke();}
-    });
-  });
-
-  // x labels - pick ~8 ticks
-  const uniqueX=[...new Set(allX)].sort((a,b)=>a-b);
-  const xStep=Math.max(1,Math.ceil(uniqueX.length/8));
-  ctx.fillStyle='#5a677f';ctx.font='9.5px DM Mono,monospace';ctx.textAlign='center';
-  uniqueX.forEach((x,i)=>{if(i%xStep===0||i===uniqueX.length-1)ctx.fillText(String(x),toX(x),H-pad.bottom+14);});
-
-  // y labels
-  ctx.textAlign='right';
-  for(let t=0;t<=5;t++){const frac=t/5,yv=yMin+(1-frac)*(yMax-yMin);ctx.fillText(yv.toFixed(1),pad.left-5,pad.top+frac*ph+4);}
-}
-
-function buildLegend(containerId,groups){
-  const el=document.getElementById(containerId);if(!el)return;
-  if(groups.length<=1){el.innerHTML='';return;}
-  el.innerHTML=groups.map((g,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${GRP_COLORS[i%GRP_COLORS.length]}"></div>${g.name}</div>`).join('');
-}
-
-// ══ IMR STATE ══
-let imrMode='simple', imrGroups=[];
-
-function setImrMode(m,el){
-  imrMode=m;
-  document.querySelectorAll('#page-imr .imt').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-  const hints={
-    simple:'Modo simples: <code>23.1, 24.5, 22.8</code> separados por vírgula ou espaço.',
-    xy:'Modo X,Y: uma observação por linha no formato <code>x;y</code> ou separadas por <code>/</code>. Ex: <code>1;129 / 6;114 / 7;142</code>',
-    groups:'Múltiplos grupos: use <code>Grupo:Nome</code> para separar séries, depois insira os dados no formato X;Y ou valores simples.'
-  };
-  document.getElementById('imr-hint').innerHTML=hints[m];
-  const mr=document.getElementById('imr-mr-card');
-  mr.style.display=(m==='groups')?'none':'block';
-}
-
-function imrGenerate(){
-  const n=parseInt(document.getElementById('imr-n').value),mu=parseFloat(document.getElementById('imr-mu').value),sig=parseFloat(document.getElementById('imr-sigma').value);
-  const data=Array.from({length:n},(_,i)=>{let v=mu+sig*randn();if(i===Math.floor(n*.62))v=mu+sig*4.1;return parseFloat(v.toFixed(3));});
-  document.getElementById('imr-input').value=data.join(', ');
-  imrMode='simple';document.querySelectorAll('#page-imr .imt').forEach((e,i)=>{e.classList.toggle('active',i===0);});
-  imrRender([{name:'Série 1',pts:data.map((v,i)=>({x:i+1,y:v}))}]);
-}
-
-function imrApply(){
-  const raw=document.getElementById('imr-input').value.trim();
-  let groups;
-  if(imrMode==='groups') groups=parseGroups(raw,true).concat(parseGroups(raw,false)).filter(g=>g.pts.length>0);
-  else if(imrMode==='xy') groups=[{name:'Série 1',pts:parseXY(raw)}];
-  else groups=[{name:'Série 1',pts:parseSimple(raw)}];
-  if(!groups.length||!groups[0].pts.length){alert('Nenhum dado válido encontrado.');return;}
-  // deduplicate parse attempt
-  if(imrMode==='groups'){
-    const g2=parseGroups(raw,false);
-    groups=g2.length>0?g2:parseGroups(raw,true);
-  }
-  imrGroups=groups;
-  imrRender(groups);
-}
-
-function imrRender(groups){
-  imrGroups=groups;
-  const isMulti=groups.length>1;
-  document.getElementById('imr-mr-card').style.display=isMulti?'none':'block';
-
-  if(isMulti){
-    // Multi-group: just plot all series, show limits based on first group
-    const allPts=groups.flatMap(g=>g.pts);
-    const allY=allPts.map(p=>p.y);
-    const xb=mean(allY);
-    const mr2=allY.slice(1).map((v,i)=>Math.abs(v-allY[i]));
-    const mrb=mean(mr2),se=mrb/d2;
-    const iu=xb+3*se,il=xb-3*se;
-    document.getElementById('i-ucl').textContent=fmt(iu);document.getElementById('i-cl').textContent=fmt(xb);document.getElementById('i-lcl').textContent=fmt(il);
-    document.getElementById('mr-ucl').textContent='—';document.getElementById('mr-cl').textContent='—';
-
-    groups.forEach(g=>{
-      const yv=g.pts.map(p=>p.y);
-      const gxb=mean(yv),gmr=yv.slice(1).map((v,i)=>Math.abs(v-yv[i]));
-      const gmrb=mean(gmr),gse=gmrb/d2,giu=gxb+3*gse,gil=gxb-3*gse;
-      g.viols=new Set(g.pts.filter(p=>p.y>giu||p.y<gil).map(p=>p.x));
-    });
-
-    drawMultiSeries('chart-i',240,groups,true,{ucl:iu,cl:xb,lcl:il});
-    buildLegend('imr-legend-i',groups);
-
-    const violHtml=groups.flatMap(g=>[...g.viols].map(x=>{const pt=g.pts.find(p=>p.x===x);return`<div class="viol-item"><div class="vdot red"></div>[${g.name}] X=${x}: ${fmt(pt?.y||0)} fora dos limites</div>`;})).join('');
-    document.getElementById('imr-viol-list').innerHTML=violHtml||'<span class="no-viol">✓ Nenhuma violação.</span>';
-    return;
-  }
-
-  // Single group
-  const pts=groups[0].pts;
-  const yv=pts.map(p=>p.y);
-  const xb=mean(yv),mr=yv.slice(1).map((v,i)=>Math.abs(v-yv[i])),mrb=mean(mr),se=mrb/d2;
-  const iu=xb+3*se,il=xb-3*se,mu2=D4*mrb;
-  document.getElementById('i-ucl').textContent=fmt(iu);document.getElementById('i-cl').textContent=fmt(xb);document.getElementById('i-lcl').textContent=fmt(il);
-  document.getElementById('mr-ucl').textContent=fmt(mu2);document.getElementById('mr-cl').textContent=fmt(mrb);
-
-  const rule=parseInt(document.getElementById('imr-rule').value),viols=[];
-  yv.forEach((v,i)=>{if(v>iu)viols.push({x:pts[i].x,msg:`X=${pts[i].x}: ${fmt(v)} > LCS ${fmt(iu)}`});if(v<il)viols.push({x:pts[i].x,msg:`X=${pts[i].x}: ${fmt(v)} < LCI ${fmt(il)}`});});
-  if(rule>=2){for(let i=7;i<yv.length;i++){const seg=yv.slice(i-7,i+1);if(seg.every(v=>v>xb))viols.push({x:pts[i].x,msg:`X=${pts[i-7].x}–${pts[i].x}: 8 acima da LC`});if(seg.every(v=>v<xb))viols.push({x:pts[i].x,msg:`X=${pts[i-7].x}–${pts[i].x}: 8 abaixo da LC`});}}
-
-  const vset=new Set(viols.map(v=>v.x));
-  groups[0].viols=vset;
-  drawMultiSeries('chart-i',240,groups,true,{ucl:iu,cl:xb,lcl:il});
-  buildLegend('imr-legend-i',groups);
-
-  // MR chart
-  const mrPts=mr.map((v,i)=>({x:pts[i+1].x,y:v}));
-  drawMultiSeries('chart-mr',180,[{name:'MR',pts:mrPts,viols:new Set(mrPts.filter(p=>p.y>mu2).map(p=>p.x))}],true,{ucl:mu2,cl:mrb,lcl:0});
-
-  document.getElementById('imr-viol-list').innerHTML=viols.length?viols.map(v=>`<div class="viol-item"><div class="vdot red"></div>${v.msg}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
-}
-
-// ══ XBS ══
-let xbsMode='simple',xbsSubgroups=[];
-function setXbsMode(m,el){
-  xbsMode=m;
-  document.querySelectorAll('#page-xbars .imt').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-  const hints={simple:'Cada linha = um subgrupo. Valores separados por vírgula.',xy:'Formato <code>x;v1,v2,v3</code> — cada linha é um subgrupo com X personalizado. Ex: <code>1;50.1,49.8,50.3</code>'};
-  document.getElementById('xbs-hint').innerHTML=hints[m];
-}
-
-function xbsGenerate(){
-  const k=parseInt(document.getElementById('xbs-k').value),n=parseInt(document.getElementById('xbs-n').value),mu=parseFloat(document.getElementById('xbs-mu').value),sig=parseFloat(document.getElementById('xbs-sigma').value);
-  const groups=Array.from({length:k},(_,gi)=>Array.from({length:n},(_,j)=>{let v=mu+sig*randn();if(gi===Math.floor(k*.65)&&j===0)v=mu+sig*4;return parseFloat(v.toFixed(3));}));
-  xbsSubgroups=groups.map((g,i)=>({x:i+1,vals:g}));
-  document.getElementById('xbs-input').value=groups.map(g=>g.join(', ')).join('\n');
-  xbsMode='simple';document.querySelectorAll('#page-xbars .imt').forEach((e,i)=>e.classList.toggle('active',i===0));
-  xbsRender(xbsSubgroups);
-}
-
-function xbsApply(){
-  const raw=document.getElementById('xbs-input').value.trim();
-  let subs;
-  if(xbsMode==='xy'){
-    subs=raw.split('\n').map(l=>l.trim()).filter(l=>l).map(l=>{const parts=l.split(';');const x=parseFloat(parts[0]);const vals=parts[1]?parts[1].split(/[,\s]+/).map(Number).filter(v=>!isNaN(v)):[];return{x,vals};}).filter(s=>!isNaN(s.x)&&s.vals.length>=2);
-  } else {
-    subs=raw.split('\n').map((l,i)=>{const vals=l.split(/[\s,;]+/).map(Number).filter(v=>!isNaN(v));return{x:i+1,vals};}).filter(s=>s.vals.length>=2);
-  }
-  if(subs.length<4){alert('Insira pelo menos 4 subgrupos.');return;}
-  xbsSubgroups=subs;xbsRender(subs);
-}
-
-function xbsRender(subs){
-  const n=subs[0].vals.length;
-  const xbars=subs.map(s=>mean(s.vals)),ss=subs.map(s=>std(s.vals));
-  const xdb=mean(xbars),sb=mean(ss),a3=getC(A3c,n),b3=getC(B3c,n),b4=getC(B4c,n);
-  const xu=xdb+a3*sb,xl=xdb-a3*sb,su=b4*sb,sl=b3*sb;
-  document.getElementById('xb-ucl').textContent=fmt(xu);document.getElementById('xb-cl').textContent=fmt(xdb);document.getElementById('xb-lcl').textContent=fmt(xl);
-  document.getElementById('s-ucl').textContent=fmt(su);document.getElementById('s-cl').textContent=fmt(sb);document.getElementById('s-lcl').textContent=fmt(sl);
-
-  const viols=[];
-  xbars.forEach((v,i)=>{if(v>xu)viols.push({x:subs[i].x,msg:`X=${subs[i].x}(X̄):${fmt(v)}>LCS`});if(v<xl)viols.push({x:subs[i].x,msg:`X=${subs[i].x}(X̄):${fmt(v)}<LCI`});});
-  ss.forEach((v,i)=>{if(v>su)viols.push({x:subs[i].x,msg:`X=${subs[i].x}(S):${fmt(v)}>LCS`});});
-
-  const xvPts=subs.map((s,i)=>({x:s.x,y:xbars[i]}));
-  const svPts=subs.map((s,i)=>({x:s.x,y:ss[i]}));
-  const xVset=new Set(viols.filter(v=>v.msg.includes('X̄')).map(v=>v.x));
-  const sVset=new Set(viols.filter(v=>v.msg.includes('(S)')).map(v=>v.x));
-
-  drawMultiSeries('chart-xb',220,[{name:'X̄',pts:xvPts,viols:xVset}],true,{ucl:xu,cl:xdb,lcl:xl});
-  drawMultiSeries('chart-s',180,[{name:'S',pts:svPts,viols:sVset}],true,{ucl:su,cl:sb,lcl:sl});
-  document.getElementById('xbs-viol-list').innerHTML=viols.length?viols.map(v=>`<div class="viol-item"><div class="vdot red"></div>${v.msg}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
-}
-
-// ══ TREND ══
-let trendMode='simple',trendGroups=[];
-
-function setTrendMode(m,el){
-  trendMode=m;
-  document.querySelectorAll('#page-trend .imt').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-  const hints={
-    simple:'Valores simples: <code>129, 114, 142, 251</code> separados por vírgula.',
-    xy:'Formato X,Y: <code>1;129 / 6;114 / 7;142</code> — um par por linha ou separado por <code>/</code>.',
-    groups:'Múltiplos grupos:<br><code>Grupo:Não Perecível</code><br><code>1;129 / 6;114 / 7;142</code><br><code>Grupo:Perecível</code><br><code>1;105 / 6;98</code>'
-  };
-  document.getElementById('trend-hint').innerHTML=hints[m];
-}
-
-function trendGenerate(){
-  const n=parseInt(document.getElementById('trend-n').value),mu=parseFloat(document.getElementById('trend-mu').value),sig=parseFloat(document.getElementById('trend-sigma').value),type=document.getElementById('trend-type').value;
-  let groups;
-  if(type==='groups'){
-    const g1=Array.from({length:n},(_,i)=>({x:i+1,y:parseFloat((mu+sig*randn()+(i/(n-1))*sig*2).toFixed(3))}));
-    const g2=Array.from({length:Math.floor(n*.8)},(_,i)=>({x:i+1,y:parseFloat((mu*0.8+sig*randn()).toFixed(3))}));
-    groups=[{name:'Grupo A',pts:g1},{name:'Grupo B',pts:g2}];
-    document.getElementById('trend-input').value=`Grupo:Grupo A\n${g1.map(p=>`${p.x};${p.y}`).join(' / ')}\nGrupo:Grupo B\n${g2.map(p=>`${p.x};${p.y}`).join(' / ')}`;
-    trendMode='groups';document.querySelectorAll('#page-trend .imt').forEach((e,i)=>e.classList.toggle('active',i===2));
-  } else {
-    const data=Array.from({length:n},(_,i)=>{let v=mu+sig*randn();if(type==='trend')v+=(i/(n-1))*sig*4;if(type==='shift'&&i>=Math.floor(n/2))v+=sig*3;if(type==='skew')v=Math.abs(mu+sig*Math.abs(randn())*randn()*1.2);return parseFloat(v.toFixed(3));});
-    groups=[{name:'Série 1',pts:data.map((v,i)=>({x:i+1,y:v}))}];
-    document.getElementById('trend-input').value=data.join(', ');
-    trendMode='simple';document.querySelectorAll('#page-trend .imt').forEach((e,i)=>e.classList.toggle('active',i===0));
-  }
-  trendGroups=groups;trendRender(groups);
-}
-
-function trendApply(){
-  const raw=document.getElementById('trend-input').value.trim();
-  let groups;
-  if(trendMode==='groups') groups=parseGroups(raw,true).length>0?parseGroups(raw,true):parseGroups(raw,false);
-  else if(trendMode==='xy') groups=[{name:'Série 1',pts:parseXY(raw)}];
-  else groups=[{name:'Série 1',pts:parseSimple(raw)}];
-  if(!groups.length||!groups[0].pts.length){alert('Nenhum dado válido.');return;}
-  trendGroups=groups;trendRender(groups);
-}
-
 function linReg(pts){
-  const n=pts.length;
-  if(n<3)return null;
+  const n=pts.length;if(n<3)return null;
   const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
   const mx=mean(xs),my=mean(ys);
-  const ssxx=xs.reduce((a,v)=>a+(v-mx)**2,0);
+  const ssxx=xs.reduce((a,v)=>a+(v-mx)**2,0)||1e-9;
   const ssxy=xs.reduce((a,v,i)=>a+(v-mx)*(ys[i]-my),0);
   const b1=ssxy/ssxx,b0=my-b1*mx;
   const yhat=xs.map(v=>b0+b1*v);
-  const ssres=ys.reduce((a,v,i)=>a+(v-yhat[i])**2,0),sstot=ys.reduce((a,v)=>a+(v-my)**2,0);
-  const r2=sstot>0?1-ssres/sstot:0,ser=Math.sqrt(ssres/(n-2)),seb=ser/Math.sqrt(ssxx||1);
-  const tc=tCrit(n),cilo=b1-tc*seb,cihi=b1+tc*seb;
-  const ciu=xs.map(x=>b0+b1*x+tc*ser*Math.sqrt(1/n+((x-mx)**2)/(ssxx||1)));
-  const cil=xs.map(x=>b0+b1*x-tc*ser*Math.sqrt(1/n+((x-mx)**2)/(ssxx||1)));
-  return{b0,b1,r2,r:Math.sqrt(r2)*(b1>=0?1:-1),ser,seb,cilo,cihi,yhat:xs.map((x,i)=>({x,y:yhat[i]})),ciu:xs.map((x,i)=>({x,y:ciu[i]})),cil:xs.map((x,i)=>({x,y:cil[i]})),n,mx,ssxx};
+  const ssres=ys.reduce((a,v,i)=>a+(v-yhat[i])**2,0),sstot=ys.reduce((a,v)=>a+(v-my)**2,0)||1e-9;
+  const r2=1-ssres/sstot,ser=Math.sqrt(ssres/(n-2)||0),seb=ser/Math.sqrt(ssxx);
+  const tc=tCrit(n);
+  const ciu=xs.map(x=>b0+b1*x+tc*ser*Math.sqrt(1/n+(x-mx)**2/ssxx));
+  const cil=xs.map(x=>b0+b1*x-tc*ser*Math.sqrt(1/n+(x-mx)**2/ssxx));
+  return{b0,b1,r2,r:Math.sqrt(r2)*(b1>=0?1:-1),ser,seb,cilo:b1-tc*seb,cihi:b1+tc*seb,
+    yhat:xs.map((x,i)=>({x,y:yhat[i]})),ciu:xs.map((x,i)=>({x,y:ciu[i]})),cil:xs.map((x,i)=>({x,y:cil[i]}))};
 }
 
 function adTest(vals){
@@ -675,66 +543,277 @@ function adTest(vals){
   return{A2,p:Math.max(0.001,Math.min(0.999,p)),m,s,n};
 }
 
-function trendRender(groups){
-  trendGroups=groups;
-  const isMulti=groups.length>1;
+// ══ DRAW ENGINE ══
+function setupCanvas(cid,H){
+  const cv=document.getElementById(cid);if(!cv)return null;
+  const ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1;
+  const W=cv.offsetWidth||cv.parentElement.offsetWidth;
+  cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  return{ctx,W,H};
+}
 
-  // Build series with regression overlays
-  const seriesForChart=groups.map((g,gi)=>{
+function drawSeries(cid,H,groups,opts){
+  // opts: {showLimits, showZones, showReg, showCI, limits:{ucl,cl,lcl}}
+  const r=setupCanvas(cid,H);if(!r)return;
+  const{ctx,W}=r;
+  const pad={top:22,right:22,bottom:32,left:60};
+  const pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
+
+  const allX=[],allY=[];
+  groups.forEach(g=>{g.pts.forEach(p=>{allX.push(p.x);allY.push(p.y);});});
+  if(opts.showLimits&&opts.limits){allY.push(opts.limits.ucl,opts.limits.lcl);}
+  if(!allX.length)return;
+  const xMin=Math.min(...allX),xMax=Math.max(...allX);
+  let yMin=Math.min(...allY),yMax=Math.max(...allY);
+  const yMg=(yMax-yMin)*0.15||5;yMin-=yMg;yMax+=yMg;
+
+  const toX=x=>(xMax===xMin)?pad.left+pw/2:pad.left+(x-xMin)/(xMax-xMin)*pw;
+  const toY=v=>pad.top+(1-(v-yMin)/(yMax-yMin))*ph;
+
+  // Grid
+  ctx.strokeStyle='#1a2030';ctx.lineWidth=1;
+  for(let t=0;t<=5;t++){const y=pad.top+(t/5)*ph;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();}
+
+  // Zones ±1σ, ±2σ
+  if(opts.showZones&&opts.limits){
+    const cl=opts.limits.cl,s3=(opts.limits.ucl-cl);
+    if(s3>0){
+      [[0,1/3,0.045],[-1/3,0,0.045],[1/3,2/3,.022],[-2/3,-1/3,.022]].forEach(([f1,f2,a])=>{
+        ctx.fillStyle=`rgba(62,207,207,${a})`;
+        const y1=toY(cl+f1*s3),y2=toY(cl+f2*s3);
+        ctx.fillRect(pad.left,Math.min(y1,y2),pw,Math.abs(y2-y1));
+      });
+    }
+  }
+
+  // Limit lines
+  if(opts.showLimits&&opts.limits){
+    const hl=(yv,col,dash,lbl)=>{if(!isFinite(yv))return;const y=toY(yv);ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.3;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col;ctx.font='500 9.5px DM Mono,monospace';ctx.fillText(lbl,3,y+4);ctx.restore();};
+    hl(opts.limits.ucl,'#e05565',[4,3],'LCS');
+    hl(opts.limits.cl,'rgba(255,255,255,0.12)',[],'LC');
+    if(opts.limits.lcl>yMin+yMg*.3)hl(opts.limits.lcl,'#f0a500',[4,3],'LCI');
+  }
+
+  // Per-series extras (regression, CI)
+  groups.forEach((g,gi)=>{
     const col=GRP_COLORS[gi%GRP_COLORS.length];
-    const reg=linReg(g.pts);
-    const extras=reg?[
-      {pts:reg.yhat,color:col,width:2,dash:[5,3]},
-      {pts:reg.ciu,color:col.replace(')',',0.3)').replace('rgb','rgba'),width:1,dash:[3,4]},
-      {pts:reg.cil,color:col.replace(')',',0.3)').replace('rgb','rgba'),width:1,dash:[3,4]},
-    ]:[];
-    g._reg=reg;
-    return{...g,extras};
+    if(g.reg&&opts.showReg){
+      ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash([5,3]);
+      ctx.beginPath();g.reg.yhat.forEach((p,i)=>{const x=toX(p.x),y=toY(p.y);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+      ctx.stroke();ctx.setLineDash([]);ctx.restore();
+    }
+    if(g.reg&&opts.showCI){
+      const drawBand=pts=>{ctx.save();ctx.strokeStyle=col.replace('#','rgba(').replace(/(..)(..)(..)$/,(m,r,g,b)=>`${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.35)`)||col+'55';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.beginPath();pts.forEach((p,i)=>{const x=toX(p.x),y=toY(p.y);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();ctx.setLineDash([]);ctx.restore();};
+      drawBand(g.reg.ciu);drawBand(g.reg.cil);
+    }
   });
 
-  // Determine limits from first group
+  // Series lines + dots
+  groups.forEach((g,gi)=>{
+    const col=GRP_COLORS[gi%GRP_COLORS.length];
+    const sorted=[...g.pts].sort((a,b)=>a.x-b.x);
+    if(sorted.length<2)return;
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2;
+    sorted.forEach((p,i)=>{const x=toX(p.x),y=toY(p.y);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.stroke();
+    sorted.forEach(p=>{
+      const x=toX(p.x),y=toY(p.y),viol=g.viols&&g.viols.has(p.x);
+      ctx.beginPath();ctx.arc(x,y,viol?5.5:3.5,0,Math.PI*2);
+      ctx.fillStyle=viol?'#e05565':col;ctx.fill();
+      if(viol){ctx.strokeStyle='#ff8899';ctx.lineWidth=1.5;ctx.stroke();}
+    });
+  });
+
+  // X axis labels
+  const uniqueX=[...new Set(allX)].sort((a,b)=>a-b);
+  const step=Math.max(1,Math.ceil(uniqueX.length/9));
+  ctx.fillStyle='#5a677f';ctx.font='9.5px DM Mono,monospace';ctx.textAlign='center';
+  uniqueX.forEach((x,i)=>{if(i%step===0||i===uniqueX.length-1)ctx.fillText(String(x),toX(x),H-pad.bottom+14);});
+
+  // Y axis labels
+  ctx.textAlign='right';
+  for(let t=0;t<=5;t++){const frac=t/5,yv=yMin+(1-frac)*(yMax-yMin);ctx.fillText(yv.toFixed(1),pad.left-5,pad.top+frac*ph+4);}
+}
+
+function buildLegend(id,groups){
+  const el=document.getElementById(id);if(!el)return;
+  if(groups.length<=1){el.innerHTML='';return;}
+  el.innerHTML=groups.map((g,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${GRP_COLORS[i%GRP_COLORS.length]}"></div>${g.name}</div>`).join('');
+}
+
+// ══ IMR ══
+function imrGenerate(){
+  const n=parseInt(document.getElementById('imr-n').value),mu=parseFloat(document.getElementById('imr-mu').value),sig=parseFloat(document.getElementById('imr-sigma').value);
+  const data=Array.from({length:n},(_,i)=>{let v=mu+sig*randn();if(i===Math.floor(n*.62))v=mu+sig*4.1;return parseFloat(v.toFixed(3));});
+  modes['imr']='simple';
+  document.querySelectorAll('#page-imr .imt').forEach((e,i)=>e.classList.toggle('active',i===0));
+  buildInputArea('imr');
+  setTimeout(()=>{const el=document.getElementById('imr-y');if(el)el.value=data.join(', ');},10);
+  imrGroups=[{name:'Série 1',pts:data.map((v,i)=>({x:i+1,y:v}))}];
+  imrRender(imrGroups);
+}
+
+function imrApply(){
+  const groups=getGroupsFromUI('imr');
+  if(!groups.length||!groups[0].pts.length){alert('Nenhum dado válido.');return;}
+  imrGroups=groups;imrRender(groups);
+}
+function imrRerender(){if(imrGroups.length)imrRender(imrGroups);}
+
+function imrRender(groups){
+  imrGroups=groups;
+  const isMulti=groups.length>1;
+  document.getElementById('imr-mr-card').style.display=isMulti?'none':'block';
+
+  const allY=groups.flatMap(g=>g.pts.map(p=>p.y));
+  const xb=mean(allY),mr2=allY.slice(1).map((v,i)=>Math.abs(v-allY[i])),mrb=mean(mr2),se=mrb/d2;
+  const iu=xb+3*se,il=xb-3*se,mru=D4*mrb;
+
+  document.getElementById('i-ucl').textContent=fmt(iu);document.getElementById('i-cl').textContent=fmt(xb);document.getElementById('i-lcl').textContent=fmt(il);
+  document.getElementById('mr-ucl').textContent=fmt(mru);document.getElementById('mr-cl').textContent=fmt(mrb);
+
+  const rule=parseInt(document.getElementById('imr-rule').value);
+  const allViols=[];
+  groups.forEach(g=>{
+    const yv=g.pts.map(p=>p.y),gxb=mean(yv),gmr=yv.slice(1).map((v,i)=>Math.abs(v-yv[i]));
+    const gmrb=mean(gmr),gse=gmrb/d2,giu=gxb+3*gse,gil=gxb-3*gse;
+    const vset=new Set();
+    g.pts.forEach(p=>{if(p.y>giu||p.y<gil){vset.add(p.x);allViols.push(`[${g.name}] X=${p.x}: ${fmt(p.y)} ${p.y>giu?'> LCS':'< LCI'}`);}});
+    if(rule>=2){for(let i=7;i<yv.length;i++){const seg=yv.slice(i-7,i+1);if(seg.every(v=>v>gxb)){allViols.push(`[${g.name}] 8 acima da LC (ptos ${i-6}–${i+1})`);for(let j=i-7;j<=i;j++)vset.add(g.pts[j].x);}if(seg.every(v=>v<gxb)){allViols.push(`[${g.name}] 8 abaixo da LC (ptos ${i-6}–${i+1})`);for(let j=i-7;j<=i;j++)vset.add(g.pts[j].x);}}}
+    g.viols=vset;
+    if(document.getElementById('imr-show-regline')?.checked){const reg=linReg(g.pts);if(reg)g.reg=reg;}else{g.reg=null;}
+  });
+
+  const showLimits=document.getElementById('imr-show-limits')?.checked??true;
+  const showZones=document.getElementById('imr-show-zones')?.checked??true;
+  const showReg=document.getElementById('imr-show-regline')?.checked??false;
+
+  drawSeries('chart-i',240,groups,{showLimits,showZones,showReg,showCI:false,limits:{ucl:iu,cl:xb,lcl:il}});
+  buildLegend('imr-legend-i',groups);
+
+  if(!isMulti){
+    const pts=groups[0].pts,yv=pts.map(p=>p.y);
+    const mrPts=yv.slice(1).map((v,i)=>({x:pts[i+1].x,y:Math.abs(v-yv[i])}));
+    const mrVset=new Set(mrPts.filter(p=>p.y>mru).map(p=>p.x));
+    drawSeries('chart-mr',170,[{name:'MR',pts:mrPts,viols:mrVset}],{showLimits,showZones:false,showReg:false,showCI:false,limits:{ucl:mru,cl:mrb,lcl:0}});
+  }
+  document.getElementById('imr-viol-list').innerHTML=allViols.length?allViols.map(m=>`<div class="viol-item"><div class="vdot"></div>${m}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
+}
+
+// ══ XBS ══
+function xbsGenerate(){
+  const k=parseInt(document.getElementById('xbs-k').value),n=parseInt(document.getElementById('xbs-n').value),mu=parseFloat(document.getElementById('xbs-mu').value),sig=parseFloat(document.getElementById('xbs-sigma').value);
+  const groups=Array.from({length:k},(_,gi)=>Array.from({length:n},(_,j)=>{let v=mu+sig*randn();if(gi===Math.floor(k*.65)&&j===0)v=mu+sig*4;return parseFloat(v.toFixed(3));}));
+  modes['xbs']='simple';document.querySelectorAll('#page-xbars .imt').forEach((e,i)=>e.classList.toggle('active',i===0));
+  buildInputArea('xbs');
+  setTimeout(()=>{const el=document.getElementById('xbs-y');if(el)el.value=groups.map(g=>g.join(', ')).join('\n');},10);
+  xbsSubs=groups.map((g,i)=>({x:i+1,vals:g}));xbsRender(xbsSubs);
+}
+function xbsApply(){const subs=getXbsFromUI();if(subs.length<4){alert('Insira pelo menos 4 subgrupos.');return;}xbsSubs=subs;xbsRender(subs);}
+function xbsRerender(){if(xbsSubs.length)xbsRender(xbsSubs);}
+
+function xbsRender(subs){
+  xbsSubs=subs;
+  const n=subs[0].vals.length;
+  const xbars=subs.map(s=>mean(s.vals)),ss=subs.map(s=>std(s.vals));
+  const xdb=mean(xbars),sb=mean(ss),a3=getC(A3c,n),b3=getC(B3c,n),b4=getC(B4c,n);
+  const xu=xdb+a3*sb,xl=xdb-a3*sb,su=b4*sb,sl=b3*sb;
+  document.getElementById('xb-ucl').textContent=fmt(xu);document.getElementById('xb-cl').textContent=fmt(xdb);document.getElementById('xb-lcl').textContent=fmt(xl);
+  document.getElementById('s-ucl').textContent=fmt(su);document.getElementById('s-cl').textContent=fmt(sb);document.getElementById('s-lcl').textContent=fmt(sl);
+
+  const viols=[];
+  const xVset=new Set(),sVset=new Set();
+  xbars.forEach((v,i)=>{if(v>xu){viols.push(`X=${subs[i].x}(X̄):${fmt(v)}>LCS`);xVset.add(subs[i].x);}if(v<xl){viols.push(`X=${subs[i].x}(X̄):${fmt(v)}<LCI`);xVset.add(subs[i].x);}});
+  ss.forEach((v,i)=>{if(v>su){viols.push(`X=${subs[i].x}(S):${fmt(v)}>LCS`);sVset.add(subs[i].x);}});
+
+  const showL=document.getElementById('xbs-show-limits')?.checked??true;
+  const showZ=document.getElementById('xbs-show-zones')?.checked??true;
+  const xPts=subs.map((s,i)=>({x:s.x,y:xbars[i]}));
+  const sPts=subs.map((s,i)=>({x:s.x,y:ss[i]}));
+  drawSeries('chart-xb',220,[{name:'X̄',pts:xPts,viols:xVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:xu,cl:xdb,lcl:xl}});
+  drawSeries('chart-s',170,[{name:'S',pts:sPts,viols:sVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:su,cl:sb,lcl:sl}});
+  document.getElementById('xbs-viol-list').innerHTML=viols.length?viols.map(m=>`<div class="viol-item"><div class="vdot"></div>${m}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
+}
+
+// ══ TREND ══
+function trendGenerate(){
+  const n=parseInt(document.getElementById('trend-n').value),mu=parseFloat(document.getElementById('trend-mu').value),sig=parseFloat(document.getElementById('trend-sigma').value),type=document.getElementById('trend-type').value;
+  let groups;
+  if(type==='groups'){
+    const g1=Array.from({length:n},(_,i)=>({x:i+1,y:parseFloat((mu+sig*randn()+(i/(n-1))*sig*2).toFixed(3))}));
+    const g2=Array.from({length:Math.floor(n*.8)},(_,i)=>({x:i+1,y:parseFloat((mu*.8+sig*randn()).toFixed(3))}));
+    groups=[{name:'Grupo A',pts:g1},{name:'Grupo B',pts:g2}];
+    modes['trend']='groups';
+    groupDefs['trend']=[{name:'Grupo A'},{name:'Grupo B'}];
+    document.querySelectorAll('#page-trend .imt').forEach((e,i)=>e.classList.toggle('active',i===2));
+    buildInputArea('trend');
+    setTimeout(()=>{
+      const xa=document.getElementById('trend-grp0-x'),ya=document.getElementById('trend-grp0-y');
+      const xb2=document.getElementById('trend-grp1-x'),yb=document.getElementById('trend-grp1-y');
+      if(xa)xa.value=g1.map(p=>p.x).join(', ');if(ya)ya.value=g1.map(p=>p.y).join(', ');
+      if(xb2)xb2.value=g2.map(p=>p.x).join(', ');if(yb)yb.value=g2.map(p=>p.y).join(', ');
+    },10);
+  } else {
+    const data=Array.from({length:n},(_,i)=>{let v=mu+sig*randn();if(type==='trend')v+=(i/(n-1))*sig*4;if(type==='shift'&&i>=Math.floor(n/2))v+=sig*3;if(type==='skew')v=Math.abs(mu+sig*Math.abs(randn())*randn()*1.2);return parseFloat(v.toFixed(3));});
+    groups=[{name:'Série 1',pts:data.map((v,i)=>({x:i+1,y:v}))}];
+    modes['trend']='simple';document.querySelectorAll('#page-trend .imt').forEach((e,i)=>e.classList.toggle('active',i===0));
+    buildInputArea('trend');
+    setTimeout(()=>{const el=document.getElementById('trend-y');if(el)el.value=data.join(', ');},10);
+  }
+  trendGroups=groups;trendRender(groups);
+}
+
+function trendApply(){
+  const groups=getGroupsFromUI('trend');
+  if(!groups.length||!groups[0].pts.length){alert('Nenhum dado válido.');return;}
+  trendGroups=groups;trendRender(groups);
+}
+function trendRerender(){if(trendGroups.length)trendRender(trendGroups);}
+
+function trendRender(groups){
+  trendGroups=groups;
+  const showL=document.getElementById('trend-show-limits')?.checked??true;
+  const showZ=document.getElementById('trend-show-zones')?.checked??true;
+  const showR=document.getElementById('trend-show-reg')?.checked??true;
+  const showCI=document.getElementById('trend-show-ci')?.checked??true;
+
   const allY=groups.flatMap(g=>g.pts.map(p=>p.y));
   const gm=mean(allY),gs=std(allY);
   const lim={ucl:gm+3*gs,cl:gm,lcl:gm-3*gs};
 
-  drawMultiSeries('chart-trend',300,seriesForChart,true,lim);
+  groups.forEach(g=>{g.reg=linReg(g.pts);});
+
+  const firstReg=groups[0].reg;
+  document.getElementById('trend-slope').textContent=firstReg?fmt(firstReg.b1,4):'—';
+  document.getElementById('trend-intercept').textContent=firstReg?fmt(firstReg.b0,4):'—';
+  document.getElementById('trend-r2').textContent=firstReg?fmt(firstReg.r2,4):'—';
+
+  drawSeries('chart-trend',300,groups,{showLimits:showL,showZones:showZ,showReg:showR,showCI,limits:lim});
   buildLegend('trend-legend',groups);
 
-  // Show first group stats in header
-  const firstReg=groups[0]._reg;
-  if(firstReg){
-    document.getElementById('trend-slope').textContent=fmt(firstReg.b1,4);
-    document.getElementById('trend-intercept').textContent=fmt(firstReg.b0,4);
-    document.getElementById('trend-r2').textContent=fmt(firstReg.r2,4);
-  }
-
   // AD panels
-  const adContainer=document.getElementById('ad-panels');
-  adContainer.innerHTML='';
+  const adCont=document.getElementById('ad-panels');adCont.innerHTML='';
   groups.forEach((g,gi)=>{
     const col=GRP_COLORS[gi%GRP_COLORS.length];
-    const vals=g.pts.map(p=>p.y);
-    const ad=adTest(vals);
-    const reg=g._reg;
-    const skew=vals.reduce((a,v)=>a+((v-ad.m)/ad.s)**3,0)/vals.length;
+    const vals=g.pts.map(p=>p.y),ad=adTest(vals),reg=g.reg,isMulti=groups.length>1;
     const normal=ad.p>=0.05;
     const dir=reg&&Math.abs(reg.b1)>0.001?(reg.b1>0?'↑ Crescente':'↓ Decrescente'):'→ Estável';
-
     const panel=document.createElement('div');
     panel.className='trend-grid';
     panel.innerHTML=`
-      <div class="result-card" style="border-color:${col}33">
-        <h3 style="color:${col}">${isMulti?g.name+' — ':''} Teste Anderson-Darling</h3>
+      <div class="result-card" style="border-color:${col}44">
+        <h3 style="color:${col}">${isMulti?g.name+' · ':''}Anderson-Darling</h3>
         <div class="ad-row"><span class="ad-label">Estatística A²</span><span class="ad-value ${normal?'pass':'fail'}">${fmt(ad.A2,4)}</span></div>
         <div class="ad-row"><span class="ad-label">Valor-p (aprox.)</span><span class="ad-value ${normal?'pass':'fail'}">${ad.p<0.001?'< 0,001':fmt(ad.p,4)}</span></div>
         <div class="ad-row"><span class="ad-label">Nível α</span><span class="ad-value neutral">0,05</span></div>
         <div class="ad-row"><span class="ad-label">Média (x̄)</span><span class="ad-value neutral">${fmt(ad.m,3)}</span></div>
         <div class="ad-row"><span class="ad-label">Desvio Padrão</span><span class="ad-value neutral">${fmt(ad.s,3)}</span></div>
         <div class="ad-row"><span class="ad-label">N</span><span class="ad-value neutral">${ad.n}</span></div>
-        <div class="verdict-box ${normal?'normal':'nonnormal'}">${normal?`✓ Normal (p=${fmt(ad.p,3)} ≥ 0,05) — H₀ não rejeitada`:`✗ Não normal (p=${ad.p<0.001?'<0,001':fmt(ad.p,3)} < 0,05) — H₀ rejeitada`}</div>
+        <div class="verdict-box ${normal?'normal':'nonnormal'}">${normal?`✓ Normal  (p=${fmt(ad.p,3)} ≥ 0,05)  H₀ não rejeitada`:`✗ Não normal  (p=${ad.p<0.001?'<0,001':fmt(ad.p,3)} < 0,05)  H₀ rejeitada`}</div>
       </div>
-      <div class="result-card" style="border-color:${col}33">
-        <h3 style="color:${col}">${isMulti?g.name+' — ':''} Regressão Linear</h3>
+      <div class="result-card" style="border-color:${col}44">
+        <h3 style="color:${col}">${isMulti?g.name+' · ':''}Regressão Linear</h3>
         <div class="trend-stats">
           <div class="trend-stat"><div class="trend-stat-label">Inclinação b₁</div><div class="trend-stat-val">${reg?fmt(reg.b1,4):'—'}</div></div>
           <div class="trend-stat"><div class="trend-stat-label">Intercepto b₀</div><div class="trend-stat-val">${reg?fmt(reg.b0,4):'—'}</div></div>
@@ -746,85 +825,78 @@ function trendRender(groups){
           <div class="trend-stat"><div class="trend-stat-label">Tendência</div><div class="trend-stat-val ${reg&&Math.abs(reg.b1)>0.001?'neg':'pos'}">${dir}</div></div>
         </div>
       </div>`;
-    adContainer.appendChild(panel);
+    adCont.appendChild(panel);
   });
 
-  // Histogram (all groups combined or first group)
-  const allVals=isMulti?groups.flatMap(g=>g.pts.map(p=>p.y)):groups[0].pts.map(p=>p.y);
+  // Histogram
+  const allVals=groups.flatMap(g=>g.pts.map(p=>p.y));
   const adAll=adTest(allVals);
-  const skewAll=allVals.reduce((a,v)=>a+((v-adAll.m)/adAll.s)**3,0)/allVals.length;
+  const skew=allVals.reduce((a,v)=>a+((v-adAll.m)/adAll.s)**3,0)/allVals.length;
   document.getElementById('hist-mean').textContent=fmt(adAll.m,3);
   document.getElementById('hist-sd').textContent=fmt(adAll.s,3);
-  document.getElementById('hist-skew').textContent=fmt(skewAll,3);
-  drawMultiHistogram('chart-hist',260,groups,GRP_COLORS);
+  document.getElementById('hist-skew').textContent=fmt(skew,3);
+  drawHistogram('chart-hist',260,groups);
   buildLegend('hist-legend',groups);
 }
 
-function drawMultiHistogram(cid,H,groups,colors){
+function drawHistogram(cid,H,groups){
   const r=setupCanvas(cid,H);if(!r)return;
   const{ctx,W}=r;
-  const pad={top:24,right:30,bottom:42,left:58};
+  const pad={top:24,right:30,bottom:42,left:60};
   const pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
   const allVals=groups.flatMap(g=>g.pts.map(p=>p.y));
   const n=allVals.length,bins=Math.max(7,Math.ceil(1+3.322*Math.log10(n)));
-  const dmin=Math.min(...allVals),dmax=Math.max(...allVals),bw=(dmax-dmin)||1;
+  const dmin=Math.min(...allVals),dmax=Math.max(...allVals),bwFull=(dmax-dmin)||1;
+  const toX=v=>pad.left+(v-dmin)/bwFull*pw;
+  const toY=f=>pad.top+(1-f)*ph;
 
-  // build per-group counts
-  const groupCounts=groups.map(g=>{
-    const cnts=Array(bins).fill(0);
-    g.pts.forEach(p=>{let b=Math.floor((p.y-dmin)/bw*bins);if(b>=bins)b=bins-1;if(b<0)b=0;cnts[b]++;});
-    return cnts;
-  });
-  const mc=Math.max(...groupCounts.flatMap(c=>c));
+  const groupCounts=groups.map(g=>{const c=Array(bins).fill(0);g.pts.forEach(p=>{let b=Math.floor((p.y-dmin)/bwFull*bins);if(b>=bins)b=bins-1;if(b<0)b=0;c[b]++;});return c;});
+  const mc=Math.max(...groupCounts.flatMap(c=>c))||1;
 
-  const toX=v=>pad.left+(v-dmin)/(dmax-dmin)*pw;
-  const toY=f=>pad.top+(1-f/mc)*ph;
-
-  // grid
   ctx.strokeStyle='#1a2030';ctx.lineWidth=1;
   for(let t=0;t<=5;t++){const y=pad.top+(t/5)*ph;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();}
 
-  // bars per group (stacked or side by side)
-  const barW=pw/bins;
+  const barFull=pw/bins;
   groupCounts.forEach((cnts,gi)=>{
-    const col=colors[gi%colors.length];
+    const col=GRP_COLORS[gi%GRP_COLORS.length];
     cnts.forEach((c,bi)=>{
       if(c===0)return;
-      const x=pad.left+bi*barW+(gi*(barW/(groups.length+0.5)));
-      const bw2=barW/(groups.length+0.5);
-      const y=toY(c);
-      ctx.fillStyle=col+'33';ctx.strokeStyle=col+'99';ctx.lineWidth=1;
-      ctx.fillRect(x,y,bw2,ph-(y-pad.top));ctx.strokeRect(x,y,bw2,ph-(y-pad.top));
+      const bwg=barFull/(groups.length+.5),xOff=gi*bwg;
+      const x=pad.left+bi*barFull+xOff,y=toY(c/mc);
+      ctx.fillStyle=col+'2a';ctx.strokeStyle=col+'88';ctx.lineWidth=1;
+      ctx.fillRect(x,y,bwg,ph-(y-pad.top));ctx.strokeRect(x,y,bwg,ph-(y-pad.top));
     });
   });
 
-  // normal curve per group
   groups.forEach((g,gi)=>{
-    const col=colors[gi%colors.length];
-    const vals=g.pts.map(p=>p.y),m=mean(vals),s=std(vals)||1,sc=vals.length*bw/bins*bins;
+    const col=GRP_COLORS[gi%GRP_COLORS.length];
+    const vals=g.pts.map(p=>p.y),m=mean(vals),s=std(vals)||1;
+    const sc=vals.length*(bwFull/bins);
     ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2;
     let first=true;
     for(let i=0;i<=120;i++){
-      const xv=dmin+(i/120)*(dmax-dmin),d=Math.exp(-0.5*((xv-m)/s)**2)/(s*Math.sqrt(2*Math.PI));
-      const yv=toY(d*sc),px=toX(xv);
+      const xv=dmin+(i/120)*bwFull,d=Math.exp(-.5*((xv-m)/s)**2)/(s*Math.sqrt(2*Math.PI));
+      const px=toX(xv),yv=toY((d*sc)/mc);
       if(px<pad.left-5||px>pad.left+pw+5)continue;
       first?ctx.moveTo(px,yv):ctx.lineTo(px,yv);first=false;
     }
     ctx.stroke();
   });
 
-  // x labels
   ctx.fillStyle='#5a677f';ctx.font='9.5px DM Mono,monospace';ctx.textAlign='center';
-  for(let i=0;i<=bins;i++){const xv=dmin+i*(dmax-dmin)/bins;ctx.fillText(xv.toFixed(1),toX(xv),H-pad.bottom+14);}
+  for(let i=0;i<=bins;i++)ctx.fillText((dmin+i*bwFull/bins).toFixed(1),toX(dmin+i*bwFull/bins),H-pad.bottom+14);
   ctx.textAlign='right';
   for(let t=0;t<=5;t++)ctx.fillText(Math.round(mc*(1-t/5)),pad.left-6,pad.top+t/5*ph+4);
 }
 
 // ══ INIT ══
-window.addEventListener('load',()=>setTimeout(imrGenerate,80));
+window.addEventListener('load',()=>{
+  buildInputArea('imr');buildInputArea('xbs');buildInputArea('trend');
+  setTimeout(imrGenerate,80);
+});
 window.addEventListener('resize',()=>{
   if(imrGroups.length)imrRender(imrGroups);
-  if(xbsSubgroups.length)xbsRender(xbsSubgroups);
+  if(xbsSubs.length)xbsRender(xbsSubs);
   if(trendGroups.length)trendRender(trendGroups);
 });
 </script>
