@@ -352,7 +352,9 @@
     <div class="formula-card"><h4>Anderson-Darling</h4><div class="fline">A²adj = A²×(1+0,75/n+2,25/n²)</div><div class="fline note">H₀: normal · rejeita se p &lt; 0,05</div></div>
     <div class="formula-card"><h4>Regressão</h4><div class="fline">ŷ = b₀ + b₁×x</div><div class="fline">R²=1−SSres/SStot</div><div class="fline note">IC 95% via t-Student</div></div>
     <div class="formula-card"><h4>Interpretação</h4><div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">b₁>0 → crescente<br>b₁&lt;0 → decrescente<br>b₁≈0 → estável<br>p&lt;0,05 → não normal</div></div>
-  </div>
+<div class="nav-item" id="nav-capability" onclick="showPage('capability', this)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;margin-right:10px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/></svg>
+  <span>Capacidade & Box-Cox</span>
 </div>
 
 </main>
@@ -918,6 +920,122 @@ window.addEventListener('resize',()=>{
   if(xbsSubs.length)xbsRender(xbsSubs);
   if(trendGroups.length)trendRender(trendGroups);
 });
+// ══ LÓGICA DE CAPACIDADE & BOX-COX (INTEGRAÇÃO) ══
+
+function runCapabilityAnalysis() {
+    // 1. Pega os dados da aba I-MR (para facilitar sua vida)
+    const rawData = document.getElementById('imr-y').value;
+    if (!rawData) return alert("Por favor, insira dados na aba I-MR primeiro.");
+    
+    let data = rawData.split(/[,\s\n]+/).map(Number).filter(v => !isNaN(v));
+    const lsl = parseFloat(document.getElementById('cap-lsl').value);
+    const usl = parseFloat(document.getElementById('cap-usl').value);
+    const lambda = parseFloat(document.getElementById('cap-lambda').value);
+
+    // 2. Aplica Box-Cox se o Lambda for diferente de 1
+    let processedData = data;
+    if (lambda !== 1) {
+        processedData = data.map(v => {
+            if (v <= 0) return 0;
+            return Math.abs(lambda) < 0.001 ? Math.log(v) : (Math.pow(v, lambda) - 1) / lambda;
+        });
+    }
+
+    // 3. Cálculos Estatísticos
+    const n = processedData.length;
+    const avg = processedData.reduce((a, b) => a + b, 0) / n;
+    const std = Math.sqrt(processedData.reduce((sq, v) => sq + Math.pow(v - avg, 2), 0) / (n - 1));
+    
+    const cp = (usl - lsl) / (6 * std);
+    const cpu = (usl - avg) / (3 * std);
+    const cpl = (avg - lsl) / (3 * std);
+    const cpk = Math.min(cpu, cpl);
+
+    // 4. Exibe os Resultados nos Cards
+    const resultsDiv = document.getElementById('cap-results');
+    resultsDiv.innerHTML = `
+        <div class="card" style="padding:10px; text-align:center; border-top:3px solid var(--accent)">
+            <div style="color:var(--muted); font-size:11px">Cp (Potencial)</div>
+            <div style="font-size:18px; font-weight:bold">${cp.toFixed(3)}</div>
+        </div>
+        <div class="card" style="padding:10px; text-align:center; border-top:3px solid ${cpk < 1.33 ? 'var(--danger)' : 'var(--accent)'}">
+            <div style="color:var(--muted); font-size:11px">Cpk (Capacidade)</div>
+            <div style="font-size:18px; font-weight:bold">${cpk.toFixed(3)}</div>
+        </div>
+        <div class="card" style="padding:10px; text-align:center; border-top:3px solid var(--muted)">
+            <div style="color:var(--muted); font-size:11px">Média</div>
+            <div style="font-size:18px; font-weight:bold">${avg.toFixed(2)}</div>
+        </div>
+        <div class="card" style="padding:10px; text-align:center; border-top:3px solid var(--muted)">
+            <div style="color:var(--muted); font-size:11px">Desvio Padrão</div>
+            <div style="font-size:18px; font-weight:bold">${std.toFixed(4)}</div>
+        </div>
+    `;
+
+    // 5. Desenha um Histograma simples no Canvas
+    renderSimpleHistogram(processedData, avg, std, lsl, usl);
+}
+
+function renderSimpleHistogram(data, avg, std, lsl, usl) {
+    const canvas = document.getElementById('chart-capability');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = "#3ecfcf22";
+    ctx.strokeStyle = "#3ecfcf";
+    ctx.font = "10px Arial";
+    
+    // Desenha uma representação visual simples (Histograma)
+    const bins = 12;
+    const min = Math.min(...data, lsl);
+    const max = Math.max(...data, usl);
+    const range = max - min;
+    
+    data.forEach(v => {
+        const x = ((v - min) / range) * (canvas.width - 40) + 20;
+        ctx.fillRect(x, canvas.height - 50, 5, -20);
+    });
+
+    ctx.fillStyle = "#e05565";
+    ctx.fillText("LIE", ((lsl - min) / range) * (canvas.width - 40) + 10, 20);
+    ctx.fillText("LSE", ((usl - min) / range) * (canvas.width - 40) + 10, 20);
+}
+  function renderSimpleHistogram(data, avg, std, lsl, usl) {
+    const canvas = document.getElementById('chart-capability');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const cw = canvas.width;
+    const ch = canvas.height;
+    ctx.clearRect(0, 0, cw, ch);
+    
+    const min = Math.min(...data, lsl) * 0.9;
+    const max = Math.max(...data, usl) * 1.1;
+    const range = max - min;
+    const toX = (v) => ((v - min) / range) * (cw - 60) + 30;
+
+    // Desenha Barras do Histograma
+    ctx.fillStyle = "rgba(62, 207, 207, 0.2)";
+    ctx.strokeStyle = "var(--accent)";
+    data.forEach(v => {
+        const x = toX(v);
+        ctx.fillRect(x - 2, ch - 40, 4, -60);
+    });
+
+    // Linhas de Limite (LIE e LSE)
+    const drawSpec = (val, label, color) => {
+        const x = toX(val);
+        ctx.strokeStyle = color;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(x, 20); ctx.lineTo(x, ch - 40); ctx.stroke();
+        ctx.fillStyle = color;
+        ctx.fillText(label, x - 10, 15);
+    };
+
+    ctx.setLineDash([]);
+    drawSpec(lsl, "LIE", "#e05565");
+    drawSpec(usl, "LSE", "#e05565");
+    drawSpec(avg, "Média", "var(--accent)");
+}
 </script>
 </body>
 </html>
