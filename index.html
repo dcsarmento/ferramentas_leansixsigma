@@ -1658,26 +1658,35 @@ function capDrawHistogram(data,usl,lsl,target,xbar,sigO){
   ctx.lineTo(mx, pad.top + ph);
   ctx.stroke();
   ctx.restore();
-} // Fecha a função de renderização do Gráfico de Capacidade
-
-// ══ FUNÇÕES DE NAVEGAÇÃO E INICIALIZAÇÃO ══
-
-function showPage(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  if (el) el.classList.add('active');
 }
 
-// Inicializa a ferramenta ao carregar a página
+// ══ FUNÇÕES DE CÁLCULO ESTATÍSTICO ══
+
+function calcCapacity(data, lsl, usl) {
+    const n = data.length;
+    const mean = data.reduce((a, b) => a + b, 0) / n;
+    const sd = Math.sqrt(data.reduce((sq, val) => sq + Math.pow(val - mean, 2), 0) / (n - 1));
+    const cp = (usl - lsl) / (6 * sd);
+    const cpk = Math.min((usl - mean) / (3 * sd), (mean - lsl) / (3 * sd));
+    return { cp, cpk, sd, mean };
+}
+
+// Função para navegação entre as abas
+function showPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    if (el) el.classList.add('active');
+}
+
+// Inicialização Geral
 window.onload = function() {
-  // Constrói as áreas de input para cada página
-  if (typeof buildInputArea === 'function') {
-    buildInputArea('imr');
-    buildInputArea('xbars');
-    buildInputArea('trend');
-  }
-  console.log("CEP Engine: Sistema estabilizado e pronto.");
+    if (typeof buildInputArea === 'function') {
+        buildInputArea('imr');
+        buildInputArea('xbars');
+        buildInputArea('trend');
+    }
+    console.log("CEP Tool: Sistema Restaurado.");
 };
 
 </script>
