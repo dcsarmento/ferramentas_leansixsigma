@@ -1648,20 +1648,37 @@ function capDrawHistogram(data,usl,lsl,target,xbar,sigO){
   }
 
   // Mean line
-  const mx=toX(xbar);
-  ctx.save();ctx.strokeStyle='rgba(62,207,207,0.7)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
-  ctx.beginPath();ctx.moveTo(mx,pad.top);ctx.lineTo(mx,pad.top+ph);ctx.stroke();
-  ctx.setLineDash([]);ctx.restore();
-  ctx.fillStyle='#3ecfcf';ctx.font='bold 9.5px DM Mono,monospace';ctx.textAlign='center';
-  ctx.fillText('x̄',mx,pad.top-5);
+ const mx = toX(xbar);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(62,207,207,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(mx, pad.top);
+  ctx.lineTo(mx, pad.top + ph);
+  ctx.stroke();
+  ctx.restore();
+} // Fecha a função de renderização do Gráfico de Capacidade
 
-  // X axis labels
-  ctx.fillStyle='#5a677f';ctx.font='9px DM Mono,monospace';ctx.textAlign='center';
-  const step=Math.max(1,Math.ceil(bins/8));
-  for(let i=0;i<=bins;i+=step)ctx.fillText((xMin+i*bw).toFixed(1),toX(xMin+i*bw),H-pad.bottom+14);
-  ctx.textAlign='right';
-  for(let t=0;t<=5;t++)ctx.fillText(Math.round(mc*(1-t/5)),pad.left-5,pad.top+t/5*ph+4);
+// ══ FUNÇÕES DE NAVEGAÇÃO E INICIALIZAÇÃO ══
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
 }
+
+// Inicializa a ferramenta ao carregar a página
+window.onload = function() {
+  // Constrói as áreas de input para cada página
+  if (typeof buildInputArea === 'function') {
+    buildInputArea('imr');
+    buildInputArea('xbars');
+    buildInputArea('trend');
+  }
+  console.log("CEP Engine: Sistema estabilizado e pronto.");
+};
 
 </script>
 </body>
