@@ -143,6 +143,36 @@
     .ad-panels{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.2rem;}
 
     @media(max-width:700px){:root{--sidebar-w:0px;}#sidebar{display:none;}#main{margin-left:0;padding:1rem;}.trend-grid{grid-template-columns:1fr;}.xy-inputs{grid-template-columns:1fr;}.group-xy{grid-template-columns:1fr;}}
+
+    /* ── BoxCox & Capacidade ── */
+    .bc-lambda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.5rem;margin-bottom:1rem;}
+    .bc-lambda-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);font-family:'DM Mono',monospace;font-size:.72rem;padding:.4rem .5rem;border-radius:4px;cursor:pointer;transition:all .15s;text-align:center;}
+    .bc-lambda-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .bc-lambda-btn.selected{background:rgba(62,207,207,0.12);border-color:var(--accent);color:var(--accent);}
+    .bc-lambda-btn .lval{font-size:.85rem;font-weight:600;display:block;}
+    .bc-lambda-btn .ldesc{font-size:.62rem;color:var(--muted);display:block;margin-top:.1rem;}
+    .bc-compare{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+    .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:1.2rem;}
+    .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1rem;}
+    .kpi-card .kpi-label{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;}
+    .kpi-card .kpi-val{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:600;line-height:1;}
+    .kpi-card .kpi-sub{font-size:.68rem;color:var(--muted2);margin-top:.3rem;}
+    .kpi-card.good{border-color:rgba(62,207,207,.3);background:rgba(62,207,207,.04);}
+    .kpi-card.warn{border-color:rgba(240,165,0,.3);background:rgba(240,165,0,.04);}
+    .kpi-card.bad {border-color:rgba(224,85,101,.3);background:rgba(224,85,101,.04);}
+    .cap-gauge{position:relative;height:12px;background:var(--surface2);border-radius:6px;overflow:hidden;margin:.4rem 0;}
+    .cap-gauge-fill{height:100%;border-radius:6px;transition:width .6s ease;}
+    .cap-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+    .cap-table th{padding:.5rem .8rem;text-align:left;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2);}
+    .cap-table td{padding:.55rem .8rem;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.78rem;color:var(--muted2);}
+    .cap-table tr:last-child td{border-bottom:none;}
+    .cap-table tr:hover td{background:var(--surface2);color:var(--text);}
+    .spec-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:1rem;}
+    .verdict-big{padding:1rem 1.2rem;border-radius:7px;font-family:'DM Mono',monospace;font-size:.85rem;font-weight:600;text-align:center;margin-bottom:1rem;line-height:1.6;}
+    .verdict-big.ok  {background:rgba(62,207,207,.08);border:1px solid rgba(62,207,207,.3);color:var(--accent);}
+    .verdict-big.warn{background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.3);color:var(--accent2);}
+    .verdict-big.bad {background:rgba(224,85,101,.08);border:1px solid rgba(224,85,101,.3);color:var(--danger);}
+    .ppm-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:1.2rem;}
   </style>
 </head>
 <body>
@@ -159,8 +189,8 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Análise</div>
     <div class="nav-item" onclick="showPage('trend',this)"><span class="nav-icon">Tend</span> Tendência</div>
-    <div class="nav-item disabled coming-soon"><span class="nav-icon">BoxCox</span> Transformação</div>
-    <div class="nav-item disabled coming-soon"><span class="nav-icon">Cp/Cpk</span> Capacidade</div>
+    <div class="nav-item" onclick="showPage('boxcox',this)"><span class="nav-icon">BoxCox</span> Transformação</div>
+    <div class="nav-item" onclick="showPage('capac',this)"><span class="nav-icon">Cp/Cpk</span> Capacidade</div>
   </div>
   <div class="sidebar-footer">d₂=1,128 · D₄=3,267<br>c₄(n) · B₃/B₄ variáveis</div>
 </nav>
@@ -355,6 +385,230 @@
   </div>
 </div>
 
+<!-- ══════════ BOX-COX ══════════ -->
+<div id="page-boxcox" class="page">
+  <div class="page-header">
+    <div><h1>Transformação <em>Box-Cox</em></h1><p>Normalização de dados não-normais · Seleção ótima de λ</p></div>
+    <span class="tag tag-ana">Análise</span>
+  </div>
+
+  <div class="data-section">
+    <div class="data-section-title">Dados de Entrada</div>
+    <div class="xy-inputs single">
+      <div class="xy-field">
+        <div class="xy-label"><span>Y</span> Valores (todos devem ser positivos)</div>
+        <textarea class="data-input" id="bc-y" rows="3" placeholder="Cole seus dados aqui: 129, 114, 142, 251, 190, 34..."></textarea>
+        <div class="data-hint">Todos os valores devem ser <strong>positivos</strong>. Se houver zeros ou negativos, adicione uma constante antes de transformar.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group"><label>Nº Pontos (sim.)</label><input type="range" id="bc-n" min="20" max="100" value="40" oninput="document.getElementById('bc-nval').textContent=this.value"><span class="range-val" id="bc-nval">40</span></div>
+    <div class="ctrl-group"><label>Tipo (simulação)</label>
+      <select id="bc-simtype">
+        <option value="lognormal">Log-normal (assimétrico +)</option>
+        <option value="exponential">Exponencial</option>
+        <option value="skewpos">Assimétrico positivo</option>
+        <option value="normal">Normal (referência)</option>
+      </select>
+    </div>
+    <button class="btn" onclick="bcGenerate()">⟳ Gerar</button>
+    <button class="btn btn-ghost" onclick="bcApply()">▶ Aplicar</button>
+  </div>
+
+  <!-- Lambda selector -->
+  <div class="data-section">
+    <div class="data-section-title">Selecionar Lambda (λ)</div>
+    <div class="bc-lambda-grid" id="bc-lambda-grid"></div>
+    <div style="display:flex;align-items:center;gap:.8rem;margin-top:.6rem;">
+      <div class="xy-label" style="margin:0"><span>λ</span> Valor personalizado</div>
+      <input type="number" id="bc-lambda-custom" step="0.1" value="0" style="width:100px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.38rem .6rem;font-family:'DM Mono',monospace;font-size:.8rem;border-radius:4px;outline:none;">
+      <button class="btn btn-ghost" style="height:32px" onclick="bcApplyLambda(parseFloat(document.getElementById('bc-lambda-custom').value))">Aplicar λ</button>
+    </div>
+  </div>
+
+  <!-- Before/After comparison -->
+  <div class="bc-compare">
+    <div class="chart-card">
+      <div class="chart-header"><h2>Histograma <em>Original</em></h2>
+        <div class="chart-stats">
+          <div class="stat"><div class="stat-label">A²</div><div class="stat-val ucl" id="bc-orig-ad">—</div></div>
+          <div class="stat"><div class="stat-label">p-valor</div><div class="stat-val" id="bc-orig-p" style="color:var(--muted2)">—</div></div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="bc-chart-orig" height="220"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header"><h2>Histograma <em>Transformado</em></h2>
+        <div class="chart-stats">
+          <div class="stat"><div class="stat-label">λ usado</div><div class="stat-val cl" id="bc-lambda-used">—</div></div>
+          <div class="stat"><div class="stat-label">A²</div><div class="stat-val ucl" id="bc-trans-ad">—</div></div>
+          <div class="stat"><div class="stat-label">p-valor</div><div class="stat-val" id="bc-trans-p" style="color:var(--muted2)">—</div></div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="bc-chart-trans" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Log-likelihood chart -->
+  <div class="chart-card">
+    <div class="chart-header"><h2>Log-Verossimilhança <em>vs λ</em> — λ ótimo destacado</h2>
+      <div class="chart-stats">
+        <div class="stat"><div class="stat-label">λ ótimo</div><div class="stat-val cl" id="bc-opt-lambda">—</div></div>
+        <div class="stat"><div class="stat-label">Log-L máx</div><div class="stat-val lcl" id="bc-opt-logl">—</div></div>
+      </div>
+    </div>
+    <div class="chart-body"><canvas id="bc-chart-logl" height="220"></canvas></div>
+  </div>
+
+  <!-- Transformed data output -->
+  <div class="data-section">
+    <div class="data-section-title">Dados Transformados (para copiar)</div>
+    <textarea class="data-input" id="bc-output" rows="3" readonly style="color:var(--accent2)" placeholder="Os dados transformados aparecerão aqui após aplicar λ..."></textarea>
+    <div class="data-hint">Copie esses dados para usar na análise de Capacidade ou nos gráficos de controle.</div>
+  </div>
+
+  <div class="formulas">
+    <div class="formula-card"><h4>Transformação Box-Cox</h4>
+      <div class="fline">y(λ) = (xᵏ − 1) / λ ,  λ ≠ 0</div>
+      <div class="fline">y(λ) = ln(x)         ,  λ = 0</div>
+      <div class="fline note" style="margin-top:.4rem">Todos os x devem ser &gt; 0</div>
+    </div>
+    <div class="formula-card"><h4>Lambdas comuns</h4>
+      <div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
+        λ = −1 → inverso (1/x)<br>
+        λ = −0,5 → inverso raiz<br>
+        λ = 0 → logaritmo natural<br>
+        λ = 0,5 → raiz quadrada<br>
+        λ = 1 → sem transformação<br>
+        λ = 2 → quadrado
+      </div>
+    </div>
+    <div class="formula-card"><h4>Quando usar</h4>
+      <div class="fline" style="color:var(--text);line-height:1.8">
+        • Dados rejeitam normalidade (A-D)<br>
+        • Histograma assimétrico<br>
+        • Antes de calcular Cp/Cpk<br>
+        • Dados de tempo, custo, contagem
+      </div>
+    </div>
+    <div class="formula-card"><h4>Método</h4>
+      <div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
+        Maximiza log-verossimilhança<br>
+        L(λ) = −n/2 · ln(Var(y(λ)))<br>
+               + (λ−1) · Σln(xᵢ)<br>
+        λ ótimo = argmax L(λ)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CAPACIDADE ══════════ -->
+<div id="page-capac" class="page">
+  <div class="page-header">
+    <div><h1>Análise de <em>Capacidade</em></h1><p>Cp · Cpk · Pp · Ppk · PPM · Sigma Level</p></div>
+    <span class="tag tag-var">Cp / Cpk</span>
+  </div>
+
+  <div class="data-section">
+    <div class="data-section-title">Dados e Limites de Especificação</div>
+    <div class="xy-inputs single" style="margin-bottom:.8rem">
+      <div class="xy-field">
+        <div class="xy-label"><span>Y</span> Valores do Processo</div>
+        <textarea class="data-input" id="cap-y" rows="3" placeholder="Cole seus dados aqui: 50.1, 49.8, 50.3, 50.0..."></textarea>
+      </div>
+    </div>
+    <div class="spec-inputs">
+      <div class="xy-field">
+        <div class="xy-label"><span>LSE</span> Limite Superior de Especificação</div>
+        <input type="number" id="cap-usl" step="0.01" placeholder="ex: 55.0" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem .7rem;font-family:'DM Mono',monospace;font-size:.82rem;border-radius:4px;outline:none;width:100%">
+      </div>
+      <div class="xy-field">
+        <div class="xy-label"><span>Alvo</span> Valor Nominal / Alvo (opcional)</div>
+        <input type="number" id="cap-target" step="0.01" placeholder="ex: 50.0" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem .7rem;font-family:'DM Mono',monospace;font-size:.82rem;border-radius:4px;outline:none;width:100%">
+      </div>
+      <div class="xy-field">
+        <div class="xy-label"><span>LIE</span> Limite Inferior de Especificação</div>
+        <input type="number" id="cap-lsl" step="0.01" placeholder="ex: 45.0" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem .7rem;font-family:'DM Mono',monospace;font-size:.82rem;border-radius:4px;outline:none;width:100%">
+      </div>
+    </div>
+    <div class="data-hint">Informe pelo menos um dos limites (LSE ou LIE). O Alvo é opcional — se omitido, usa o ponto médio entre LSE e LIE.</div>
+  </div>
+
+  <div class="options-row">
+    <label class="opt-check"><input type="checkbox" id="cap-use-within" checked onchange="capRerender()"><span>Usar σ interno (within) para Cp/Cpk</span></label>
+    <label class="opt-check"><input type="checkbox" id="cap-show-spec" checked onchange="capRerender()"><span>Mostrar limites de especificação</span></label>
+    <label class="opt-check"><input type="checkbox" id="cap-show-normal" checked onchange="capRerender()"><span>Mostrar curva normal</span></label>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group"><label>Nº Pontos (sim.)</label><input type="range" id="cap-n" min="30" max="200" value="100" oninput="document.getElementById('cap-nval').textContent=this.value"><span class="range-val" id="cap-nval">100</span></div>
+    <div class="ctrl-group"><label>Média (μ)</label><input type="number" id="cap-mu" value="50" step="0.1"></div>
+    <div class="ctrl-group"><label>Desvio (σ)</label><input type="number" id="cap-sigma" value="1.5" step="0.1" min="0.01"></div>
+    <div class="ctrl-group"><label>LSE sim.</label><input type="number" id="cap-usl-sim" value="55" step="0.1"></div>
+    <div class="ctrl-group"><label>LIE sim.</label><input type="number" id="cap-lsl-sim" value="45" step="0.1"></div>
+    <button class="btn" onclick="capGenerate()">⟳ Gerar</button>
+    <button class="btn btn-ghost" onclick="capApply()">▶ Aplicar</button>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-row" id="cap-kpis"></div>
+
+  <!-- Verdict -->
+  <div id="cap-verdict" class="verdict-big ok">Execute a análise</div>
+
+  <!-- Histogram with spec limits -->
+  <div class="chart-card">
+    <div class="chart-header"><h2>Histograma do Processo <em>com Limites de Especificação</em></h2>
+      <div class="chart-stats">
+        <div class="stat"><div class="stat-label">Média</div><div class="stat-val cl" id="cap-mean">—</div></div>
+        <div class="stat"><div class="stat-label">σ within</div><div class="stat-val lcl" id="cap-sw">—</div></div>
+        <div class="stat"><div class="stat-label">σ overall</div><div class="stat-val" style="color:var(--muted2)" id="cap-so">—</div></div>
+      </div>
+    </div>
+    <div class="chart-body"><canvas id="cap-hist" height="280"></canvas></div>
+  </div>
+
+  <!-- PPM table -->
+  <div class="ppm-row" id="cap-ppm-row"></div>
+
+  <!-- Full capability table -->
+  <div class="chart-card" style="overflow:auto">
+    <div class="chart-header"><h2>Tabela Completa de <em>Capacidade</em></h2></div>
+    <table class="cap-table" id="cap-table">
+      <thead><tr><th>Índice</th><th>Valor</th><th>Interpretação</th><th>Status</th></tr></thead>
+      <tbody id="cap-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="formulas">
+    <div class="formula-card"><h4>Cp e Cpk (within)</h4>
+      <div class="fline">Cp  = (LSE−LIE) / (6σ_w)</div>
+      <div class="fline">Cpk = min[(LSE−x̄), (x̄−LIE)] / (3σ_w)</div>
+      <div class="fline note">σ_w = MR̄/d₂ (baseado na variação interna)</div>
+    </div>
+    <div class="formula-card"><h4>Pp e Ppk (overall)</h4>
+      <div class="fline">Pp  = (LSE−LIE) / (6σ_o)</div>
+      <div class="fline">Ppk = min[(LSE−x̄), (x̄−LIE)] / (3σ_o)</div>
+      <div class="fline note">σ_o = desvio padrão amostral (n−1)</div>
+    </div>
+    <div class="formula-card"><h4>Sigma Level e PPM</h4>
+      <div class="fline">σ_level = Cpk × 3</div>
+      <div class="fline">PPM = 1000000 × P(fora espec.)</div>
+      <div class="fline note">P via distribuição normal acumulada</div>
+    </div>
+    <div class="formula-card"><h4>Referência</h4>
+      <div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
+        Cp/Cpk ≥ 1,33 → Capaz ✓<br>
+        1,00 ≤ Cp/Cpk &lt; 1,33 → Marginal ⚠<br>
+        Cp/Cpk &lt; 1,00 → Incapaz ✗<br>
+        Cp ≫ Cpk → Processo descentrado
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 <script>
 // ══ CONSTANTS ══
@@ -368,7 +622,7 @@ const GRP_COLORS=['#3ecfcf','#ff6b4a','#a78bfa','#34d399','#f472b6','#fbbf24','#
 // ══ STATE ══
 const modes={imr:'simple',xbs:'simple',trend:'simple'};
 const groupDefs={imr:[{name:'Série 1'}],trend:[{name:'Série 1'},{name:'Série 2'}]};
-let imrGroups=[],xbsSubs=[],trendGroups=[];
+let imrGroups=[],xbsSubs=[],trendGroups=[],bcData=[],capData=[];
 
 // ══ NAV ══
 function showPage(id,el){
@@ -377,6 +631,8 @@ function showPage(id,el){
   document.getElementById('page-'+id).classList.add('active');
   if(el)el.classList.add('active');
   if(id==='trend'&&trendGroups.length===0)trendGenerate();
+  if(id==='boxcox'&&bcData.length===0)bcGenerate();
+  if(id==='capac'&&capData.length===0)capGenerate();
 }
 
 // ══ INPUT AREA BUILDERS ══
@@ -512,7 +768,7 @@ function getXbsFromUI(){
 function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
 function std(a){if(a.length<2)return 0;const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1));}
-function fmt(v,d=3){return isFinite(v)?v.toFixed(d):'—';}
+function fmt(v,d=3){if(v===null||v===undefined||typeof v==='boolean')return'—';const n=Number(v);return isFinite(n)?n.toFixed(d):'—';}
 function normCDF(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;const sg=x<0?-1:1;x=Math.abs(x)/Math.sqrt(2);const t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return 0.5*(1+sg*y);}
 function tCrit(n){return n<=10?2.228:n<=20?2.086:n<=30?2.042:1.96;}
 
@@ -650,7 +906,7 @@ function drawSeries(cid,H,groups,opts){
 
   // Y axis labels
   ctx.textAlign='right';
-  for(let t=0;t<=5;t++){const frac=t/5,yv=yMin+(1-frac)*(yMax-yMin);ctx.fillText(yv.toFixed(1),pad.left-5,pad.top+frac*ph+4);}
+  for(let t=0;t<=5;t++){const frac=t/5,yv=yMin+(1-frac)*(yMax-yMin);if(isFinite(yv))ctx.fillText(yv.toFixed(1),pad.left-5,pad.top+frac*ph+4);}
 }
 
 function buildLegend(id,groups){
@@ -917,7 +1173,499 @@ window.addEventListener('resize',()=>{
   if(imrGroups.length)imrRender(imrGroups);
   if(xbsSubs.length)xbsRender(xbsSubs);
   if(trendGroups.length)trendRender(trendGroups);
+  if(bcData.length)bcRender(bcData);
+  if(capData.length)capRender(capData,capUSL,capLSL,capTarget);
 });
+
+// ══════════════════════════════════════════════
+// BOX-COX
+// ══════════════════════════════════════════════
+let bcLambdaSelected=0;
+
+const BC_LAMBDAS=[
+  {v:-2,  d:'Inverso²'},
+  {v:-1,  d:'Inverso'},
+  {v:-0.5,d:'Inv. Raiz'},
+  {v:0,   d:'Log natural'},
+  {v:0.5, d:'Raiz quadrada'},
+  {v:1,   d:'Sem transform.'},
+  {v:2,   d:'Quadrado'},
+  {v:3,   d:'Cúbico'},
+];
+
+function bcTransform(x,lam){
+  if(Math.abs(lam)<1e-9) return Math.log(x);
+  return (Math.pow(x,lam)-1)/lam;
+}
+
+function bcLogLikelihood(data,lam){
+  const n=data.length;
+  const transformed=data.map(x=>bcTransform(x,lam));
+  const m=mean(transformed);
+  const variance=transformed.reduce((a,v)=>a+(v-m)**2,0)/n;
+  if(variance<=0) return -Infinity;
+  const sumLogX=data.reduce((a,x)=>a+Math.log(x),0);
+  return -n/2*Math.log(variance)+(lam-1)*sumLogX;
+}
+
+function bcFindOptimal(data){
+  let bestL=-2, bestLL=-Infinity;
+  for(let l=-3; l<=3; l+=0.01){
+    const ll=bcLogLikelihood(data,l);
+    if(ll>bestLL){bestLL=ll;bestL=l;}
+  }
+  return{lambda:Math.round(bestL*100)/100, logL:bestLL};
+}
+
+function bcGenerate(){
+  const n=parseInt(document.getElementById('bc-n').value);
+  const type=document.getElementById('bc-simtype').value;
+  let data=[];
+  for(let i=0;i<n;i++){
+    let v;
+    if(type==='lognormal') v=Math.exp(1.5+0.8*randn());
+    else if(type==='exponential') v=-Math.log(Math.random())*50+5;
+    else if(type==='skewpos') v=Math.pow(Math.abs(3+randn()),2)+1;
+    else v=50+10*randn();
+    data.push(Math.max(0.001,parseFloat(v.toFixed(3))));
+  }
+  bcData=data;
+  document.getElementById('bc-y').value=data.join(', ');
+  bcRender(data);
+}
+
+function bcApply(){
+  const raw=document.getElementById('bc-y').value;
+  const vals=raw.split(/[,;\s]+/).map(Number).filter(v=>!isNaN(v)&&v>0);
+  if(vals.length<5){alert('Insira pelo menos 5 valores positivos.');return;}
+  bcData=vals;bcRender(vals);
+}
+
+function bcApplyLambda(lam){
+  bcLambdaSelected=lam;
+  document.querySelectorAll('.bc-lambda-btn').forEach(b=>{
+    b.classList.toggle('selected',Math.abs(parseFloat(b.dataset.lam)-lam)<0.001);
+  });
+  if(bcData.length>0) bcUpdateTransformed(bcData,lam);
+}
+
+function bcRender(data){
+  // AD on original
+  const adOrig=adTest(data);
+  document.getElementById('bc-orig-ad').textContent=fmt(adOrig.A2,4);
+  const pOrig=adOrig.p;
+  const pOrigEl=document.getElementById('bc-orig-p');
+  pOrigEl.textContent=pOrig<0.001?'<0,001':fmt(pOrig,4);
+  pOrigEl.style.color=pOrig>=0.05?'var(--accent)':'var(--danger)';
+
+  // Find optimal lambda
+  const opt=bcFindOptimal(data);
+  bcLambdaSelected=opt.lambda;
+  document.getElementById('bc-opt-lambda').textContent=fmt(opt.lambda,3);
+  document.getElementById('bc-opt-logl').textContent=fmt(opt.logL,2);
+
+  // Build lambda grid
+  const grid=document.getElementById('bc-lambda-grid');
+  grid.innerHTML=BC_LAMBDAS.map(b=>`
+    <div class="bc-lambda-btn ${Math.abs(b.v-opt.lambda)<0.05?'selected':''}" data-lam="${b.v}" onclick="bcApplyLambda(${b.v})">
+      <span class="lval">λ = ${b.v}</span>
+      <span class="ldesc">${b.d}</span>
+    </div>`).join('');
+
+  // Draw original histogram
+  drawHistSingle('bc-chart-orig',220,data,'#3ecfcf');
+
+  // Draw log-likelihood curve
+  bcDrawLogL(data,opt.lambda);
+
+  // Apply optimal lambda
+  bcUpdateTransformed(data,opt.lambda);
+  document.getElementById('bc-lambda-custom').value=opt.lambda;
+}
+
+function bcUpdateTransformed(data,lam){
+  const transformed=data.map(x=>bcTransform(x,lam));
+  const adTrans=adTest(transformed);
+
+  document.getElementById('bc-lambda-used').textContent=fmt(lam,3);
+  document.getElementById('bc-trans-ad').textContent=fmt(adTrans.A2,4);
+  const pTr=adTrans.p;
+  const pTrEl=document.getElementById('bc-trans-p');
+  pTrEl.textContent=pTr<0.001?'<0,001':fmt(pTr,4);
+  pTrEl.style.color=pTr>=0.05?'var(--accent)':'var(--danger)';
+
+  drawHistSingle('bc-chart-trans',220,transformed,'#ff6b4a');
+  document.getElementById('bc-output').value=transformed.map(v=>v.toFixed(4)).join(', ');
+}
+
+function bcDrawLogL(data,optLam){
+  const r=setupCanvas('bc-chart-logl',220);if(!r)return;
+  const{ctx,W,H}=r;
+  const pad={top:20,right:20,bottom:32,left:60};
+  const pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
+
+  const lambdas=[],logls=[];
+  for(let l=-3;l<=3;l+=0.05){
+    const ll=bcLogLikelihood(data,l);
+    if(isFinite(ll)){lambdas.push(l);logls.push(ll);}
+  }
+  if(!logls.length)return;
+
+  const lmin=Math.min(...lambdas),lmax=Math.max(...lambdas);
+  let yMin=Math.min(...logls),yMax=Math.max(...logls);
+  const yMg=(yMax-yMin)*0.1||1;yMin-=yMg;yMax+=yMg;
+
+  const toX=l=>pad.left+(l-lmin)/(lmax-lmin)*pw;
+  const toY=v=>pad.top+(1-(v-yMin)/(yMax-yMin))*ph;
+
+  // Grid
+  ctx.strokeStyle='#1a2030';ctx.lineWidth=1;
+  for(let t=0;t<=4;t++){const y=pad.top+(t/4)*ph;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();}
+
+  // IC band (approx ±2 log-likelihood units from max)
+  const icThresh=Math.max(...logls)-3.84/2;
+  const icXs=lambdas.filter((_,i)=>logls[i]>=icThresh);
+  if(icXs.length>1){
+    const x1=toX(Math.min(...icXs)),x2=toX(Math.max(...icXs));
+    ctx.fillStyle='rgba(62,207,207,0.07)';
+    ctx.fillRect(x1,pad.top,x2-x1,ph);
+    ctx.strokeStyle='rgba(62,207,207,0.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(x1,pad.top);ctx.lineTo(x1,pad.top+ph);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x2,pad.top);ctx.lineTo(x2,pad.top+ph);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Curve
+  ctx.beginPath();ctx.strokeStyle='#f0a500';ctx.lineWidth=2;
+  lambdas.forEach((l,i)=>{const x=toX(l),y=toY(logls[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+
+  // Optimal marker
+  const ox=toX(optLam),oy=toY(Math.max(...logls));
+  ctx.save();ctx.strokeStyle='#3ecfcf';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(ox,pad.top);ctx.lineTo(ox,pad.top+ph);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+  ctx.beginPath();ctx.arc(ox,oy,5,0,Math.PI*2);ctx.fillStyle='#3ecfcf';ctx.fill();
+
+  // Label
+  ctx.fillStyle='#3ecfcf';ctx.font='bold 10px DM Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('λ='+fmt(optLam,2),ox,pad.top-5);
+
+  // Axes
+  ctx.fillStyle='#5a677f';ctx.font='9.5px DM Mono,monospace';ctx.textAlign='center';
+  [-3,-2,-1,0,1,2,3].forEach(l=>{if(l>=lmin&&l<=lmax)ctx.fillText(l,toX(l),H-pad.bottom+14);});
+  ctx.textAlign='right';
+  for(let t=0;t<=4;t++){const yv=yMin+(1-t/4)*(yMax-yMin);ctx.fillText(yv.toFixed(0),pad.left-5,pad.top+t/4*ph+4);}
+}
+
+function drawHistSingle(cid,H,data,color){
+  const r=setupCanvas(cid,H);if(!r)return;
+  const{ctx,W}=r;
+  const pad={top:18,right:18,bottom:32,left:54};
+  const pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
+  const n=data.length,bins=Math.max(7,Math.ceil(1+3.322*Math.log10(n)));
+  const dmin=Math.min(...data),dmax=Math.max(...data),bwFull=(dmax-dmin)||1;
+  const counts=Array(bins).fill(0);
+  data.forEach(v=>{let b=Math.floor((v-dmin)/bwFull*bins);if(b>=bins)b=bins-1;if(b<0)b=0;counts[b]++;});
+  const mc=Math.max(...counts)||1;
+  const m=mean(data),s=std(data)||1;
+  const toX=v=>pad.left+(v-dmin)/bwFull*pw;
+  const toY=f=>pad.top+(1-f/mc)*ph;
+
+  ctx.strokeStyle='#1a2030';ctx.lineWidth=1;
+  for(let t=0;t<=5;t++){const y=pad.top+(t/5)*ph;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();}
+
+  counts.forEach((c,i)=>{
+    const x=pad.left+i*(pw/bins),bw=pw/bins,y=toY(c);
+    ctx.fillStyle=color+'2a';ctx.strokeStyle=color+'88';ctx.lineWidth=1;
+    ctx.fillRect(x,y,bw,ph-(y-pad.top));ctx.strokeRect(x,y,bw,ph-(y-pad.top));
+  });
+
+  // Normal curve
+  const sc=n*bwFull/bins;
+  ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2;
+  let first=true;
+  for(let i=0;i<=120;i++){
+    const xv=dmin+(i/120)*bwFull,d=Math.exp(-.5*((xv-m)/s)**2)/(s*Math.sqrt(2*Math.PI));
+    const px=toX(xv),yv=toY(d*sc);
+    if(px<pad.left-5||px>pad.left+pw+5)continue;
+    first?ctx.moveTo(px,yv):ctx.lineTo(px,yv);first=false;
+  }
+  ctx.stroke();
+
+  // Mean line
+  ctx.save();ctx.strokeStyle=color+'aa';ctx.lineWidth=1.2;ctx.setLineDash([3,3]);
+  const mx=toX(m);ctx.beginPath();ctx.moveTo(mx,pad.top);ctx.lineTo(mx,pad.top+ph);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+
+  ctx.fillStyle='#5a677f';ctx.font='9px DM Mono,monospace';ctx.textAlign='center';
+  for(let i=0;i<=bins;i++){const xv=dmin+i*bwFull/bins;if(isFinite(xv))ctx.fillText(xv.toFixed(1),toX(xv),H-pad.bottom+13);}
+  ctx.textAlign='right';
+  for(let t=0;t<=5;t++)ctx.fillText(Math.round(mc*(1-t/5)),pad.left-5,pad.top+t/5*ph+4);
+}
+
+// ══════════════════════════════════════════════
+// CAPACIDADE
+// ══════════════════════════════════════════════
+let capUSL=null, capLSL=null, capTarget=null;
+
+function capGenerate(){
+  const n=parseInt(document.getElementById('cap-n').value);
+  const mu=parseFloat(document.getElementById('cap-mu').value);
+  const sig=parseFloat(document.getElementById('cap-sigma').value);
+  const usl=parseFloat(document.getElementById('cap-usl-sim').value);
+  const lsl=parseFloat(document.getElementById('cap-lsl-sim').value);
+  const data=Array.from({length:n},()=>parseFloat((mu+sig*randn()).toFixed(4)));
+  capData=data;
+  document.getElementById('cap-y').value=data.join(', ');
+  document.getElementById('cap-usl').value=usl;
+  document.getElementById('cap-lsl').value=lsl;
+  document.getElementById('cap-target').value=((usl+lsl)/2).toFixed(2);
+  capUSL=usl;capLSL=lsl;capTarget=(usl+lsl)/2;
+  capRender(data,usl,lsl,(usl+lsl)/2);
+}
+
+function capApply(){
+  const raw=document.getElementById('cap-y').value;
+  const vals=raw.split(/[,;\s]+/).map(Number).filter(v=>!isNaN(v));
+  if(vals.length<10){alert('Insira pelo menos 10 valores.');return;}
+  const usl=parseFloat(document.getElementById('cap-usl').value)||null;
+  const lsl=parseFloat(document.getElementById('cap-lsl').value)||null;
+  const tgt=parseFloat(document.getElementById('cap-target').value)||null;
+  if(usl===null&&lsl===null){alert('Informe pelo menos LSE ou LIE.');return;}
+  capData=vals;capUSL=usl;capLSL=lsl;
+  capTarget=tgt||(usl!==null&&lsl!==null?(usl+lsl)/2:usl||lsl);
+  capRender(vals,usl,lsl,capTarget);
+}
+
+function capRerender(){if(capData.length>0)capRender(capData,capUSL,capLSL,capTarget);}
+
+function capRender(data,usl,lsl,target){
+  const n=data.length;
+  const xbar=mean(data);
+  // σ overall (amostral n-1)
+  const sigO=std(data);
+  // σ within via amplitude móvel
+  const mr=data.slice(1).map((v,i)=>Math.abs(v-data[i]));
+  const sigW=(mean(mr)/d2)||sigO;
+
+  const useWithin=document.getElementById('cap-use-within')?.checked??true;
+  const sigCap=useWithin?sigW:sigO;
+
+  // Indices
+  let cp=null,cpk=null,pp=null,ppk=null;
+  const hasBoth=usl!==null&&lsl!==null;
+  const hasU=usl!==null, hasL=lsl!==null;
+
+  if(hasBoth){
+    cp =(usl-lsl)/(6*sigCap);
+    pp =(usl-lsl)/(6*sigO);
+  }
+  const cpu=hasU?(usl-xbar)/(3*sigCap):null;
+  const cpl=hasL?(xbar-lsl)/(3*sigCap):null;
+  const ppu=hasU?(usl-xbar)/(3*sigO):null;
+  const ppl=hasL?(xbar-lsl)/(3*sigO):null;
+
+  cpk=cpu!==null&&cpl!==null?Math.min(cpu,cpl):cpu??cpl;
+  ppk=ppu!==null&&ppl!==null?Math.min(ppu,ppl):ppu??ppl;
+
+  const sigmaLevel=cpk!==null?cpk*3:null;
+
+  // PPM
+  let ppmTotal=0,ppmAbove=0,ppmBelow=0;
+  if(hasU){const z=(usl-xbar)/sigO;ppmAbove=(1-normCDF(z))*1e6;}
+  if(hasL){const z=(xbar-lsl)/sigO;ppmBelow=normCDF(-z)*1e6;}
+  ppmTotal=ppmAbove+ppmBelow;
+
+  // Update header stats
+  document.getElementById('cap-mean').textContent=fmt(xbar,4);
+  document.getElementById('cap-sw').textContent=fmt(sigW,4);
+  document.getElementById('cap-so').textContent=fmt(sigO,4);
+
+  // KPI cards
+  const kpiEl=document.getElementById('cap-kpis');
+  const kpiCard=(label,val,sub,status)=>`
+    <div class="kpi-card ${status}">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-val" style="color:${status==='good'?'var(--accent)':status==='warn'?'var(--accent2)':'var(--danger)'}">${val!==null?fmt(val,3):'—'}</div>
+      <div class="kpi-sub">${sub}</div>
+    </div>`;
+  const capStatus=v=>v===null?'':v>=1.33?'good':v>=1.0?'warn':'bad';
+
+  kpiEl.innerHTML=
+    kpiCard('Cp',cp,'Potencial (within)',capStatus(cp))+
+    kpiCard('Cpk',cpk,'Real (within)',capStatus(cpk))+
+    kpiCard('Pp',pp,'Potencial (overall)',capStatus(pp))+
+    kpiCard('Ppk',ppk,'Real (overall)',capStatus(ppk))+
+    kpiCard('Nível σ',sigmaLevel,'Cpk × 3',capStatus(sigmaLevel?sigmaLevel/3:null))+
+    kpiCard('PPM Total',isFinite(ppmTotal)?ppmTotal:null,'Partes por milhão',''+capStatus(cpk));
+
+  // Gauge bars
+  const gaugeHTML=(v)=>{
+    if(v===null)return '';
+    const pct=Math.min(v/2,1)*100;
+    const col=v>=1.33?'var(--accent)':v>=1.0?'var(--accent2)':'var(--danger)';
+    return`<div class="cap-gauge"><div class="cap-gauge-fill" style="width:${pct}%;background:${col}"></div></div>`;
+  };
+
+  // Verdict
+  const verdEl=document.getElementById('cap-verdict');
+  if(cpk!==null){
+    if(cpk>=1.33){
+      verdEl.className='verdict-big ok';
+      verdEl.innerHTML=`✓ Processo CAPAZ  —  Cpk = ${fmt(cpk,3)} ≥ 1,33<br><span style="font-size:.75rem;font-weight:400">Variação dentro dos limites de especificação</span>`;
+    } else if(cpk>=1.0){
+      verdEl.className='verdict-big warn';
+      verdEl.innerHTML=`⚠ Processo MARGINAL  —  Cpk = ${fmt(cpk,3)}  (1,00 ≤ Cpk &lt; 1,33)<br><span style="font-size:.75rem;font-weight:400">Monitorar — risco de não-conformidades</span>`;
+    } else {
+      verdEl.className='verdict-big bad';
+      verdEl.innerHTML=`✗ Processo INCAPAZ  —  Cpk = ${fmt(cpk,3)} &lt; 1,00<br><span style="font-size:.75rem;font-weight:400">Ação imediata necessária</span>`;
+    }
+  } else {
+    verdEl.className='verdict-big warn';verdEl.textContent='Insira LSE e/ou LIE para calcular capacidade.';
+  }
+
+  // PPM row
+  const ppmEl=document.getElementById('cap-ppm-row');
+  ppmEl.innerHTML=`
+    <div class="kpi-card ${!hasU?'':ppmAbove<3.4?'good':ppmAbove<1000?'warn':'bad'}">
+      <div class="kpi-label">PPM Acima do LSE</div>
+      <div class="kpi-val" style="color:var(--accent2)">${hasU?fmt(ppmAbove,1):'—'}</div>
+      <div class="kpi-sub">${hasU?'Não conformes acima':'Sem LSE definido'}</div>
+    </div>
+    <div class="kpi-card ${!hasL?'':ppmBelow<3.4?'good':ppmBelow<1000?'warn':'bad'}">
+      <div class="kpi-label">PPM Abaixo do LIE</div>
+      <div class="kpi-val" style="color:var(--accent2)">${hasL?fmt(ppmBelow,1):'—'}</div>
+      <div class="kpi-sub">${hasL?'Não conformes abaixo':'Sem LIE definido'}</div>
+    </div>
+    <div class="kpi-card ${ppmTotal<3.4?'good':ppmTotal<1000?'warn':'bad'}">
+      <div class="kpi-label">PPM Total</div>
+      <div class="kpi-val" style="color:var(--danger)">${fmt(ppmTotal,1)}</div>
+      <div class="kpi-sub">Não conformidades totais/milhão</div>
+    </div>`;
+
+  // Full table
+  const rows=[
+    ['Cp',  cp,  'Potencial within — largura da especificação vs 6σ_w'],
+    ['Cpu', cpu, 'Capacidade unilateral superior (within)'],
+    ['Cpl', cpl, 'Capacidade unilateral inferior (within)'],
+    ['Cpk', cpk, 'Capacidade real within — min(Cpu, Cpl)'],
+    ['Pp',  pp,  'Potencial overall — largura da especificação vs 6σ_o'],
+    ['Ppu', ppu, 'Potencial unilateral superior (overall)'],
+    ['Ppl', ppl, 'Potencial unilateral inferior (overall)'],
+    ['Ppk', ppk, 'Capacidade real overall — min(Ppu, Ppl)'],
+    ['σ within (MR)',  sigW, 'Estimativa da variação de curto prazo'],
+    ['σ overall',      sigO, 'Desvio padrão amostral (n−1)'],
+    ['Nível σ (Cpk×3)',sigmaLevel, 'Sigma level do processo'],
+    ['PPM estimado',   ppmTotal,   'Não conformidades por milhão (baseado em σ_overall)'],
+  ];
+  const statusLabel=v=>v===null?'—':v>=1.33?'<span style="color:var(--accent)">✓ Capaz</span>':v>=1.0?'<span style="color:var(--accent2)">⚠ Marginal</span>':'<span style="color:var(--danger)">✗ Incapaz</span>';
+  document.getElementById('cap-tbody').innerHTML=rows.map(([name,val,desc])=>`
+    <tr>
+      <td style="color:var(--text);font-weight:500">${name}</td>
+      <td>${val!==null?fmt(val,4):'—'}</td>
+      <td style="font-size:.72rem">${desc}</td>
+      <td>${name.startsWith('Cp')||name.startsWith('Pp')||name.startsWith('Nível')?statusLabel(val):'—'}</td>
+    </tr>`).join('');
+
+  // Draw histogram
+  capDrawHistogram(data,usl,lsl,target,xbar,sigO);
+}
+
+function capDrawHistogram(data,usl,lsl,target,xbar,sigO){
+  const r=setupCanvas('cap-hist',280);if(!r)return;
+  const{ctx,W,H}=r;
+  const pad={top:22,right:22,bottom:36,left:58};
+  const pw=W-pad.left-pad.right,ph=H-pad.top-pad.bottom;
+  const n=data.length,bins=Math.max(10,Math.ceil(1+3.322*Math.log10(n)));
+
+  // x range: include spec limits
+  const allX=[...data];
+  if(usl!==null)allX.push(usl);if(lsl!==null)allX.push(lsl);
+  const dmin=Math.min(...allX),dmax=Math.max(...allX);
+  const xMg=(dmax-dmin)*0.1;
+  const xMin=dmin-xMg,xMax=dmax+xMg;
+
+  const bw=(xMax-xMin)/bins;
+  const counts=Array(bins).fill(0);
+  data.forEach(v=>{let b=Math.floor((v-xMin)/bw);if(b>=bins)b=bins-1;if(b<0)b=0;counts[b]++;});
+  const mc=Math.max(...counts)||1;
+  const s=std(data)||1;
+
+  const toX=v=>pad.left+(v-xMin)/(xMax-xMin)*pw;
+  const toY=f=>pad.top+(1-f/mc)*ph;
+
+  const showSpec=document.getElementById('cap-show-spec')?.checked??true;
+  const showNorm=document.getElementById('cap-show-normal')?.checked??true;
+
+  // Grid
+  ctx.strokeStyle='#1a2030';ctx.lineWidth=1;
+  for(let t=0;t<=5;t++){const y=pad.top+(t/5)*ph;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+pw,y);ctx.stroke();}
+
+  // Spec limit shading
+  if(showSpec){
+    if(lsl!==null){const x=toX(lsl);ctx.fillStyle='rgba(224,85,101,0.08)';ctx.fillRect(pad.left,pad.top,Math.max(0,x-pad.left),ph);}
+    if(usl!==null){const x=toX(usl);ctx.fillStyle='rgba(224,85,101,0.08)';ctx.fillRect(x,pad.top,Math.max(0,pad.left+pw-x),ph);}
+  }
+
+  // Bars — color by in/out spec
+  counts.forEach((c,i)=>{
+    if(c===0)return;
+    const xv=xMin+i*bw, xv2=xv+bw;
+    const inSpec=(lsl===null||xv2>=lsl)&&(usl===null||xv<=usl);
+    const col=inSpec?'#3ecfcf':'#e05565';
+    const x=toX(xv),x2=toX(xv2),y=toY(c);
+    ctx.fillStyle=col+'2a';ctx.strokeStyle=col+'88';ctx.lineWidth=1;
+    ctx.fillRect(x,y,x2-x,ph-(y-pad.top));ctx.strokeRect(x,y,x2-x,ph-(y-pad.top));
+  });
+
+  // Normal curve
+  if(showNorm){
+    const sc=n*bw;
+    ctx.beginPath();ctx.strokeStyle='#3ecfcf';ctx.lineWidth=2;
+    let first=true;
+    for(let i=0;i<=150;i++){
+      const xv=xMin+(i/150)*(xMax-xMin),d=Math.exp(-.5*((xv-xbar)/sigO)**2)/(sigO*Math.sqrt(2*Math.PI));
+      const px=toX(xv),yv=toY(d*sc);
+      if(px<pad.left-5||px>pad.left+pw+5)continue;
+      first?ctx.moveTo(px,yv):ctx.lineTo(px,yv);first=false;
+    }
+    ctx.stroke();
+  }
+
+  // Spec lines
+  if(showSpec){
+    const vline=(xv,col,lbl,side)=>{
+      if(xv===null||!isFinite(xv))return;
+      const x=toX(xv);
+      ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(x,pad.top);ctx.lineTo(x,pad.top+ph);ctx.stroke();
+      ctx.fillStyle=col;ctx.font='bold 10px DM Mono,monospace';
+      ctx.textAlign=side==='right'?'left':'right';
+      ctx.fillText(lbl,side==='right'?x+4:x-4,pad.top+14);
+      ctx.restore();
+    };
+    vline(usl,'#e05565','LSE','right');
+    vline(lsl,'#e05565','LIE','left');
+    vline(target,'rgba(255,255,255,0.3)','Alvo','right');
+  }
+
+  // Mean line
+  const mx=toX(xbar);
+  ctx.save();ctx.strokeStyle='rgba(62,207,207,0.7)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(mx,pad.top);ctx.lineTo(mx,pad.top+ph);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+  ctx.fillStyle='#3ecfcf';ctx.font='bold 9.5px DM Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('x̄',mx,pad.top-5);
+
+  // X axis labels
+  ctx.fillStyle='#5a677f';ctx.font='9px DM Mono,monospace';ctx.textAlign='center';
+  const step=Math.max(1,Math.ceil(bins/8));
+  for(let i=0;i<=bins;i+=step){const xv=xMin+i*bw;if(isFinite(xv))ctx.fillText(xv.toFixed(1),toX(xv),H-pad.bottom+14);}
+  ctx.textAlign='right';
+  for(let t=0;t<=5;t++)ctx.fillText(Math.round(mc*(1-t/5)),pad.left-5,pad.top+t/5*ph+4);
+}
+
 </script>
 </body>
 </html>
