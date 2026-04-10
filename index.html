@@ -183,6 +183,21 @@
     .yr-sep{color:var(--muted);font-size:.75rem;font-family:'DM Mono',monospace;}
     .yr-reset{background:transparent;border:1px solid var(--border2);color:var(--muted);font-family:'DM Mono',monospace;font-size:.68rem;padding:.28rem .65rem;border-radius:4px;cursor:pointer;transition:all .15s;}
     .yr-reset:hover{border-color:var(--accent2);color:var(--accent2);}
+
+    /* Inline Anderson-Darling panel */
+    .ad-inline{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+    .ad-inline-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.6rem;}
+    .ad-inline-title{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+    .ad-inline-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;}
+    .ad-inline-stat{background:var(--surface2);border-radius:5px;padding:.5rem .75rem;}
+    .ad-inline-stat .lbl{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.15rem;}
+    .ad-inline-stat .val{font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;}
+    .ad-inline-verdict{margin-top:.75rem;padding:.6rem .9rem;border-radius:5px;font-family:'DM Mono',monospace;font-size:.76rem;font-weight:500;text-align:center;}
+    .ad-inline-verdict.normal{background:rgba(62,207,207,0.08);border:1px solid rgba(62,207,207,0.3);color:var(--accent);}
+    .ad-inline-verdict.nonnormal{background:rgba(224,85,101,0.08);border:1px solid rgba(224,85,101,0.3);color:var(--danger);}
+    .ad-inline-verdict.pending{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);}
+    .ad-bc-link{font-size:.7rem;color:var(--accent2);font-family:'DM Mono',monospace;cursor:pointer;text-decoration:underline;white-space:nowrap;}
+    .ad-bc-link:hover{color:var(--accent);}
   </style>
 </head>
 <body>
@@ -275,6 +290,23 @@
   </div>
 
   <div class="violations"><h3>Sinais de Fora de Controle</h3><div id="imr-viol-list"><span class="no-viol">Nenhuma violação.</span></div></div>
+
+  <!-- Anderson-Darling inline — IMR -->
+  <div class="ad-inline" id="imr-ad-panel">
+    <div class="ad-inline-header">
+      <span class="ad-inline-title">Teste de Normalidade — Anderson-Darling</span>
+      <span class="ad-bc-link" onclick="sendToBoxCox('imr')" title="Abrir dados no Box-Cox">⟶ Abrir no Box-Cox</span>
+    </div>
+    <div class="ad-inline-body" id="imr-ad-body">
+      <div class="ad-inline-stat"><div class="lbl">Estatística A²</div><div class="val" id="imr-ad-stat" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Valor-p (aprox.)</div><div class="val" id="imr-ad-p" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Valor crítico α=0,05</div><div class="val" id="imr-ad-crit" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Média (MLE)</div><div class="val" id="imr-ad-mean" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Desvio Padrão (MLE)</div><div class="val" id="imr-ad-sd" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">N</div><div class="val" id="imr-ad-n" style="color:var(--muted2)">—</div></div>
+    </div>
+    <div class="ad-inline-verdict pending" id="imr-ad-verdict">Aplique os dados para calcular o teste de normalidade</div>
+  </div>
   <div class="formulas">
     <div class="formula-card"><h4>Gráfico I</h4><div class="fline">LCS = x̄ + 3×(MR̄/d₂)</div><div class="fline">LCI = x̄ − 3×(MR̄/d₂)</div><div class="fline note">d₂=1,128 · D₄=3,267</div></div>
     <div class="formula-card"><h4>Quando Usar</h4><div class="fline" style="color:var(--text);line-height:1.8">• n=1 por amostragem<br>• Medições no tempo<br>• Dados administrativos</div></div>
@@ -345,6 +377,23 @@
     <div class="chart-body"><canvas id="chart-s" height="170"></canvas></div>
   </div>
   <div class="violations"><h3>Sinais de Fora de Controle</h3><div id="xbs-viol-list"><span class="no-viol">Nenhuma violação.</span></div></div>
+
+  <!-- Anderson-Darling inline — XBS -->
+  <div class="ad-inline" id="xbs-ad-panel">
+    <div class="ad-inline-header">
+      <span class="ad-inline-title">Teste de Normalidade — Anderson-Darling (médias dos subgrupos)</span>
+      <span class="ad-bc-link" onclick="sendToBoxCox('xbs')" title="Abrir médias no Box-Cox">⟶ Abrir no Box-Cox</span>
+    </div>
+    <div class="ad-inline-body">
+      <div class="ad-inline-stat"><div class="lbl">Estatística A²</div><div class="val" id="xbs-ad-stat" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Valor-p (aprox.)</div><div class="val" id="xbs-ad-p" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Valor crítico α=0,05</div><div class="val" id="xbs-ad-crit" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Média (MLE)</div><div class="val" id="xbs-ad-mean" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">Desvio Padrão (MLE)</div><div class="val" id="xbs-ad-sd" style="color:var(--muted2)">—</div></div>
+      <div class="ad-inline-stat"><div class="lbl">N (subgrupos)</div><div class="val" id="xbs-ad-n" style="color:var(--muted2)">—</div></div>
+    </div>
+    <div class="ad-inline-verdict pending" id="xbs-ad-verdict">Aplique os dados para calcular o teste de normalidade</div>
+  </div>
   <div class="formulas">
     <div class="formula-card"><h4>X̄</h4><div class="fline">LCS = X̄̄ + A₃×S̄</div><div class="fline">LCI = X̄̄ − A₃×S̄</div></div>
     <div class="formula-card"><h4>S</h4><div class="fline">LCS = B₄×S̄</div><div class="fline">LCI = B₃×S̄</div></div>
@@ -1034,6 +1083,8 @@ function imrRender(groups){
     drawSeries('chart-mr',170,[{name:'MR',pts:mrPts,viols:mrVset}],{showLimits,showZones:false,showReg:false,showCI:false,limits:{ucl:mru,cl:mrb,lcl:0}});
   }
   document.getElementById('imr-viol-list').innerHTML=allViols.length?allViols.map(m=>`<div class="viol-item"><div class="vdot"></div>${m}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
+  // Run AD test on all data combined
+  renderADPanel('imr', groups.flatMap(g=>g.pts.map(p=>p.y)));
 }
 
 // ══ XBS ══
@@ -1072,6 +1123,8 @@ function xbsRender(subs){
   drawSeries('chart-xb',220,[{name:'X̄',pts:xPts,viols:xVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:xu,cl:xdb,lcl:xl},yMin:xbsYmin,yMax:xbsYmax});
   drawSeries('chart-s',170,[{name:'S',pts:sPts,viols:sVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:su,cl:sb,lcl:sl},yMin:0,yMax:xbsSmax});
   document.getElementById('xbs-viol-list').innerHTML=viols.length?viols.map(m=>`<div class="viol-item"><div class="vdot"></div>${m}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
+  // Run AD test on x-bar values (means)
+  renderADPanel('xbs', xbars);
 }
 
 // ══ TREND ══
@@ -1236,6 +1289,70 @@ function drawHistogram(cid,H,groups,xRange){
   for(let t=0;t<=5;t++)ctx.fillText(Math.round(mc*(1-t/5)),pad.left-6,pad.top+t/5*ph+4);
 }
 
+
+// ── Inline Anderson-Darling panel ──
+function renderADPanel(prefix, vals){
+  if(!vals||vals.length<4)return;
+  const ad=adTest(vals);
+  const normal=ad.p>=0.05;
+  const pStr=ad.p<0.001?'< 0,001':fmt(ad.p,4);
+
+  document.getElementById(prefix+'-ad-stat').textContent=fmt(ad.A2,4);
+  document.getElementById(prefix+'-ad-stat').style.color=normal?'var(--accent)':'var(--danger)';
+  document.getElementById(prefix+'-ad-p').textContent=pStr;
+  document.getElementById(prefix+'-ad-p').style.color=normal?'var(--accent)':'var(--danger)';
+  document.getElementById(prefix+'-ad-crit').textContent=fmt(ad.critValue,4);
+  document.getElementById(prefix+'-ad-crit').style.color='var(--muted2)';
+  document.getElementById(prefix+'-ad-mean').textContent=fmt(ad.m,4);
+  document.getElementById(prefix+'-ad-mean').style.color='var(--text)';
+  document.getElementById(prefix+'-ad-sd').textContent=fmt(ad.s,4);
+  document.getElementById(prefix+'-ad-sd').style.color='var(--text)';
+  document.getElementById(prefix+'-ad-n').textContent=ad.n;
+  document.getElementById(prefix+'-ad-n').style.color='var(--text)';
+
+  const vEl=document.getElementById(prefix+'-ad-verdict');
+  if(normal){
+    vEl.className='ad-inline-verdict normal';
+    vEl.innerHTML=`✓ Dados normais &nbsp;(p = ${pStr} ≥ 0,05) — H₀ não rejeitada · Não é necessário transformar`;
+  } else {
+    vEl.className='ad-inline-verdict nonnormal';
+    vEl.innerHTML=`✗ Dados não normais &nbsp;(p = ${pStr} &lt; 0,05) — H₀ rejeitada · <span class="ad-bc-link" onclick="sendToBoxCox('${prefix}')">Recomendado: aplicar Box-Cox →</span>`;
+  }
+}
+
+// Send current data to BoxCox page
+function sendToBoxCox(source){
+  let vals=[];
+  if(source==='imr'){
+    vals=imrGroups.flatMap(g=>g.pts.map(p=>p.y));
+  } else if(source==='xbs'){
+    // send the raw individual values (all subgroup values flattened)
+    vals=xbsSubs.flatMap(s=>s.vals);
+  }
+  if(!vals.length)return;
+  // Check all positive
+  const allPos=vals.every(v=>v>0);
+  if(!allPos){
+    alert('Box-Cox requer valores positivos. Alguns valores são zero ou negativos.\nAdicionando constante automaticamente...');
+    const minVal=Math.min(...vals);
+    if(minVal<=0) vals=vals.map(v=>v-(minVal-1));
+  }
+  // Navigate to BoxCox page and fill data
+  const bcInput=document.getElementById('bc-y');
+  if(bcInput){
+    bcInput.value=vals.map(v=>fmt(v,4)).join(', ');
+    // Trigger boxcox page
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-boxcox').classList.add('active');
+    // Find and activate boxcox nav item
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      if(n.textContent.includes('Transformação'))n.classList.add('active');
+    });
+    bcData=vals;
+    bcRender(vals);
+  }
+}
 
 // ── Y/X Range helpers ──
 function clearYRange(chart){
