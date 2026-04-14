@@ -246,6 +246,9 @@
   </div>
 
   <div class="yrange-row">
+    <span class="yr-label">Eixo X — Intervalo:</span>
+    <input type="number" id="imr-xstep" placeholder="auto" min="1" step="1" title="Mostrar rótulo a cada N pontos" oninput="imrRerender()" style="width:70px">
+    <span class="yr-sep" style="margin:0 .3rem">|</span>
     <span class="yr-label">Eixo Y — I:</span>
     <span class="yr-label" style="color:var(--muted)">Mín</span>
     <input type="number" id="imr-ymin" placeholder="auto" step="any" oninput="imrRerender()">
@@ -336,6 +339,9 @@
   </div>
 
   <div class="yrange-row">
+    <span class="yr-label">Eixo X — Intervalo:</span>
+    <input type="number" id="xbs-xstep" placeholder="auto" min="1" step="1" title="Mostrar rótulo a cada N pontos" oninput="xbsRerender()" style="width:70px">
+    <span class="yr-sep" style="margin:0 .3rem">|</span>
     <span class="yr-label">Eixo Y — X̄:</span>
     <span class="yr-label" style="color:var(--muted)">Mín</span>
     <input type="number" id="xbs-ymin" placeholder="auto" step="any" oninput="xbsRerender()">
@@ -427,6 +433,9 @@
   </div>
 
   <div class="yrange-row">
+    <span class="yr-label">Eixo X — Intervalo:</span>
+    <input type="number" id="trend-xstep" placeholder="auto" min="1" step="1" title="Mostrar rótulo a cada N pontos" oninput="trendRerender()" style="width:70px">
+    <span class="yr-sep" style="margin:0 .3rem">|</span>
     <span class="yr-label">Eixo Y:</span>
     <span class="yr-label" style="color:var(--muted)">Mín</span>
     <input type="number" id="trend-ymin" placeholder="auto" step="any" oninput="trendRerender()">
@@ -494,7 +503,7 @@
       <div class="xy-field">
         <div class="xy-label"><span>Y</span> Valores (todos devem ser positivos)</div>
         <textarea class="data-input" id="bc-y" rows="3" placeholder="Cole seus dados aqui: 129, 114, 142, 251, 190, 34..."></textarea>
-        <div class="data-hint">Todos os valores devem ser <strong>positivos</strong>. Se houver zeros ou negativos, adicione uma constante antes de transformar.</div>
+        <div class="data-hint">Todos os valores devem ser <strong>positivos</strong>. Se houver zeros ou negativos, adicione uma constante antes de transformar.<br>⚠ Cole os valores em <strong>uma única linha</strong> separados por vírgula para evitar erros de leitura.</div>
       </div>
     </div>
   </div>
@@ -821,8 +830,25 @@ function setMode(chart,m,el){
 }
 
 // ══ PARSE ══
-function parseVals(str){return str.split(/[\n,;\s]+/).map(Number).filter(v=>!isNaN(v)&&v!==null);}
-function parseLabels(str){return str.split(/[\n,;\s]+/).map(s=>s.trim()).filter(s=>s!=='');}
+function parseVals(str){
+  // First: join lines that end/start with digits (line-broken numbers)
+  // e.g. "25,2\n2,18" could be "25, 22, 18" — but we can't know for sure
+  // Safe approach: replace newlines with commas, then split
+  const clean=str.replace(/\r/g,'').replace(/\n/g,',');
+  return clean.split(/[,;\s]+/).map(s=>s.trim()).filter(s=>s!=='').map(Number).filter(v=>!isNaN(v));
+}
+function parseLabels(str){
+  // Accept any text labels — dates, codes, numbers, etc.
+  // Split by newline first, then by comma/semicolon
+  const lines=str.split('\n').map(l=>l.trim()).filter(l=>l);
+  const labels=[];
+  for(const line of lines){
+    // Split line by comma or semicolon, keep each token
+    const parts=line.split(/[,;]+/).map(s=>s.trim()).filter(s=>s);
+    labels.push(...parts);
+  }
+  return labels;
+}
 
 function getGroupsFromUI(chart){
   const m=modes[chart];
@@ -840,8 +866,9 @@ function getGroupsFromUI(chart){
     const xRaw=document.getElementById(`${chart}-x`)?.value||'';
     const yRaw=document.getElementById(`${chart}-y`)?.value||'';
     const yVals=parseVals(yRaw);
-    const xVals=xRaw.trim()?parseLabels(xRaw).map(Number):yVals.map((_,i)=>i+1);
-    const pts=yVals.map((y,i)=>({x:xVals[i]??i+1,y})).filter(p=>isFinite(p.x));
+    const xLabels=xRaw.trim()?parseLabels(xRaw):yVals.map((_,i)=>String(i+1));
+    // Store labels as strings; use index as numeric x for calculations
+    const pts=yVals.map((y,i)=>({x:i+1,xLabel:xLabels[i]??String(i+1),y}));
     return[{name:'Série 1',pts}];
   } else {
     const yRaw=document.getElementById(`${chart}-y`)?.value||'';
@@ -1006,11 +1033,26 @@ function drawSeries(cid,H,groups,opts){
     });
   });
 
-  // X axis labels
+  // X axis labels — support text labels and custom step
   const uniqueX=[...new Set(allX)].sort((a,b)=>a-b);
-  const step=Math.max(1,Math.ceil(uniqueX.length/9));
+  const autoStep=Math.max(1,Math.ceil(uniqueX.length/9));
+  const userStep=isFinite(opts.xStep)&&opts.xStep>=1?Math.round(opts.xStep):autoStep;
   ctx.fillStyle='#5a677f';ctx.font='9.5px DM Mono,monospace';ctx.textAlign='center';
-  uniqueX.forEach((x,i)=>{if(i%step===0||i===uniqueX.length-1)ctx.fillText(String(x),toX(x),H-pad.bottom+14);});
+  // Build label map: x -> xLabel from first group that has it
+  const labelMap={};
+  groups.forEach(g=>(g.pts||[]).forEach(p=>{if(!labelMap[p.x])labelMap[p.x]=p.xLabel||String(p.x);}));
+  uniqueX.forEach((x,i)=>{
+    if(i%userStep===0||i===uniqueX.length-1){
+      const lbl=labelMap[x]||String(x);
+      // Rotate long labels (dates, codes > 5 chars)
+      if(lbl.length>5){
+        ctx.save();ctx.translate(toX(x),H-pad.bottom+12);ctx.rotate(-Math.PI/4);
+        ctx.textAlign='right';ctx.fillText(lbl,0,0);ctx.restore();
+      } else {
+        ctx.fillText(lbl,toX(x),H-pad.bottom+14);
+      }
+    }
+  });
 
   // Y axis labels
   ctx.textAlign='right';
@@ -1073,7 +1115,8 @@ function imrRender(groups){
   const imrYmin=parseFloat(document.getElementById('imr-ymin')?.value)||null;
   const imrYmax=parseFloat(document.getElementById('imr-ymax')?.value)||null;
   const imrMRmax=parseFloat(document.getElementById('imr-mrmax')?.value)||null;
-  drawSeries('chart-i',240,groups,{showLimits,showZones,showReg,showCI:false,limits:{ucl:iu,cl:xb,lcl:il},yMin:imrYmin,yMax:imrYmax});
+  const imrXstep=parseFloat(document.getElementById('imr-xstep')?.value)||null;
+  drawSeries('chart-i',240,groups,{showLimits,showZones,showReg,showCI:false,limits:{ucl:iu,cl:xb,lcl:il},yMin:imrYmin,yMax:imrYmax,xStep:imrXstep});
   buildLegend('imr-legend-i',groups);
 
   if(!isMulti){
@@ -1120,7 +1163,8 @@ function xbsRender(subs){
   const xbsYmin=parseFloat(document.getElementById('xbs-ymin')?.value)||null;
   const xbsYmax=parseFloat(document.getElementById('xbs-ymax')?.value)||null;
   const xbsSmax=parseFloat(document.getElementById('xbs-smax')?.value)||null;
-  drawSeries('chart-xb',220,[{name:'X̄',pts:xPts,viols:xVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:xu,cl:xdb,lcl:xl},yMin:xbsYmin,yMax:xbsYmax});
+  const xbsXstep=parseFloat(document.getElementById('xbs-xstep')?.value)||null;
+  drawSeries('chart-xb',220,[{name:'X̄',pts:xPts,viols:xVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:xu,cl:xdb,lcl:xl},yMin:xbsYmin,yMax:xbsYmax,xStep:xbsXstep});
   drawSeries('chart-s',170,[{name:'S',pts:sPts,viols:sVset}],{showLimits:showL,showZones:showZ,showReg:false,showCI:false,limits:{ucl:su,cl:sb,lcl:sl},yMin:0,yMax:xbsSmax});
   document.getElementById('xbs-viol-list').innerHTML=viols.length?viols.map(m=>`<div class="viol-item"><div class="vdot"></div>${m}</div>`).join(''):'<span class="no-viol">✓ Nenhuma violação.</span>';
   // Run AD test on x-bar values (means)
@@ -1182,7 +1226,8 @@ function trendRender(groups){
 
   const trendYmin=parseFloat(document.getElementById('trend-ymin')?.value)||null;
   const trendYmax=parseFloat(document.getElementById('trend-ymax')?.value)||null;
-  drawSeries('chart-trend',300,groups,{showLimits:showL,showZones:showZ,showReg:showR,showCI,limits:lim,yMin:trendYmin,yMax:trendYmax});
+  const trendXstep=parseFloat(document.getElementById('trend-xstep')?.value)||null;
+  drawSeries('chart-trend',300,groups,{showLimits:showL,showZones:showZ,showReg:showR,showCI,limits:lim,yMin:trendYmin,yMax:trendYmax,xStep:trendXstep});
   buildLegend('trend-legend',groups);
 
   // AD panels
@@ -1340,7 +1385,7 @@ function sendToBoxCox(source){
   // Navigate to BoxCox page and fill data
   const bcInput=document.getElementById('bc-y');
   if(bcInput){
-    bcInput.value=vals.map(v=>fmt(v,4)).join(', ');
+    bcInput.value=vals.map(v=>Number.isInteger(v)?String(v):v.toFixed(4)).join(', ');
     // Trigger boxcox page
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1357,9 +1402,9 @@ function sendToBoxCox(source){
 // ── Y/X Range helpers ──
 function clearYRange(chart){
   const ids={
-    imr:['imr-ymin','imr-ymax','imr-mrmax'],
-    xbs:['xbs-ymin','xbs-ymax','xbs-smax'],
-    trend:['trend-ymin','trend-ymax','trend-hxmin','trend-hxmax'],
+    imr:['imr-ymin','imr-ymax','imr-mrmax','imr-xstep'],
+    xbs:['xbs-ymin','xbs-ymax','xbs-smax','xbs-xstep'],
+    trend:['trend-ymin','trend-ymax','trend-hxmin','trend-hxmax','trend-xstep'],
     cap:['cap-xmin','cap-xmax'],
   };
   (ids[chart]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
