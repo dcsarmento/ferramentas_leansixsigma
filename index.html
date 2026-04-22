@@ -822,6 +822,38 @@
   <!-- Per-group stats -->
   <div class="disp-group-stats" id="disp-group-stats"></div>
 
+  <!-- Descriptive Stats Table -->
+  <div class="chart-card" id="disp-desc-card">
+    <div class="chart-header">
+      <h2>Estatísticas <em>Descritivas</em></h2>
+      <div class="chart-stats">
+        <div class="stat"><div class="stat-label">Variável</div><div class="stat-val cl">X e Y</div></div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="cap-table" id="disp-desc-table">
+        <thead><tr>
+          <th>Grupo / Série</th><th>Var.</th>
+          <th>N</th><th>Mín</th><th>Q1</th><th>Mediana</th><th>Q3</th><th>Máx</th>
+          <th>Média</th><th>Desvio P.</th><th>Assimetria</th><th>IQR</th><th>Amplitude</th>
+        </tr></thead>
+        <tbody id="disp-desc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Box Plot -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <h2>Box Plot <em>com Outliers</em></h2>
+      <div class="chart-stats">
+        <div class="stat"><div class="stat-label">Outliers</div><div class="stat-val" style="color:var(--muted2)" id="disp-bp-outliers">—</div></div>
+      </div>
+    </div>
+    <div class="chart-body"><canvas id="chart-disp-bp" height="260"></canvas></div>
+    <div class="legend" id="disp-bp-legend"></div>
+  </div>
+
   <div class="formulas">
     <div class="formula-card"><h4>Correlação de Pearson</h4>
       <div class="fline">r = Σ(xᵢ−x̄)(yᵢ−ȳ) /</div>
@@ -1865,6 +1897,13 @@ function dispRender(groups) {
   }
 
   buildLegend('disp-legend', groups.map((g, i) => ({ name: g.name })));
+  buildLegend('disp-bp-legend', groups.map((g, i) => ({ name: g.name })));
+
+  // Descriptive stats table
+  renderDescStats(groups);
+
+  // Box plot
+  drawBoxPlot('chart-disp-bp', 260, groups);
 
   // Draw scatter
   drawScatter('chart-disp', 420, groups, {
@@ -1924,18 +1963,23 @@ function drawScatter(cid, H, groups, opts) {
     const n = g.xs.length;
 
     // Confidence ellipse
-    if (opts.showEllipse && n >= 5 && reg) {
-      const ell = confidenceEllipse(g.xs, g.ys, 5.991);
-      ctx.save();
-      ctx.translate(toX(ell.mx), toY(ell.my));
-      ctx.rotate(-ell.theta);
-      const rx = ell.a / (xMax - xMin) * pw;
-      const ry = ell.b / (yMax - yMin) * ph;
-      ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = col + '55'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
-      ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = col + '0d'; ctx.fill();
-      ctx.restore();
+    if (opts.showEllipse && n >= 5) {
+      try {
+        const ell = confidenceEllipse(g.xs, g.ys, 5.991);
+        const xRange = (xMax - xMin) || 1;
+        const yRange = (yMax - yMin) || 1;
+        // Compute radii in pixel space — clamp to avoid canvas errors
+        const rx = Math.max(2, Math.min(pw * 0.98, Math.abs(ell.a / xRange * pw)));
+        const ry = Math.max(2, Math.min(ph * 0.98, Math.abs(ell.b / yRange * ph)));
+        ctx.save();
+        ctx.translate(toX(ell.mx), toY(ell.my));
+        ctx.rotate(-ell.theta);
+        ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = col + '55'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+        ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col + '0d'; ctx.fill();
+        ctx.restore();
+      } catch(e) { /* skip ellipse if computation fails */ }
     }
 
     // CI band
@@ -2026,6 +2070,208 @@ function drawScatter(cid, H, groups, opts) {
 // disp input area handled inside buildInputArea
 
 
+
+
+// ══════════════════════════════════════════
+// DESCRIPTIVE STATS + BOX PLOT for Scatter
+// ══════════════════════════════════════════
+
+function quantile(sorted, q) {
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  if (base + 1 < sorted.length)
+    return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+  return sorted[base];
+}
+
+function calcDescStats(vals) {
+  if (!vals.length) return null;
+  const n = vals.length;
+  const sorted = [...vals].sort((a, b) => a - b);
+  const mn = mean(vals);
+  const sd = std(vals);
+  const mn2 = sum => sum / n;
+  const q1 = quantile(sorted, 0.25);
+  const med = quantile(sorted, 0.5);
+  const q3 = quantile(sorted, 0.75);
+  const iqr = q3 - q1;
+  const skew = sd > 0 ? vals.reduce((a, v) => a + ((v - mn) / sd) ** 3, 0) / n : 0;
+  // Outliers: Tukey fences
+  const lo = q1 - 1.5 * iqr;
+  const hi = q3 + 1.5 * iqr;
+  const outliers = sorted.filter(v => v < lo || v > hi);
+  return {
+    n, min: sorted[0], max: sorted[n-1],
+    q1, med, q3, iqr,
+    mean: mn, sd, skew,
+    range: sorted[n-1] - sorted[0],
+    outliers, lo, hi,
+    whiskerLo: sorted.find(v => v >= lo) ?? sorted[0],
+    whiskerHi: [...sorted].reverse().find(v => v <= hi) ?? sorted[n-1],
+  };
+}
+
+function renderDescStats(groups) {
+  const tbody = document.getElementById('disp-desc-tbody');
+  if (!tbody) return;
+  const rows = [];
+  groups.forEach(g => {
+    ['X', 'Y'].forEach(varName => {
+      const vals = varName === 'X' ? g.xs : g.ys;
+      const s = calcDescStats(vals);
+      if (!s) return;
+      rows.push(`<tr>
+        <td style="color:var(--text);font-weight:500">${g.name}</td>
+        <td style="color:var(--accent2)">${varName}</td>
+        <td>${s.n}</td>
+        <td>${fmt(s.min,3)}</td>
+        <td>${fmt(s.q1,3)}</td>
+        <td style="color:var(--accent)">${fmt(s.med,3)}</td>
+        <td>${fmt(s.q3,3)}</td>
+        <td>${fmt(s.max,3)}</td>
+        <td style="color:var(--accent2)">${fmt(s.mean,3)}</td>
+        <td>${fmt(s.sd,3)}</td>
+        <td style="color:${Math.abs(s.skew)>1?'var(--danger)':'var(--muted2)'}">${fmt(s.skew,3)}</td>
+        <td>${fmt(s.iqr,3)}</td>
+        <td>${fmt(s.range,3)}</td>
+      </tr>`);
+    });
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+function drawBoxPlot(cid, H, groups) {
+  const r = setupCanvas(cid, H); if (!r) return;
+  const { ctx, W } = r;
+  const pad = { top: 30, right: 30, bottom: 48, left: 64 };
+  const pw = W - pad.left - pad.right;
+  const ph = H - pad.top - pad.bottom;
+
+  // Collect all values to set Y range
+  const allVals = groups.flatMap(g => [...g.xs, ...g.ys]);
+  if (!allVals.length) return;
+  const allStats = groups.flatMap(g => [calcDescStats(g.xs), calcDescStats(g.ys)]).filter(Boolean);
+  let yMin = Math.min(...allStats.map(s => Math.min(s.min, s.whiskerLo)));
+  let yMax = Math.max(...allStats.map(s => Math.max(s.max, s.whiskerHi)));
+  const yMg = (yMax - yMin) * 0.12 || 2;
+  yMin -= yMg; yMax += yMg;
+
+  const toY = v => pad.top + (1 - (v - yMin) / (yMax - yMin)) * ph;
+
+  // Grid
+  ctx.strokeStyle = '#1a2030'; ctx.lineWidth = 1;
+  for (let t = 0; t <= 5; t++) {
+    const y = pad.top + (t / 5) * ph;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pw, y); ctx.stroke();
+  }
+
+  // Calculate box positions
+  // Each group has 2 boxes (X and Y), laid out across the width
+  const totalBoxes = groups.length * 2;
+  const slotW = pw / (totalBoxes + 1);
+  const boxW = Math.min(slotW * 0.55, 50);
+
+  let totalOutliers = 0;
+
+  groups.forEach((g, gi) => {
+    ['X', 'Y'].forEach((varName, vi) => {
+      const vals = varName === 'X' ? g.xs : g.ys;
+      const s = calcDescStats(vals);
+      if (!s) return;
+
+      const slotIdx = gi * 2 + vi;
+      const cx = pad.left + (slotIdx + 1) * slotW;
+      const col = GRP_COLORS[gi % GRP_COLORS.length];
+      const boxCol = vi === 0 ? col : col + 'aa';
+
+      // Whiskers
+      ctx.save();
+      ctx.strokeStyle = col + 'cc'; ctx.lineWidth = 1.5;
+      // Lower whisker
+      ctx.beginPath();
+      ctx.moveTo(cx, toY(s.whiskerLo));
+      ctx.lineTo(cx, toY(s.q1));
+      ctx.stroke();
+      // Lower whisker cap
+      ctx.beginPath();
+      ctx.moveTo(cx - boxW * 0.3, toY(s.whiskerLo));
+      ctx.lineTo(cx + boxW * 0.3, toY(s.whiskerLo));
+      ctx.stroke();
+      // Upper whisker
+      ctx.beginPath();
+      ctx.moveTo(cx, toY(s.q3));
+      ctx.lineTo(cx, toY(s.whiskerHi));
+      ctx.stroke();
+      // Upper whisker cap
+      ctx.beginPath();
+      ctx.moveTo(cx - boxW * 0.3, toY(s.whiskerHi));
+      ctx.lineTo(cx + boxW * 0.3, toY(s.whiskerHi));
+      ctx.stroke();
+      ctx.restore();
+
+      // IQR box
+      const boxTop = toY(s.q3);
+      const boxBot = toY(s.q1);
+      const boxH = Math.abs(boxBot - boxTop);
+      ctx.fillStyle = col + '33';
+      ctx.strokeStyle = col + 'cc';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(cx - boxW / 2, boxTop, boxW, boxH);
+      ctx.strokeRect(cx - boxW / 2, boxTop, boxW, boxH);
+
+      // Median line
+      ctx.save();
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - boxW / 2, toY(s.med));
+      ctx.lineTo(cx + boxW / 2, toY(s.med));
+      ctx.stroke();
+      ctx.restore();
+
+      // Mean × marker
+      ctx.save();
+      ctx.strokeStyle = '#ffffff88'; ctx.lineWidth = 1.5;
+      const my2 = toY(s.mean);
+      const ms = 5;
+      ctx.beginPath(); ctx.moveTo(cx - ms, my2 - ms); ctx.lineTo(cx + ms, my2 + ms); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + ms, my2 - ms); ctx.lineTo(cx - ms, my2 + ms); ctx.stroke();
+      ctx.restore();
+
+      // Outliers
+      s.outliers.forEach(ov => {
+        totalOutliers++;
+        ctx.save();
+        ctx.strokeStyle = '#e05565'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, toY(ov), 4, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // X-axis label
+      ctx.fillStyle = col; ctx.font = '10px DM Mono,monospace'; ctx.textAlign = 'center';
+      ctx.fillText(`${g.name} ${varName}`, cx, H - pad.bottom + 14);
+      // Stats mini-label
+      ctx.fillStyle = '#5a677f'; ctx.font = '9px DM Mono,monospace';
+      ctx.fillText(`μ=${fmt(s.mean,1)}`, cx, H - pad.bottom + 28);
+    });
+  });
+
+  // Update outliers count
+  const outEl = document.getElementById('disp-bp-outliers');
+  if (outEl) outEl.textContent = totalOutliers === 0 ? 'Nenhum' : `${totalOutliers} ponto(s)`;
+
+  // Y axis
+  ctx.fillStyle = '#5a677f'; ctx.font = '9.5px DM Mono,monospace'; ctx.textAlign = 'right';
+  for (let t = 0; t <= 5; t++) {
+    const v = yMin + (1 - t / 5) * (yMax - yMin);
+    if (isFinite(v)) ctx.fillText(v.toFixed(1), pad.left - 5, pad.top + (t / 5) * ph + 4);
+  }
+
+  // Legend: median / mean / outlier
+  ctx.fillStyle = '#5a677f'; ctx.font = '9px DM Mono,monospace'; ctx.textAlign = 'left';
+  ctx.fillText('— Mediana   × Média   ○ Outlier', pad.left, pad.top - 10);
+}
 
 // ══ INIT ══
 window.addEventListener('load',()=>{
