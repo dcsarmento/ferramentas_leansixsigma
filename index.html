@@ -198,6 +198,26 @@
     .ad-inline-verdict.pending{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);}
     .ad-bc-link{font-size:.7rem;color:var(--accent2);font-family:'DM Mono',monospace;cursor:pointer;text-decoration:underline;white-space:nowrap;}
     .ad-bc-link:hover{color:var(--accent);}
+
+    /* ── Dispersão / Scatter ── */
+    .disp-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.7rem;margin-bottom:1.2rem;}
+    .disp-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.9rem 1rem;}
+    .disp-stat-card .lbl{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem;}
+    .disp-stat-card .val{font-family:'DM Mono',monospace;font-size:1rem;font-weight:600;}
+    .disp-stat-card .sub{font-size:.68rem;color:var(--muted2);margin-top:.2rem;}
+    .corr-verdict{padding:.75rem 1.1rem;border-radius:6px;font-family:'DM Mono',monospace;font-size:.8rem;font-weight:500;text-align:center;margin-bottom:1.2rem;}
+    .corr-verdict.strong-pos{background:rgba(62,207,207,0.08);border:1px solid rgba(62,207,207,.3);color:var(--accent);}
+    .corr-verdict.mod-pos{background:rgba(74,180,255,0.08);border:1px solid rgba(74,180,255,.3);color:#4ab4ff;}
+    .corr-verdict.weak{background:rgba(90,103,127,0.15);border:1px solid var(--border2);color:var(--muted2);}
+    .corr-verdict.mod-neg{background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,.3);color:var(--accent2);}
+    .corr-verdict.strong-neg{background:rgba(224,85,101,0.08);border:1px solid rgba(224,85,101,.3);color:var(--danger);}
+    .disp-group-stats{display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.2rem;}
+    .disp-group-row{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.9rem 1.1rem;}
+    .disp-group-row h4{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.06em;margin-bottom:.6rem;}
+    .disp-group-row-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.5rem;}
+    .disp-group-row-stat{background:var(--surface2);border-radius:4px;padding:.4rem .6rem;}
+    .disp-group-row-stat .l{font-size:.6rem;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;}
+    .disp-group-row-stat .v{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;color:var(--text);}
   </style>
 </head>
 <body>
@@ -214,6 +234,7 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Análise</div>
     <div class="nav-item" onclick="showPage('trend',this)"><span class="nav-icon">Tend</span> Tendência</div>
+    <div class="nav-item" onclick="showPage('disp',this)"><span class="nav-icon">Disp</span> Dispersão</div>
     <div class="nav-item" onclick="showPage('boxcox',this)"><span class="nav-icon">BoxCox</span> Transformação</div>
     <div class="nav-item" onclick="showPage('capac',this)"><span class="nav-icon">Cp/Cpk</span> Capacidade</div>
   </div>
@@ -723,6 +744,116 @@
   </div>
 </div>
 
+<!-- ══════════ DISPERSÃO ══════════ -->
+<div id="page-disp" class="page">
+  <div class="page-header">
+    <div><h1>Gráfico de <em>Dispersão</em></h1><p>Correlação · Regressão · Análise bivariada · Múltiplos grupos</p></div>
+    <span class="tag tag-ana">Análise</span>
+  </div>
+
+  <div class="data-section">
+    <div class="data-section-title">Dados de Entrada</div>
+    <div class="mode-row">
+      <span class="mode-label">Modo:</span>
+      <div class="imt active" onclick="setMode('disp','simple',this)">Pares X,Y (uma coluna)</div>
+      <div class="imt" onclick="setMode('disp','xy',this)">X e Y separados</div>
+      <div class="imt" onclick="setMode('disp','groups',this)">Múltiplos grupos</div>
+    </div>
+    <div id="disp-input-area"></div>
+  </div>
+
+  <div class="options-row">
+    <label class="opt-check"><input type="checkbox" id="disp-show-reg" checked onchange="dispRerender()"><span>Linha de regressão</span></label>
+    <label class="opt-check"><input type="checkbox" id="disp-show-ci" checked onchange="dispRerender()"><span>Intervalo de confiança 95%</span></label>
+    <label class="opt-check"><input type="checkbox" id="disp-show-ellipse" checked onchange="dispRerender()"><span>Elipse de confiança 95%</span></label>
+    <label class="opt-check"><input type="checkbox" id="disp-show-means" checked onchange="dispRerender()"><span>Linhas de média (X̄, Ȳ)</span></label>
+    <label class="opt-check"><input type="checkbox" id="disp-show-grid" checked onchange="dispRerender()"><span>Grid</span></label>
+  </div>
+
+  <div class="yrange-row">
+    <span class="yr-label">Eixo X:</span>
+    <input type="number" id="disp-xmin" placeholder="auto" step="any" oninput="dispRerender()">
+    <span class="yr-sep">—</span>
+    <input type="number" id="disp-xmax" placeholder="auto" step="any" oninput="dispRerender()">
+    <span class="yr-sep" style="margin:0 .3rem">|</span>
+    <span class="yr-label">Eixo Y:</span>
+    <input type="number" id="disp-ymin" placeholder="auto" step="any" oninput="dispRerender()">
+    <span class="yr-sep">—</span>
+    <input type="number" id="disp-ymax" placeholder="auto" step="any" oninput="dispRerender()">
+    <button class="yr-reset" onclick="clearYRange('disp')">↺ Resetar</button>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group"><label>Nº Pares (sim.)</label><input type="range" id="disp-n" min="20" max="150" value="50" oninput="document.getElementById('disp-nval').textContent=this.value"><span class="range-val" id="disp-nval">50</span></div>
+    <div class="ctrl-group"><label>Correlação (sim.)</label><input type="number" id="disp-corr" value="0.75" min="-1" max="1" step="0.05"></div>
+    <div class="ctrl-group"><label>Simulação</label>
+      <select id="disp-simtype">
+        <option value="linear">Correlação linear</option>
+        <option value="none">Sem correlação</option>
+        <option value="negative">Correlação negativa</option>
+        <option value="groups">Dois grupos (demo)</option>
+      </select>
+    </div>
+    <button class="btn" onclick="dispGenerate()">⟳ Gerar</button>
+    <button class="btn btn-ghost" onclick="dispApply()">▶ Aplicar</button>
+  </div>
+
+  <!-- Verdict -->
+  <div id="disp-verdict" class="corr-verdict weak">Execute a análise para ver a correlação</div>
+
+  <!-- Stats grid -->
+  <div class="disp-stats-grid" id="disp-stats-grid"></div>
+
+  <!-- Main scatter chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <h2>Gráfico de <em>Dispersão</em></h2>
+      <div class="chart-stats">
+        <div class="stat"><div class="stat-label">r (Pearson)</div><div class="stat-val cl" id="disp-r">—</div></div>
+        <div class="stat"><div class="stat-label">R²</div><div class="stat-val lcl" id="disp-r2">—</div></div>
+        <div class="stat"><div class="stat-label">p-valor</div><div class="stat-val" style="color:var(--muted2)" id="disp-pval">—</div></div>
+        <div class="stat"><div class="stat-label">N</div><div class="stat-val" style="color:var(--muted2)" id="disp-n-stat">—</div></div>
+      </div>
+    </div>
+    <div class="chart-body"><canvas id="chart-disp" height="420"></canvas></div>
+    <div class="legend" id="disp-legend"></div>
+  </div>
+
+  <!-- Per-group stats -->
+  <div class="disp-group-stats" id="disp-group-stats"></div>
+
+  <div class="formulas">
+    <div class="formula-card"><h4>Correlação de Pearson</h4>
+      <div class="fline">r = Σ(xᵢ−x̄)(yᵢ−ȳ) /</div>
+      <div class="fline">&nbsp;&nbsp;&nbsp;&nbsp;√[Σ(xᵢ−x̄)²·Σ(yᵢ−ȳ)²]</div>
+      <div class="fline note" style="margin-top:.4rem">−1 ≤ r ≤ 1</div>
+    </div>
+    <div class="formula-card"><h4>Regressão Linear</h4>
+      <div class="fline">ŷ = b₀ + b₁·x</div>
+      <div class="fline">b₁ = r·(sᵧ/sₓ)</div>
+      <div class="fline">b₀ = ȳ − b₁·x̄</div>
+    </div>
+    <div class="formula-card"><h4>Interpretação de r</h4>
+      <div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
+        |r| ≥ 0,90 → Muito forte<br>
+        0,70 ≤ |r| &lt; 0,90 → Forte<br>
+        0,50 ≤ |r| &lt; 0,70 → Moderado<br>
+        0,30 ≤ |r| &lt; 0,50 → Fraco<br>
+        |r| &lt; 0,30 → Muito fraco
+      </div>
+    </div>
+    <div class="formula-card"><h4>Formatos aceitos</h4>
+      <div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
+        Pares: <span style="color:var(--accent2)">x,y por linha</span><br>
+        <span style="color:var(--accent2)">1.2, 3.4</span><br>
+        <span style="color:var(--accent2)">5.6, 7.8</span><br>
+        X e Y sep.: dois campos<br>
+        Grupos: <span style="color:var(--accent2)">Grupo:Nome</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 <script>
 // ══ CONSTANTS ══
@@ -736,7 +867,7 @@ const GRP_COLORS=['#3ecfcf','#ff6b4a','#a78bfa','#34d399','#f472b6','#fbbf24','#
 // ══ STATE ══
 const modes={imr:'simple',xbs:'simple',trend:'simple'};
 const groupDefs={imr:[{name:'Série 1'}],trend:[{name:'Série 1'},{name:'Série 2'}]};
-let imrGroups=[],xbsSubs=[],trendGroups=[],bcData=[],capData=[];
+let imrGroups=[],xbsSubs=[],trendGroups=[],dispGroups=[],bcData=[],capData=[];
 
 // ══ NAV ══
 function showPage(id,el){
@@ -746,11 +877,62 @@ function showPage(id,el){
   if(el)el.classList.add('active');
   if(id==='trend'&&trendGroups.length===0)trendGenerate();
   if(id==='boxcox'&&bcData.length===0)bcGenerate();
+  if(id==='disp'&&dispGroups.length===0)dispGenerate();
   if(id==='capac'&&capData.length===0)capGenerate();
 }
 
 // ══ INPUT AREA BUILDERS ══
 function buildInputArea(chart){
+  // ── Dispersão has its own input structure ──
+  if(chart==='disp'){
+    const m=modes[chart]||'simple';
+    const container=document.getElementById('disp-input-area');
+    if(!container)return;
+    if(m==='simple'){
+      container.innerHTML=`
+        <div class="xy-inputs single"><div class="xy-field">
+          <div class="xy-label"><span>X,Y</span> Pares — uma linha por par</div>
+          <textarea class="data-input" id="disp-y" rows="5" placeholder="1.2, 3.4&#10;5.6, 7.8&#10;9.0, 11.2"></textarea>
+          <div class="data-hint">Cada linha = um par: <code>x, y</code> separados por vírgula ou ponto e vírgula.</div>
+        </div></div>`;
+    } else if(m==='xy'){
+      container.innerHTML=`
+        <div class="xy-inputs">
+          <div class="xy-field">
+            <div class="xy-label"><span>X</span> Variável X</div>
+            <textarea class="data-input axis-x" id="disp-x" rows="4" placeholder="1.2, 5.6, 9.0..."></textarea>
+            <div class="data-hint">Valores da variável X (independente).</div>
+          </div>
+          <div class="xy-field">
+            <div class="xy-label"><span>Y</span> Variável Y</div>
+            <textarea class="data-input" id="disp-y" rows="4" placeholder="3.4, 7.8, 11.2..."></textarea>
+            <div class="data-hint">Valores correspondentes da variável Y.</div>
+          </div>
+        </div>`;
+    } else {
+      const defs=groupDefs[chart]||[{name:'Grupo 1'},{name:'Grupo 2'}];
+      let html=`<div class="groups-input-wrap" id="disp-groups-wrap">`;
+      defs.forEach((g,i)=>{
+        const col=GRP_COLORS[i%GRP_COLORS.length];
+        html+=`<div class="group-row" id="disp-grp-${i}">
+          <div class="group-row-header">
+            <div class="group-color-dot" style="background:${col}"></div>
+            <input class="group-name-input" value="${g.name}" placeholder="Nome do grupo" oninput="groupDefs['disp'][${i}].name=this.value">
+            <button class="btn-rm" onclick="removeGroup('disp',${i})">✕</button>
+          </div>
+          <div class="group-xy">
+            <div class="xy-field"><div class="xy-label"><span>X</span> Variável X</div>
+              <textarea class="data-input axis-x" id="disp-grp${i}-x" rows="3" placeholder="1.2, 5.6, 9.0"></textarea></div>
+            <div class="xy-field"><div class="xy-label"><span>Y</span> Variável Y</div>
+              <textarea class="data-input" id="disp-grp${i}-y" rows="3" placeholder="3.4, 7.8, 11.2"></textarea></div>
+          </div>
+        </div>`;
+      });
+      html+=`</div><button class="btn-add-group" onclick="addGroup('disp')">+ Adicionar grupo</button>`;
+      container.innerHTML=html;
+    }
+    return;
+  }
   const m=modes[chart];
   const container=document.getElementById(chart+'-input-area');
   if(!container)return;
@@ -1406,6 +1588,8 @@ function clearYRange(chart){
     xbs:['xbs-ymin','xbs-ymax','xbs-smax','xbs-xstep'],
     trend:['trend-ymin','trend-ymax','trend-hxmin','trend-hxmax','trend-xstep'],
     cap:['cap-xmin','cap-xmax'],
+    disp:['disp-xmin','disp-xmax','disp-ymin','disp-ymax'],
+
   };
   (ids[chart]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   if(chart==='imr')imrRerender();
@@ -1413,9 +1597,440 @@ function clearYRange(chart){
   else if(chart==='trend')trendRerender();
   else if(chart==='cap')capRerender();
 }
+
+// ══════════════════════════════════════════════════════════
+// DISPERSÃO — Scatter Plot
+// ══════════════════════════════════════════════════════════
+// ── Input area builder (reuse setMode infrastructure) ──
+// Mode 'simple': each line is "x, y" or "x; y"
+// Mode 'xy': two separate textarea fields
+// Mode 'groups': Grupo:Name blocks
+
+// ── Math helpers ──
+function pearsonR(xs, ys) {
+  const n = xs.length;
+  if (n < 2) return 0;
+  const mx = mean(xs), my = mean(ys);
+  const num = xs.reduce((a, x, i) => a + (x - mx) * (ys[i] - my), 0);
+  const dx = Math.sqrt(xs.reduce((a, x) => a + (x - mx) ** 2, 0));
+  const dy = Math.sqrt(ys.reduce((a, y) => a + (y - my) ** 2, 0));
+  if (dx === 0 || dy === 0) return 0;
+  return num / (dx * dy);
+}
+
+function tPvalueCorr(r, n) {
+  // t = r * sqrt(n-2) / sqrt(1-r²), df = n-2
+  if (n <= 2) return 1;
+  const t = r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r + 1e-12);
+  // Approximate p-value via incomplete beta (two-tailed)
+  const df = n - 2;
+  const x = df / (df + t * t);
+  // Regularized incomplete beta approximation
+  let p;
+  if (Math.abs(t) > 100) return 0;
+  // Use normal approximation for large df
+  if (df > 30) {
+    p = 2 * (1 - normCDF(Math.abs(t)));
+  } else {
+    // Simple approximation
+    const z = Math.abs(t) / Math.sqrt(df / (df - 2 + 1e-9));
+    p = 2 * (1 - normCDF(z * 0.95));
+  }
+  return Math.max(0.0001, Math.min(1, p));
+}
+
+function linRegXY(xs, ys) {
+  const n = xs.length;
+  if (n < 2) return null;
+  const mx = mean(xs), my = mean(ys);
+  const ssxx = xs.reduce((a, x) => a + (x - mx) ** 2, 0) || 1e-12;
+  const ssxy = xs.reduce((a, x, i) => a + (x - mx) * (ys[i] - my), 0);
+  const b1 = ssxy / ssxx, b0 = my - b1 * mx;
+  const yhat = xs.map(x => b0 + b1 * x);
+  const ssres = ys.reduce((a, y, i) => a + (y - yhat[i]) ** 2, 0);
+  const sstot = ys.reduce((a, y) => a + (y - my) ** 2, 0) || 1e-12;
+  const r2 = 1 - ssres / sstot;
+  const ser = Math.sqrt(ssres / (n - 2) || 0);
+  const tc = tCrit(n);
+  return { b0, b1, r2, ser, mx, ssxx, tc,
+    // x range for drawing the line
+    predict: x => b0 + b1 * x,
+    ciUpper: x => b0 + b1 * x + tc * ser * Math.sqrt(1 / n + (x - mx) ** 2 / ssxx),
+    ciLower: x => b0 + b1 * x - tc * ser * Math.sqrt(1 / n + (x - mx) ** 2 / ssxx),
+  };
+}
+
+// Confidence ellipse at given confidence level
+function confidenceEllipse(xs, ys, chiSqLevel) {
+  // chiSqLevel: 5.991 for 95% (chi² 2df)
+  const n = xs.length;
+  const mx = mean(xs), my = mean(ys);
+  const sxx = xs.reduce((a, x) => a + (x - mx) ** 2, 0) / (n - 1);
+  const syy = ys.reduce((a, y) => a + (y - my) ** 2, 0) / (n - 1);
+  const sxy = xs.reduce((a, x, i) => a + (x - mx) * (ys[i] - my), 0) / (n - 1);
+  // Eigenvalues of covariance matrix
+  const trace = sxx + syy;
+  const det = sxx * syy - sxy * sxy;
+  const disc = Math.sqrt(Math.max(0, (trace / 2) ** 2 - det));
+  const lam1 = trace / 2 + disc;
+  const lam2 = trace / 2 - disc;
+  const a = Math.sqrt(chiSqLevel * lam1);
+  const b = Math.sqrt(chiSqLevel * Math.max(0, lam2));
+  // Angle of first eigenvector
+  const theta = Math.atan2(lam1 - sxx, sxy);
+  return { mx, my, a, b, theta };
+}
+
+// ── Parse scatter data ──
+function parseDispGroups(chart) {
+  const m = modes[chart] || 'simple';
+  if (m === 'groups') {
+    const defs = groupDefs[chart] || [];
+    return defs.map((g, i) => {
+      const xRaw = document.getElementById(`${chart}-grp${i}-x`)?.value || '';
+      const yRaw = document.getElementById(`${chart}-grp${i}-y`)?.value || '';
+      const xs = parseVals(xRaw), ys = parseVals(yRaw);
+      const len = Math.min(xs.length, ys.length);
+      return { name: g.name, xs: xs.slice(0, len), ys: ys.slice(0, len) };
+    }).filter(g => g.xs.length >= 2);
+  } else if (m === 'xy') {
+    const xRaw = document.getElementById(`${chart}-x`)?.value || '';
+    const yRaw = document.getElementById(`${chart}-y`)?.value || '';
+    const xs = parseVals(xRaw), ys = parseVals(yRaw);
+    const len = Math.min(xs.length, ys.length);
+    return [{ name: 'Série 1', xs: xs.slice(0, len), ys: ys.slice(0, len) }];
+  } else {
+    // simple: each line is "x, y"
+    const raw = document.getElementById(`${chart}-y`)?.value || '';
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
+    const xs = [], ys = [];
+    for (const line of lines) {
+      const parts = line.split(/[,;\s]+/).map(Number).filter(v => !isNaN(v));
+      if (parts.length >= 2) { xs.push(parts[0]); ys.push(parts[1]); }
+    }
+    return [{ name: 'Série 1', xs, ys }];
+  }
+}
+
+// ── Generate sample data ──
+function dispGenerate() {
+  const n = parseInt(document.getElementById('disp-n').value);
+  const targetR = parseFloat(document.getElementById('disp-corr').value);
+  const type = document.getElementById('disp-simtype').value;
+
+  let groups = [];
+
+  if (type === 'groups') {
+    // Two distinct groups
+    const gen = (n2, mx, my, r) => {
+      const xs = [], ys = [];
+      for (let i = 0; i < n2; i++) {
+        const x = mx + 5 * randn();
+        const y = my + 5 * (r * ((x - mx) / 5) + Math.sqrt(1 - r * r) * randn());
+        xs.push(parseFloat(x.toFixed(2))); ys.push(parseFloat(y.toFixed(2)));
+      }
+      return { xs, ys };
+    };
+    const g1 = gen(Math.floor(n / 2), 20, 30, 0.85);
+    const g2 = gen(n - Math.floor(n / 2), 50, 60, 0.85);
+    groups = [
+      { name: 'Grupo A', ...g1 },
+      { name: 'Grupo B', ...g2 },
+    ];
+    // Update textarea
+    modes['disp'] = 'groups';
+    groupDefs['disp'] = [{ name: 'Grupo A' }, { name: 'Grupo B' }];
+    document.querySelectorAll('#page-disp .imt').forEach((e, i) => e.classList.toggle('active', i === 2));
+    buildInputArea('disp');
+    setTimeout(() => {
+      [g1, g2].forEach((g, i) => {
+        const ex = document.getElementById(`disp-grp${i}-x`);
+        const ey = document.getElementById(`disp-grp${i}-y`);
+        if (ex) ex.value = g.xs.join(', ');
+        if (ey) ey.value = g.ys.join(', ');
+      });
+    }, 20);
+  } else {
+    const r = type === 'none' ? 0 : type === 'negative' ? -Math.abs(targetR) : targetR;
+    const xs = [], ys = [];
+    for (let i = 0; i < n; i++) {
+      const x = 10 + 5 * randn();
+      const y = 20 + 8 * (r * ((x - 10) / 5) + Math.sqrt(1 - r * r) * randn());
+      xs.push(parseFloat(x.toFixed(2))); ys.push(parseFloat(y.toFixed(2)));
+    }
+    groups = [{ name: 'Série 1', xs, ys }];
+    modes['disp'] = 'xy';
+    document.querySelectorAll('#page-disp .imt').forEach((e, i) => e.classList.toggle('active', i === 1));
+    buildInputArea('disp');
+    setTimeout(() => {
+      const ex = document.getElementById('disp-x');
+      const ey = document.getElementById('disp-y');
+      if (ex) ex.value = xs.join(', ');
+      if (ey) ey.value = ys.join(', ');
+    }, 20);
+  }
+  dispGroups = groups;
+  dispRender(groups);
+}
+
+function dispApply() {
+  const groups = parseDispGroups('disp');
+  if (!groups.length || !groups[0].xs.length) { alert('Insira pares X,Y válidos.'); return; }
+  dispGroups = groups;
+  dispRender(groups);
+}
+
+function dispRerender() { if (dispGroups.length) dispRender(dispGroups); }
+
+// ── Render ──
+function dispRender(groups) {
+  dispGroups = groups;
+
+  const showReg = document.getElementById('disp-show-reg')?.checked ?? true;
+  const showCI = document.getElementById('disp-show-ci')?.checked ?? true;
+  const showEllipse = document.getElementById('disp-show-ellipse')?.checked ?? true;
+  const showMeans = document.getElementById('disp-show-means')?.checked ?? true;
+  const showGrid = document.getElementById('disp-show-grid')?.checked ?? true;
+
+  const xMinU = parseFloat(document.getElementById('disp-xmin')?.value) || null;
+  const xMaxU = parseFloat(document.getElementById('disp-xmax')?.value) || null;
+  const yMinU = parseFloat(document.getElementById('disp-ymin')?.value) || null;
+  const yMaxU = parseFloat(document.getElementById('disp-ymax')?.value) || null;
+
+  // All data combined
+  const allXs = groups.flatMap(g => g.xs);
+  const allYs = groups.flatMap(g => g.ys);
+  const totalN = allXs.length;
+
+  const globalR = pearsonR(allXs, allYs);
+  const globalR2 = globalR * globalR;
+  const globalP = tPvalueCorr(globalR, totalN);
+  const globalReg = linRegXY(allXs, allYs);
+
+  // Update header stats
+  document.getElementById('disp-r').textContent = fmt(globalR, 4);
+  document.getElementById('disp-r').style.color = Math.abs(globalR) >= 0.7 ? 'var(--accent)' : Math.abs(globalR) >= 0.3 ? 'var(--accent2)' : 'var(--muted2)';
+  document.getElementById('disp-r2').textContent = fmt(globalR2, 4);
+  document.getElementById('disp-pval').textContent = globalP < 0.001 ? '< 0,001' : fmt(globalP, 4);
+  document.getElementById('disp-pval').style.color = globalP < 0.05 ? 'var(--accent)' : 'var(--danger)';
+  document.getElementById('disp-n-stat').textContent = totalN;
+
+  // Verdict
+  const verdEl = document.getElementById('disp-verdict');
+  const absR = Math.abs(globalR);
+  const dir = globalR >= 0 ? 'positiva' : 'negativa';
+  let cls, msg;
+  if (absR >= 0.90) { cls = globalR >= 0 ? 'strong-pos' : 'strong-neg'; msg = `Correlação muito forte ${dir}  (r = ${fmt(globalR,4)})  ·  ${globalP<0.05?'Estatisticamente significativa (p<0,05)':'p ≥ 0,05'}`; }
+  else if (absR >= 0.70) { cls = globalR >= 0 ? 'strong-pos' : 'strong-neg'; msg = `Correlação forte ${dir}  (r = ${fmt(globalR,4)})  ·  ${globalP<0.05?'Estatisticamente significativa':'p ≥ 0,05'}`; }
+  else if (absR >= 0.50) { cls = globalR >= 0 ? 'mod-pos' : 'mod-neg'; msg = `Correlação moderada ${dir}  (r = ${fmt(globalR,4)})  ·  ${globalP<0.05?'Estatisticamente significativa':'p ≥ 0,05'}`; }
+  else if (absR >= 0.30) { cls = globalR >= 0 ? 'mod-pos' : 'mod-neg'; msg = `Correlação fraca ${dir}  (r = ${fmt(globalR,4)})  ·  ${globalP<0.05?'Significativa':'p ≥ 0,05'}`; }
+  else { cls = 'weak'; msg = `Correlação muito fraca / ausente  (r = ${fmt(globalR,4)})  ·  Sem relação linear`; }
+  verdEl.className = `corr-verdict ${cls}`;
+  verdEl.textContent = msg;
+
+  // Stats grid
+  const statsEl = document.getElementById('disp-stats-grid');
+  const sc = (l, v, s, c) => `<div class="disp-stat-card"><div class="lbl">${l}</div><div class="val" style="color:${c||'var(--text)'}">${v}</div><div class="sub">${s}</div></div>`;
+  statsEl.innerHTML =
+    sc('r de Pearson', fmt(globalR,4), 'Coeficiente de correlação', Math.abs(globalR)>=0.7?'var(--accent)':'var(--accent2)') +
+    sc('R²', fmt(globalR2,4), `${(globalR2*100).toFixed(1)}% da variância explicada`, 'var(--accent2)') +
+    sc('p-valor', globalP<0.001?'< 0,001':fmt(globalP,4), globalP<0.05?'Significativo (α=0,05)':'Não significativo', globalP<0.05?'var(--accent)':'var(--danger)') +
+    sc('Equação', globalReg?`y = ${fmt(globalReg.b1,3)}x + ${fmt(globalReg.b0,2)}`:'—', 'Regressão linear OLS', 'var(--muted2)') +
+    sc('N total', totalN, 'Pares observados', 'var(--muted2)') +
+    sc('Grupos', groups.length, groups.length>1?'Análise multivariada':'Série única', 'var(--muted2)');
+
+  // Per-group stats
+  const grpEl = document.getElementById('disp-group-stats');
+  if (groups.length > 1) {
+    grpEl.innerHTML = groups.map((g, gi) => {
+      const r = pearsonR(g.xs, g.ys);
+      const r2 = r * r;
+      const p = tPvalueCorr(r, g.xs.length);
+      const reg = linRegXY(g.xs, g.ys);
+      const col = GRP_COLORS[gi % GRP_COLORS.length];
+      return `<div class="disp-group-row" style="border-color:${col}44">
+        <h4 style="color:${col}">${g.name} &nbsp;·&nbsp; N=${g.xs.length}</h4>
+        <div class="disp-group-row-stats">
+          <div class="disp-group-row-stat"><div class="l">r Pearson</div><div class="v" style="color:${col}">${fmt(r,4)}</div></div>
+          <div class="disp-group-row-stat"><div class="l">R²</div><div class="v">${fmt(r2,4)}</div></div>
+          <div class="disp-group-row-stat"><div class="l">p-valor</div><div class="v" style="color:${p<0.05?'var(--accent)':'var(--danger)'}">${p<0.001?'<0,001':fmt(p,4)}</div></div>
+          <div class="disp-group-row-stat"><div class="l">x̄</div><div class="v">${fmt(mean(g.xs),3)}</div></div>
+          <div class="disp-group-row-stat"><div class="l">ȳ</div><div class="v">${fmt(mean(g.ys),3)}</div></div>
+          <div class="disp-group-row-stat"><div class="l">Equação</div><div class="v" style="font-size:.72rem">${reg?`y=${fmt(reg.b1,3)}x+${fmt(reg.b0,2)}`:'—'}</div></div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    grpEl.innerHTML = '';
+  }
+
+  buildLegend('disp-legend', groups.map((g, i) => ({ name: g.name })));
+
+  // Draw scatter
+  drawScatter('chart-disp', 420, groups, {
+    showReg, showCI, showEllipse, showMeans, showGrid,
+    xMin: xMinU, xMax: xMaxU, yMin: yMinU, yMax: yMaxU,
+  });
+}
+
+// ── Draw Scatter ──
+function drawScatter(cid, H, groups, opts) {
+  const r = setupCanvas(cid, H); if (!r) return;
+  const { ctx, W } = r;
+  const pad = { top: 24, right: 24, bottom: 48, left: 64 };
+  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
+
+  const allXs = groups.flatMap(g => g.xs);
+  const allYs = groups.flatMap(g => g.ys);
+  if (!allXs.length) return;
+
+  const xMg = (Math.max(...allXs) - Math.min(...allXs)) * 0.1 || 2;
+  const yMg = (Math.max(...allYs) - Math.min(...allYs)) * 0.1 || 2;
+  const xMin = isFinite(opts.xMin) ? opts.xMin : Math.min(...allXs) - xMg;
+  const xMax = isFinite(opts.xMax) ? opts.xMax : Math.max(...allXs) + xMg;
+  const yMin = isFinite(opts.yMin) ? opts.yMin : Math.min(...allYs) - yMg;
+  const yMax = isFinite(opts.yMax) ? opts.yMax : Math.max(...allYs) + yMg;
+
+  const toX = v => pad.left + (v - xMin) / (xMax - xMin) * pw;
+  const toY = v => pad.top + (1 - (v - yMin) / (yMax - yMin)) * ph;
+
+  // Grid
+  if (opts.showGrid) {
+    ctx.strokeStyle = '#1a2030'; ctx.lineWidth = 1;
+    for (let t = 0; t <= 5; t++) {
+      const y = pad.top + (t / 5) * ph;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pw, y); ctx.stroke();
+    }
+    for (let t = 0; t <= 6; t++) {
+      const x = pad.left + (t / 6) * pw;
+      ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + ph); ctx.stroke();
+    }
+  }
+
+  // Zero lines
+  if (xMin < 0 && xMax > 0) {
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+    const x0 = toX(0); ctx.beginPath(); ctx.moveTo(x0, pad.top); ctx.lineTo(x0, pad.top + ph); ctx.stroke(); ctx.restore();
+  }
+  if (yMin < 0 && yMax > 0) {
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+    const y0 = toY(0); ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(pad.left + pw, y0); ctx.stroke(); ctx.restore();
+  }
+
+  // Per-group rendering
+  groups.forEach((g, gi) => {
+    const col = GRP_COLORS[gi % GRP_COLORS.length];
+    const reg = linRegXY(g.xs, g.ys);
+    const n = g.xs.length;
+
+    // Confidence ellipse
+    if (opts.showEllipse && n >= 5 && reg) {
+      const ell = confidenceEllipse(g.xs, g.ys, 5.991);
+      ctx.save();
+      ctx.translate(toX(ell.mx), toY(ell.my));
+      ctx.rotate(-ell.theta);
+      const rx = ell.a / (xMax - xMin) * pw;
+      const ry = ell.b / (yMax - yMin) * ph;
+      ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = col + '55'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+      ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = col + '0d'; ctx.fill();
+      ctx.restore();
+    }
+
+    // CI band
+    if (opts.showCI && reg && n >= 3) {
+      const steps = 80;
+      const xs2 = Array.from({ length: steps + 1 }, (_, i) => xMin + i * (xMax - xMin) / steps);
+      ctx.save();
+      ctx.fillStyle = col + '18';
+      ctx.beginPath();
+      xs2.forEach((x, i) => {
+        const y = reg.ciUpper(x);
+        const px = toX(x), py = toY(y);
+        if (py < pad.top - 5 || py > pad.top + ph + 5) return;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      });
+      [...xs2].reverse().forEach(x => {
+        const y = reg.ciLower(x);
+        const px = toX(x), py = toY(y);
+        ctx.lineTo(px, py);
+      });
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+
+    // Regression line
+    if (opts.showReg && reg) {
+      ctx.save();
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([6, 3]);
+      ctx.beginPath();
+      const x1 = xMin, x2 = xMax;
+      ctx.moveTo(toX(x1), toY(reg.predict(x1)));
+      ctx.lineTo(toX(x2), toY(reg.predict(x2)));
+      ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+
+      // Equation label on line
+      const midX = (xMin + xMax) / 2;
+      const midY = reg.predict(midX);
+      ctx.save();
+      ctx.fillStyle = col; ctx.font = '500 9.5px DM Mono,monospace'; ctx.textAlign = 'center';
+      const eq = `y = ${fmt(reg.b1,3)}x + ${fmt(reg.b0,2)}  (R²=${fmt(reg.r2,3)})`;
+      ctx.fillText(eq, toX(midX), toY(midY) - 8);
+      ctx.restore();
+    }
+
+    // Mean lines
+    if (opts.showMeans) {
+      const mx2 = mean(g.xs), my2 = mean(g.ys);
+      ctx.save(); ctx.strokeStyle = col + '66'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(toX(mx2), pad.top); ctx.lineTo(toX(mx2), pad.top + ph); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad.left, toY(my2)); ctx.lineTo(pad.left + pw, toY(my2)); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+    }
+
+    // Points
+    g.xs.forEach((x, i) => {
+      const y = g.ys[i];
+      const px = toX(x), py = toY(y);
+      if (px < pad.left - 8 || px > pad.left + pw + 8) return;
+      if (py < pad.top - 8 || py > pad.top + ph + 8) return;
+      ctx.beginPath(); ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = col + 'cc'; ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.stroke();
+    });
+  });
+
+  // Axis labels
+  ctx.fillStyle = '#5a677f'; ctx.font = '9.5px DM Mono,monospace'; ctx.textAlign = 'center';
+  for (let t = 0; t <= 6; t++) {
+    const v = xMin + (t / 6) * (xMax - xMin);
+    if (isFinite(v)) ctx.fillText(v.toFixed(1), toX(v), H - pad.bottom + 14);
+  }
+  ctx.textAlign = 'right';
+  for (let t = 0; t <= 5; t++) {
+    const v = yMin + (1 - t / 5) * (yMax - yMin);
+    if (isFinite(v)) ctx.fillText(v.toFixed(1), pad.left - 5, pad.top + (t / 5) * ph + 4);
+  }
+
+  // Axis titles
+  ctx.save();
+  ctx.fillStyle = 'var(--muted2)'; ctx.font = '10px DM Mono,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('X', pad.left + pw / 2, H - 4);
+  ctx.translate(14, pad.top + ph / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Y', 0, 0);
+  ctx.restore();
+}
+
+// ── Input area for scatter ──
+// disp input area handled inside buildInputArea
+
+
+
 // ══ INIT ══
 window.addEventListener('load',()=>{
-  buildInputArea('imr');buildInputArea('xbs');buildInputArea('trend');
+  if(!groupDefs['disp'])groupDefs['disp']=[{name:'Grupo 1'},{name:'Grupo 2'}];
+  buildInputArea('imr');buildInputArea('xbs');buildInputArea('trend');buildInputArea('disp');
   setTimeout(imrGenerate,80);
 });
 window.addEventListener('resize',()=>{
@@ -1424,6 +2039,7 @@ window.addEventListener('resize',()=>{
   if(trendGroups.length)trendRender(trendGroups);
   if(bcData.length)bcRender(bcData);
   if(capData.length)capRender(capData,capUSL,capLSL,capTarget);
+  if(dispGroups.length)dispRender(dispGroups);
 });
 
 // ══════════════════════════════════════════════
