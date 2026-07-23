@@ -218,6 +218,24 @@
     .disp-group-row-stat{background:var(--surface2);border-radius:4px;padding:.4rem .6rem;}
     .disp-group-row-stat .l{font-size:.6rem;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;}
     .disp-group-row-stat .v{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;color:var(--text);}
+
+    /* ── ANOVA ── */
+    .anova-result{background:var(--surface);border:1px solid var(--border);border-radius:7px;margin-bottom:1.2rem;overflow:hidden;}
+    .anova-result-header{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;}
+    .anova-result-header h2{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;letter-spacing:.04em;}
+    .anova-result-header h2 em{color:var(--accent);font-style:normal;}
+    .anova-verdict{padding:.75rem 1.1rem;border-radius:6px;font-family:'DM Mono',monospace;font-size:.8rem;font-weight:500;text-align:center;margin-bottom:1.2rem;line-height:1.6;}
+    .anova-verdict.sig{background:rgba(224,85,101,0.08);border:1px solid rgba(224,85,101,.3);color:var(--danger);}
+    .anova-verdict.nonsig{background:rgba(62,207,207,0.08);border:1px solid rgba(62,207,207,.3);color:var(--accent);}
+    .anova-verdict.pending{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);}
+    .anova-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.7rem;margin-bottom:1.2rem;}
+    .anova-stat{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.85rem 1rem;}
+    .anova-stat .lbl{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem;}
+    .anova-stat .val{font-family:'DM Mono',monospace;font-size:1rem;font-weight:600;}
+    .anova-stat .sub{font-size:.67rem;color:var(--muted2);margin-top:.2rem;}
+    .tukey-sig{color:var(--danger);font-weight:600;}
+    .tukey-ns{color:var(--muted2);}
+    .anova-group-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.4rem;flex-shrink:0;}
   </style>
 </head>
 <body>
@@ -235,8 +253,16 @@
     <div class="sidebar-section-label">Análise</div>
     <div class="nav-item" onclick="showPage('trend',this)"><span class="nav-icon">Tend</span> Tendência</div>
     <div class="nav-item" onclick="showPage('disp',this)"><span class="nav-icon">Disp</span> Dispersão</div>
+    <div class="nav-item" onclick="showPage('anova',this)"><span class="nav-icon">ANOVA</span> ANOVA</div>
     <div class="nav-item" onclick="showPage('boxcox',this)"><span class="nav-icon">BoxCox</span> Transformação</div>
     <div class="nav-item" onclick="showPage('capac',this)"><span class="nav-icon">Cp/Cpk</span> Capacidade</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Projetos</div>
+    <div class="nav-item" onclick="window.open('dmaic.html','_blank')" style="background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.2);color:var(--accent2);">
+      <span class="nav-icon" style="background:rgba(240,165,0,0.12);border-color:rgba(240,165,0,0.3);color:var(--accent2);">DMAIC</span>
+      Roteiro DMAIC ↗
+    </div>
   </div>
   <div class="sidebar-footer">d₂=1,128 · D₄=3,267<br>c₄(n) · B₃/B₄ variáveis</div>
 </nav>
@@ -886,6 +912,148 @@
   </div>
 </div>
 
+<!-- ══════════ ANOVA ══════════ -->
+<div id="page-anova" class="page">
+  <div class="page-header">
+    <div><h1>Análise de <em>Variância</em> — ANOVA</h1>
+    <p>One-Way ANOVA · Teste F · Post-Hoc Tukey HSD · Gráfico de Médias</p></div>
+    <span class="tag tag-var">ANOVA</span>
+  </div>
+
+  <div class="data-section">
+    <div class="data-section-title">Grupos — Dados de Entrada</div>
+    <div style="font-size:.72rem;color:var(--muted2);font-family:'DM Mono',monospace;margin-bottom:.8rem;">
+      Insira os valores de cada grupo. Mínimo 2 grupos, mínimo 2 valores por grupo.
+    </div>
+    <div class="groups-input-wrap" id="anova-groups-wrap"></div>
+    <button class="btn-add-group" id="anova-add-btn" onclick="anovaAddGroup()" style="margin-top:.6rem">+ Adicionar grupo</button>
+  </div>
+
+  <div class="options-row">
+    <label class="opt-check"><input type="checkbox" id="anova-show-ci" checked onchange="anovaRerender()"><span>Intervalo de confiança 95% no gráfico</span></label>
+    <label class="opt-check"><input type="checkbox" id="anova-show-points" checked onchange="anovaRerender()"><span>Pontos individuais</span></label>
+    <label class="opt-check"><input type="checkbox" id="anova-show-sd" checked onchange="anovaRerender()"><span>Barras de desvio padrão</span></label>
+    <label class="opt-check"><input type="checkbox" id="anova-tukey" checked onchange="anovaRerender()"><span>Post-Hoc Tukey HSD</span></label>
+  </div>
+
+  <div class="yrange-row">
+    <span class="yr-label">Eixo Y:</span>
+    <input type="number" id="anova-ymin" placeholder="auto" step="any" oninput="anovaRerender()">
+    <span class="yr-sep">—</span>
+    <input type="number" id="anova-ymax" placeholder="auto" step="any" oninput="anovaRerender()">
+    <button class="yr-reset" onclick="clearYRange('anova')">↺ Resetar</button>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group"><label>Nº Grupos (sim.)</label>
+      <select id="anova-sim-k">
+        <option value="3">3 grupos</option>
+        <option value="4">4 grupos</option>
+        <option value="5">5 grupos</option>
+      </select>
+    </div>
+    <div class="ctrl-group"><label>N por grupo (sim.)</label>
+      <input type="number" id="anova-sim-n" value="20" min="5" max="100" step="1">
+    </div>
+    <div class="ctrl-group"><label>Cenário</label>
+      <select id="anova-sim-type">
+        <option value="sig">Com diferença significativa</option>
+        <option value="nonsig">Sem diferença (H₀ verdadeira)</option>
+        <option value="partial">Diferença parcial</option>
+      </select>
+    </div>
+    <button class="btn" onclick="anovaGenerate()">⟳ Gerar</button>
+    <button class="btn btn-ghost" onclick="anovaApply()">▶ Aplicar</button>
+  </div>
+
+  <!-- Verdict -->
+  <div id="anova-verdict" class="anova-verdict pending">Execute a análise</div>
+
+  <!-- ANOVA stats -->
+  <div class="anova-stats-row" id="anova-stats-row"></div>
+
+  <!-- ANOVA table -->
+  <div class="anova-result">
+    <div class="anova-result-header"><h2>Tabela <em>ANOVA</em></h2></div>
+    <div style="overflow-x:auto">
+      <table class="cap-table" id="anova-table">
+        <thead><tr>
+          <th>Fonte de Variação</th><th>SQ</th><th>GL</th><th>QM</th><th>F</th><th>p-valor</th><th>F crítico (α=0,05)</th>
+        </tr></thead>
+        <tbody id="anova-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Means chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <h2>Gráfico de <em>Médias</em> com IC 95%</h2>
+      <div class="chart-stats">
+        <div class="stat"><div class="stat-label">Grande Média</div><div class="stat-val cl" id="anova-grand-mean">—</div></div>
+        <div class="stat"><div class="stat-label">Grupos</div><div class="stat-val" style="color:var(--muted2)" id="anova-k-stat">—</div></div>
+        <div class="stat"><div class="stat-label">N Total</div><div class="stat-val" style="color:var(--muted2)" id="anova-n-stat">—</div></div>
+      </div>
+    </div>
+    <div class="chart-body"><canvas id="chart-anova-means" height="320"></canvas></div>
+  </div>
+
+  <!-- Box plot per group -->
+  <div class="chart-card">
+    <div class="chart-header"><h2>Box Plot <em>por Grupo</em></h2></div>
+    <div class="chart-body"><canvas id="chart-anova-bp" height="280"></canvas></div>
+  </div>
+
+  <!-- Tukey HSD -->
+  <div class="anova-result" id="anova-tukey-section">
+    <div class="anova-result-header"><h2>Post-Hoc <em>Tukey HSD</em> — Comparações par a par</h2></div>
+    <div style="overflow-x:auto">
+      <table class="cap-table">
+        <thead><tr><th>Grupo A</th><th>Grupo B</th><th>Diff. Médias</th><th>IC 95% inf</th><th>IC 95% sup</th><th>p-valor ajust.</th><th>Conclusão</th></tr></thead>
+        <tbody id="anova-tukey-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Descriptive per group -->
+  <div class="anova-result">
+    <div class="anova-result-header"><h2>Estatísticas <em>Descritivas</em> por Grupo</h2></div>
+    <div style="overflow-x:auto">
+      <table class="cap-table">
+        <thead><tr><th>Grupo</th><th>N</th><th>Média</th><th>Desvio P.</th><th>EP</th><th>Mín</th><th>Q1</th><th>Mediana</th><th>Q3</th><th>Máx</th><th>IC inf</th><th>IC sup</th></tr></thead>
+        <tbody id="anova-desc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="formulas">
+    <div class="formula-card"><h4>One-Way ANOVA</h4>
+      <div class="fline">H₀: μ₁ = μ₂ = ... = μₖ</div>
+      <div class="fline">H₁: pelo menos uma μ diferente</div>
+      <div class="fline">F = QMentre / QMdentro</div>
+      <div class="fline note" style="margin-top:.4rem">Rejeita H₀ se p &lt; 0,05</div>
+    </div>
+    <div class="formula-card"><h4>Decomposição</h4>
+      <div class="fline">SQtotal = SQentre + SQdentro</div>
+      <div class="fline">QMentre = SQentre / (k−1)</div>
+      <div class="fline">QMdentro = SQdentro / (N−k)</div>
+    </div>
+    <div class="formula-card"><h4>Tukey HSD</h4>
+      <div class="fline">HSD = q × √(QMdentro/n)</div>
+      <div class="fline">Diferença sig. se |μᵢ−μⱼ| &gt; HSD</div>
+      <div class="fline note" style="margin-top:.4rem">q = amplitude studentizada</div>
+    </div>
+    <div class="formula-card"><h4>Pressupostos</h4>
+      <div class="fline" style="color:var(--text);font-size:.74rem;line-height:1.9">
+        • Normalidade em cada grupo<br>
+        • Homogeneidade de variâncias<br>
+        • Independência das obs.<br>
+        • Use AD test para verificar
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 <script>
 // ══ CONSTANTS ══
@@ -899,7 +1067,7 @@ const GRP_COLORS=['#3ecfcf','#ff6b4a','#a78bfa','#34d399','#f472b6','#fbbf24','#
 // ══ STATE ══
 const modes={imr:'simple',xbs:'simple',trend:'simple'};
 const groupDefs={imr:[{name:'Série 1'}],trend:[{name:'Série 1'},{name:'Série 2'}]};
-let imrGroups=[],xbsSubs=[],trendGroups=[],dispGroups=[],bcData=[],capData=[];
+let imrGroups=[],xbsSubs=[],trendGroups=[],dispGroups=[],anovaGroups=[],bcData=[],capData=[];
 
 // ══ NAV ══
 function showPage(id,el){
@@ -911,6 +1079,7 @@ function showPage(id,el){
   if(id==='boxcox'&&bcData.length===0)bcGenerate();
   if(id==='disp'&&dispGroups.length===0)dispGenerate();
   if(id==='capac'&&capData.length===0)capGenerate();
+  if(id==='anova'&&anovaGroups.length===0)anovaGenerate();
 }
 
 // ══ INPUT AREA BUILDERS ══
@@ -1621,6 +1790,7 @@ function clearYRange(chart){
     trend:['trend-ymin','trend-ymax','trend-hxmin','trend-hxmax','trend-xstep'],
     cap:['cap-xmin','cap-xmax'],
     disp:['disp-xmin','disp-xmax','disp-ymin','disp-ymax'],
+    anova:['anova-ymin','anova-ymax'],
 
   };
   (ids[chart]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
