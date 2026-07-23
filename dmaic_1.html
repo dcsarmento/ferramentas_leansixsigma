@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DMAIC · Contrato de Melhoria</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0e13;--surface:#111520;--surface2:#161b27;--border:#1e2535;--border2:#252d40;
+  --accent:#3ecfcf;--accent2:#f0a500;--danger:#e05565;--success:#34d399;--purple:#a78bfa;
+  --text:#dce4f0;--muted:#5a677f;--muted2:#8090aa;--sidebar-w:230px;
+  --d:hsl(195,70%,55%);--m:hsl(38,90%,55%);--a:hsl(262,70%,70%);--i:hsl(142,55%,55%);--c:hsl(347,75%,60%);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;min-height:100vh;font-size:14px;}
+
+/* SIDEBAR */
+#sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto;}
+.sidebar-logo{padding:1.2rem;border-bottom:1px solid var(--border);}
+.logo-text{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);letter-spacing:.04em;}
+.logo-sub{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem;}
+.sidebar-section{padding:.8rem .7rem .3rem;}
+.sidebar-section-label{font-size:.63rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-family:'DM Mono',monospace;padding:0 .4rem;margin-bottom:.3rem;}
+.nav-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;border-radius:5px;cursor:pointer;color:var(--muted2);font-size:.8rem;transition:all .15s;border:1px solid transparent;margin-bottom:2px;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(62,207,207,.08);border-color:rgba(62,207,207,.2);color:var(--accent);}
+.nav-icon{font-family:'DM Mono',monospace;font-size:.7rem;min-width:34px;background:var(--surface2);border:1px solid var(--border2);padding:2px 4px;border-radius:3px;text-align:center;}
+.phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.phase-status{font-size:.62rem;font-family:'DM Mono',monospace;margin-left:auto;white-space:nowrap;}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid var(--border);font-size:.65rem;color:var(--muted);}
+
+/* PROJECT SELECTOR */
+.project-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+.project-bar select{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.78rem;padding:.3rem .6rem;border-radius:4px;outline:none;flex:1;max-width:300px;}
+.project-bar select:focus{border-color:var(--accent);}
+.btn-sm{font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .75rem;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted2);transition:all .15s;white-space:nowrap;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm.primary{background:var(--accent);color:#0b0e13;border-color:var(--accent);}
+.btn-sm.primary:hover{opacity:.85;}
+.btn-sm.danger{border-color:var(--danger);color:var(--danger);}
+
+/* MAIN */
+#main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.page{display:none;padding:2rem 2.5rem;max-width:1100px;}
+.page.active{display:block;animation:fadein .2s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-header{margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.8rem;}
+.page-header h1{font-family:'DM Mono',monospace;font-size:1.3rem;font-weight:500;}
+.page-header h1 em{font-style:normal;}
+.page-header p{font-size:.76rem;color:var(--muted2);margin-top:.3rem;}
+.phase-badge{font-family:'DM Mono',monospace;font-size:.68rem;padding:.3rem .75rem;border-radius:20px;font-weight:500;letter-spacing:.05em;}
+
+/* CARDS / FORMS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.2rem;margin-bottom:1.2rem;}
+.card-title{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.card-title span{font-size:.75rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.form-grid.cols1{grid-template-columns:1fr;}
+.field{display:flex;flex-direction:column;gap:.3rem;}
+.field label{font-size:.68rem;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;}
+.field input,.field textarea,.field select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.45rem .65rem;font-family:'DM Mono',monospace;font-size:.8rem;border-radius:4px;outline:none;transition:border-color .15s;width:100%;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;line-height:1.6;}
+.field select option{background:var(--surface2);}
+.hint{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:.2rem;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin-top:.5rem;}
+table.dmaic-tbl{width:100%;border-collapse:collapse;font-size:.78rem;}
+table.dmaic-tbl th{padding:.5rem .75rem;text-align:left;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
+table.dmaic-tbl td{padding:.5rem .75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+table.dmaic-tbl tr:last-child td{border-bottom:none;}
+table.dmaic-tbl tr:hover td{background:rgba(255,255,255,.02);}
+table.dmaic-tbl td input,table.dmaic-tbl td textarea,table.dmaic-tbl td select{background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.78rem;padding:.2rem .3rem;outline:none;width:100%;resize:none;}
+table.dmaic-tbl td input:focus,table.dmaic-tbl td textarea:focus,table.dmaic-tbl td select:focus{border-bottom-color:var(--accent);}
+
+/* BUTTONS */
+.btn{background:var(--accent);color:#0b0e13;border:none;padding:.5rem 1.1rem;font-family:'DM Mono',monospace;font-size:.77rem;font-weight:500;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--muted2);}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn.danger{background:var(--danger);color:#fff;}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem;}
+.btn-add-row{background:transparent;border:1px dashed var(--border2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:.72rem;padding:.35rem .8rem;border-radius:4px;cursor:pointer;transition:all .15s;width:100%;margin-top:.5rem;}
+.btn-add-row:hover{border-color:var(--accent);color:var(--accent);}
+.btn-rm-row{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:.85rem;}
+.btn-rm-row:hover{color:var(--danger);}
+
+/* STATUS BADGE */
+.status-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:.65rem;padding:.2rem .55rem;border-radius:3px;font-weight:500;}
+.status-done{background:rgba(52,211,153,.1);color:var(--success);border:1px solid rgba(52,211,153,.25);}
+.status-wip{background:rgba(240,165,0,.1);color:var(--accent2);border:1px solid rgba(240,165,0,.25);}
+.status-todo{background:var(--surface2);color:var(--muted2);border:1px solid var(--border);}
+.status-late{background:rgba(224,85,101,.1);color:var(--danger);border:1px solid rgba(224,85,101,.25);}
+.status-na{background:rgba(90,103,127,.15);color:var(--muted2);border:1px solid var(--border2);}
+
+/* SIPOC */
+.sipoc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-top:.8rem;}
+.sipoc-col{background:var(--surface2);border-radius:6px;overflow:hidden;}
+.sipoc-header{padding:.5rem .7rem;font-family:'DM Mono',monospace;font-size:.72rem;font-weight:500;text-align:center;letter-spacing:.06em;}
+.sipoc-body{padding:.5rem;}
+.sipoc-item{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.4rem .6rem;margin-bottom:.4rem;font-size:.76rem;display:flex;align-items:center;gap:.4rem;}
+.sipoc-item input{background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.76rem;outline:none;flex:1;min-width:0;}
+
+/* PARETO CHART */
+canvas.chart{display:block;width:100%;}
+
+/* CHECKLIST */
+.checklist-item{display:flex;align-items:center;gap:.8rem;padding:.65rem .8rem;border-bottom:1px solid var(--border);font-size:.8rem;}
+.checklist-item:last-child{border-bottom:none;}
+.checklist-item .q{flex:1;}
+.checklist-score{display:flex;gap:.3rem;}
+.score-btn{width:28px;height:28px;border-radius:4px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:.72rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.score-btn.active{background:var(--accent);color:#0b0e13;border-color:var(--accent);}
+
+/* ISHIKAWA */
+.ishikawa-wrap{overflow-x:auto;}
+.ishikawa-svg{min-width:700px;}
+
+/* 5W2H */
+.why-row{display:grid;grid-template-columns:28px 1fr;gap:.5rem;align-items:start;margin-bottom:.6rem;}
+.why-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#0b0e13;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.25rem;}
+
+/* SUMMARY / ROADMAP */
+.roadmap{display:flex;gap:0;margin-bottom:1.5rem;border-radius:7px;overflow:hidden;border:1px solid var(--border);}
+.rm-phase{flex:1;padding:1rem .8rem;text-align:center;cursor:pointer;transition:background .15s;border-right:1px solid var(--border);}
+.rm-phase:last-child{border-right:none;}
+.rm-phase:hover{background:var(--surface2);}
+.rm-phase.active{background:rgba(62,207,207,.06);}
+.rm-phase .rm-letter{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:600;margin-bottom:.3rem;}
+.rm-phase .rm-name{font-size:.72rem;color:var(--muted2);}
+.rm-phase .rm-status{font-size:.65rem;font-family:'DM Mono',monospace;margin-top:.4rem;}
+
+/* PROGRESS */
+.progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:.5rem 0;}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+
+/* SAVE INDICATOR */
+.save-indicator{position:fixed;bottom:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.4rem .8rem;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--accent);opacity:0;transition:opacity .3s;z-index:999;}
+.save-indicator.show{opacity:1;}
+
+/* CEP LINK */
+.cep-link-card{background:rgba(62,207,207,.05);border:1px solid rgba(62,207,207,.2);border-radius:7px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;}
+.cep-link-card .icon{font-size:1.5rem;}
+.cep-link-card .info{flex:1;}
+.cep-link-card .info strong{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--accent);}
+.cep-link-card .info p{font-size:.74rem;color:var(--muted2);margin-top:.2rem;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  :root{--sidebar-w:0px;}
+  #sidebar{display:none;}
+  #main{margin-left:0;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-grid.cols3{grid-template-columns:1fr;}
+  .sipoc-grid{grid-template-columns:1fr;}
+  .roadmap{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">DMAIC</div>
+    <div class="logo-sub">Contrato de Melhoria</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Projeto</div>
+    <div class="nav-item active" onclick="showPage('home',this)">
+      <span class="nav-icon">⌂</span> Visão Geral
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Fases DMAIC</div>
+    <div class="nav-item" onclick="showPage('define',this)" id="nav-define">
+      <div class="phase-dot" style="background:var(--d)"></div> Define
+      <span class="phase-status" id="st-define">○</span>
+    </div>
+    <div class="nav-item" onclick="showPage('measure',this)" id="nav-measure">
+      <div class="phase-dot" style="background:var(--m)"></div> Measure
+      <span class="phase-status" id="st-measure">○</span>
+    </div>
+    <div class="nav-item" onclick="showPage('analyse',this)" id="nav-analyse">
+      <div class="phase-dot" style="background:var(--a)"></div> Analyse
+      <span class="phase-status" id="st-analyse">○</span>
+    </div>
+    <div class="nav-item" onclick="showPage('improve',this)" id="nav-improve">
+      <div class="phase-dot" style="background:var(--i)"></div> Improve
+      <span class="phase-status" id="st-improve">○</span>
+    </div>
+    <div class="nav-item" onclick="showPage('control',this)" id="nav-control">
+      <div class="phase-dot" style="background:var(--c)"></div> Control
+      <span class="phase-status" id="st-control">○</span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Ferramentas CEP</div>
+    <div class="nav-item" onclick="window.open('index.html','_blank')">
+      <span class="nav-icon" style="font-size:.65rem">CEP</span> Abrir Ferramentas
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    DMAIC · Lean Six Sigma<br>
+    <span id="footer-project" style="color:var(--accent)">—</span>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- PROJECT BAR -->
+  <div class="project-bar">
+    <select id="project-select" onchange="loadProject(this.value)">
+      <option value="">— Selecionar projeto —</option>
+    </select>
+    <button class="btn-sm primary" onclick="newProject()">+ Novo</button>
+    <button class="btn-sm" onclick="saveProject()">💾 Salvar</button>
+    <button class="btn-sm" onclick="exportProject()">⬇ Exportar .json</button>
+    <button class="btn-sm" onclick="document.getElementById('import-file').click()">⬆ Importar</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProject(event)">
+    <button class="btn-sm danger" onclick="deleteProject()">🗑 Excluir</button>
+  </div>
+
+  <!-- ══ HOME ══ -->
+  <div id="page-home" class="page active">
+    <div class="page-header">
+      <div>
+        <h1>Contrato de <em style="color:var(--accent)">Melhoria</em></h1>
+        <p id="home-project-name" style="color:var(--muted2);font-size:.8rem">Nenhum projeto selecionado</p>
+      </div>
+      <span class="phase-badge" style="background:rgba(62,207,207,.1);color:var(--accent);border:1px solid rgba(62,207,207,.25)">DMAIC</span>
+    </div>
+    <div class="roadmap">
+      <div class="rm-phase" onclick="showPage('define',document.getElementById('nav-define'))">
+        <div class="rm-letter" style="color:var(--d)">D</div>
+        <div class="rm-name">Define</div>
+        <div class="rm-status" id="rm-d">○ Não iniciado</div>
+      </div>
+      <div class="rm-phase" onclick="showPage('measure',document.getElementById('nav-measure'))">
+        <div class="rm-letter" style="color:var(--m)">M</div>
+        <div class="rm-name">Measure</div>
+        <div class="rm-status" id="rm-m">○ Não iniciado</div>
+      </div>
+      <div class="rm-phase" onclick="showPage('analyse',document.getElementById('nav-analyse'))">
+        <div class="rm-letter" style="color:var(--a)">A</div>
+        <div class="rm-name">Analyse</div>
+        <div class="rm-status" id="rm-a">○ Não iniciado</div>
+      </div>
+      <div class="rm-phase" onclick="showPage('improve',document.getElementById('nav-improve'))">
+        <div class="rm-letter" style="color:var(--i)">I</div>
+        <div class="rm-name">Improve</div>
+        <div class="rm-status" id="rm-i">○ Não iniciado</div>
+      </div>
+      <div class="rm-phase" onclick="showPage('control',document.getElementById('nav-control'))">
+        <div class="rm-letter" style="color:var(--c)">C</div>
+        <div class="rm-name">Control</div>
+        <div class="rm-status" id="rm-c">○ Não iniciado</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+      <div class="card">
+        <div class="card-title">Informações do Projeto</div>
+        <div id="home-info" style="font-size:.8rem;color:var(--muted2);line-height:2">Crie ou selecione um projeto para começar.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Progresso Geral</div>
+        <div id="home-progress"></div>
+      </div>
+    </div>
+    <div class="card" style="background:rgba(62,207,207,.03);border-color:rgba(62,207,207,.15)">
+      <div class="card-title">Como usar</div>
+      <div style="font-size:.78rem;color:var(--muted2);line-height:1.9">
+        <strong style="color:var(--text)">1. Crie um novo projeto</strong> clicando em "+ Novo" na barra acima.<br>
+        <strong style="color:var(--text)">2. Preencha as fases</strong> DMAIC sequencialmente pelo menu lateral.<br>
+        <strong style="color:var(--text)">3. Salve</strong> a qualquer momento — os dados ficam no navegador.<br>
+        <strong style="color:var(--text)">4. Exporte</strong> como arquivo .json para backup ou compartilhamento.<br>
+        <strong style="color:var(--text)">5. Importe</strong> projetos de outros dispositivos ou colaboradores.<br>
+        <strong style="color:var(--text)">6. Use as Ferramentas CEP</strong> para análises estatísticas da fase Measure.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEFINE ══ -->
+  <div id="page-define" class="page">
+    <div class="page-header">
+      <div><h1>Fase <em style="color:var(--d)">Define</em></h1>
+        <p>Contrato de Melhoria · SIPOC · VOC · Árvore CTC · Variáveis · Checklist</p></div>
+      <div style="display:flex;align-items:center;gap:.7rem">
+        <select id="define-status" onchange="saveField('define','status',this.value);updateStatus()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .6rem;border-radius:4px;outline:none;">
+          <option value="todo">○ Não Iniciado</option>
+          <option value="wip">⧖ Em Andamento</option>
+          <option value="done">✓ Finalizado</option>
+          <option value="late">⚠ Atrasado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CONTRATO DE MELHORIA -->
+    <div class="card">
+      <div class="card-title">📋 Contrato de Melhoria — Informações Gerais</div>
+      <div class="form-grid">
+        <div class="field"><label>Nome do Projeto</label><input id="d-nome" oninput="saveField('define','nome',this.value);updateHomeInfo()" placeholder="Ex: Governança de Indicadores de Frota"></div>
+        <div class="field"><label>Processo a ser impactado</label><input id="d-processo" oninput="saveField('define','processo',this.value)" placeholder="Ex: Gestão de Frota"></div>
+        <div class="field"><label>Patrocinador</label><input id="d-patrocinador" oninput="saveField('define','patrocinador',this.value)" placeholder="Nome e cargo"></div>
+        <div class="field"><label>Líder do Projeto</label><input id="d-lider" oninput="saveField('define','lider',this.value)" placeholder="Nome e cargo"></div>
+        <div class="field"><label>E-mail do Líder</label><input id="d-email" type="email" oninput="saveField('define','email',this.value)" placeholder="email@empresa.com"></div>
+        <div class="field"><label>Departamento</label><input id="d-depto" oninput="saveField('define','depto',this.value)" placeholder="Ex: Diretoria Executiva"></div>
+        <div class="field"><label>Data de Início</label><input id="d-inicio" type="date" oninput="saveField('define','inicio',this.value)"></div>
+        <div class="field"><label>Data Esperada de Conclusão</label><input id="d-fim" type="date" oninput="saveField('define','fim',this.value)"></div>
+        <div class="field"><label>Ganho Esperado (R$)</label><input id="d-ganho" type="number" oninput="saveField('define','ganho',this.value)" placeholder="0,00"></div>
+        <div class="field"><label>Custo Esperado (R$)</label><input id="d-custo" type="number" oninput="saveField('define','custo',this.value)" placeholder="0,00"></div>
+        <div class="field"><label>Green Belts Envolvidos</label><input id="d-gb" oninput="saveField('define','gb',this.value)" placeholder="Nomes"></div>
+        <div class="field"><label>Black Belts Envolvidos</label><input id="d-bb" oninput="saveField('define','bb',this.value)" placeholder="Nomes"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📌 Contexto, Problema e Objetivos</div>
+      <div class="form-grid cols1">
+        <div class="field"><label>Contexto / Descrição</label><textarea id="d-contexto" rows="3" oninput="saveField('define','contexto',this.value)" placeholder="Descreva o contexto do projeto e a situação atual..."></textarea></div>
+        <div class="field"><label>Incômodo ou Oportunidade</label><textarea id="d-incomodo" rows="3" oninput="saveField('define','incomodo',this.value)" placeholder="Qual é o problema ou a oportunidade identificada?"></textarea></div>
+        <div class="field"><label>Objetivos (Como saberemos que as mudanças são melhorias?)</label><textarea id="d-objetivos" rows="3" oninput="saveField('define','objetivos',this.value)" placeholder="Defina objetivos mensuráveis..."></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📐 Escopo e Cronograma</div>
+      <div class="form-grid">
+        <div class="field"><label>Dentro do Escopo</label><textarea id="d-escopo-in" rows="3" oninput="saveField('define','escopoIn',this.value)" placeholder="O que está incluído no projeto..."></textarea></div>
+        <div class="field"><label>Fora do Escopo</label><textarea id="d-escopo-out" rows="3" oninput="saveField('define','escopoOut',this.value)" placeholder="O que está excluído do projeto..."></textarea></div>
+        <div class="field"><label>Restrições</label><textarea id="d-restricoes" rows="2" oninput="saveField('define','restricoes',this.value)" placeholder="Restrições do projeto..."></textarea></div>
+        <div class="field"><label>Riscos</label><textarea id="d-riscos" rows="2" oninput="saveField('define','riscos',this.value)" placeholder="Riscos identificados..."></textarea></div>
+        <div class="field"><label>Pressupostos</label><textarea id="d-pressupostos" rows="2" oninput="saveField('define','pressupostos',this.value)" placeholder="Premissas do projeto..."></textarea></div>
+      </div>
+    </div>
+
+    <!-- SIPOC -->
+    <div class="card">
+      <div class="card-title">🔄 SIPOC</div>
+      <div class="sipoc-grid">
+        <div class="sipoc-col">
+          <div class="sipoc-header" style="background:rgba(62,207,207,.12);color:var(--accent)">S — Fornecedores</div>
+          <div class="sipoc-body" id="sipoc-s"></div>
+          <button class="btn-add-row" onclick="addSipocItem('s')">+ Adicionar</button>
+        </div>
+        <div class="sipoc-col">
+          <div class="sipoc-header" style="background:rgba(240,165,0,.12);color:var(--accent2)">I — Entradas</div>
+          <div class="sipoc-body" id="sipoc-i"></div>
+          <button class="btn-add-row" onclick="addSipocItem('i')">+ Adicionar</button>
+        </div>
+        <div class="sipoc-col">
+          <div class="sipoc-header" style="background:rgba(167,139,250,.12);color:var(--purple)">P — Processo</div>
+          <div class="sipoc-body" id="sipoc-p"></div>
+          <button class="btn-add-row" onclick="addSipocItem('p')">+ Adicionar</button>
+        </div>
+        <div class="sipoc-col">
+          <div class="sipoc-header" style="background:rgba(52,211,153,.12);color:var(--success)">O — Saídas</div>
+          <div class="sipoc-body" id="sipoc-o"></div>
+          <button class="btn-add-row" onclick="addSipocItem('o')">+ Adicionar</button>
+        </div>
+        <div class="sipoc-col">
+          <div class="sipoc-header" style="background:rgba(244,114,182,.12);color:#f472b6">C — Clientes</div>
+          <div class="sipoc-body" id="sipoc-c"></div>
+          <button class="btn-add-row" onclick="addSipocItem('c')">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOC -->
+    <div class="card">
+      <div class="card-title">🗣 Voz do Cliente (VOC)</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl" id="voc-table">
+        <thead><tr><th>#</th><th>Cliente</th><th>Voz do Cliente</th><th>Direcionador de Qualidade</th><th>Requerimentos</th><th></th></tr></thead>
+        <tbody id="voc-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addVocRow()">+ Adicionar cliente</button>
+    </div>
+
+    <!-- ÁRVORE CTC -->
+    <div class="card">
+      <div class="card-title">🌳 Árvore CTC — Critical To Customer</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl" id="ctc-table">
+        <thead><tr><th>Saída (SIPOC)</th><th>Direcionador de Qualidade</th><th>Variável / Como medir</th><th>Indicador</th><th></th></tr></thead>
+        <tbody id="ctc-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addCtcRow()">+ Adicionar linha</button>
+    </div>
+
+    <!-- DEFINIÇÃO DE VARIÁVEIS -->
+    <div class="card">
+      <div class="card-title">📊 Definição das Variáveis</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl" id="vars-table">
+        <thead><tr><th>#</th><th>Variável</th><th>Definição Operacional</th><th>Método de Medição</th><th>Indexador</th><th>Amostragem</th><th>Responsável</th><th>Uso</th><th></th></tr></thead>
+        <tbody id="vars-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addVarRow()">+ Adicionar variável</button>
+    </div>
+
+    <!-- CHECKLIST DO DEFINE -->
+    <div class="card">
+      <div class="card-title">✅ Checklist do Define <span id="checklist-score" style="color:var(--accent);margin-left:.5rem"></span></div>
+      <div id="checklist-items"></div>
+      <div class="progress-bar" style="margin-top:.8rem"><div class="progress-fill" id="checklist-bar" style="background:var(--accent)"></div></div>
+      <div id="checklist-verdict" style="font-family:'DM Mono',monospace;font-size:.75rem;margin-top:.5rem;text-align:center"></div>
+    </div>
+  </div>
+
+  <!-- ══ MEASURE ══ -->
+  <div id="page-measure" class="page">
+    <div class="page-header">
+      <div><h1>Fase <em style="color:var(--m)">Measure</em></h1>
+        <p>Tempos & Métodos · Pareto · Coleta de Dados</p></div>
+      <select id="measure-status" onchange="saveField('measure','status',this.value);updateStatus()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .6rem;border-radius:4px;outline:none;">
+        <option value="todo">○ Não Iniciado</option><option value="wip">⧖ Em Andamento</option>
+        <option value="done">✓ Finalizado</option><option value="late">⚠ Atrasado</option>
+      </select>
+    </div>
+
+    <!-- CEP LINK -->
+    <div class="cep-link-card">
+      <div class="icon">📈</div>
+      <div class="info">
+        <strong>Ferramentas CEP — Gráficos de Controle e Capacidade</strong>
+        <p>Use o sistema CEP para: I-MR, X̄-S, Tendência, Box-Cox, Cp/Cpk, ANOVA, Dispersão</p>
+      </div>
+      <button class="btn" onclick="window.open('index.html','_blank')">Abrir CEP →</button>
+    </div>
+
+    <!-- TEMPOS E MÉTODOS -->
+    <div class="card">
+      <div class="card-title">⏱ Tempos & Métodos</div>
+      <div class="field" style="margin-bottom:.8rem"><label>Nome do Procedimento / Atividade</label>
+        <input id="m-proc-nome" oninput="saveField('measure','procNome',this.value)" placeholder="Ex: Coleta e processamento de dados de frota"></div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>#</th><th>Nome da Ação</th><th>Tempo (min)</th><th>Responsável</th><th>Padronizada?</th><th>Tipo</th><th>Observações</th><th></th></tr></thead>
+        <tbody id="tempos-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addTemposRow()">+ Adicionar ação</button>
+    </div>
+
+    <!-- PARETO -->
+    <div class="card">
+      <div class="card-title">📊 Gráfico de Pareto</div>
+      <div class="form-grid">
+        <div class="field"><label>Categorias (uma por linha)</label>
+          <textarea id="pareto-cats" rows="6" placeholder="Problema A&#10;Problema B&#10;Problema C" oninput="saveField('measure','paretoCats',this.value);renderPareto()"></textarea></div>
+        <div class="field"><label>Frequências (correspondentes)</label>
+          <textarea id="pareto-vals" rows="6" placeholder="200&#10;150&#10;120" oninput="saveField('measure','paretoVals',this.value);renderPareto()"></textarea></div>
+      </div>
+      <canvas id="chart-pareto" height="280" class="chart"></canvas>
+    </div>
+
+    <!-- OBSERVAÇÕES MEASURE -->
+    <div class="card">
+      <div class="card-title">📝 Observações e Conclusões da Fase Measure</div>
+      <div class="field"><textarea id="m-obs" rows="4" oninput="saveField('measure','obs',this.value)" placeholder="Registre os principais achados, anomalias encontradas, hipóteses iniciais..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- ══ ANALYSE ══ -->
+  <div id="page-analyse" class="page">
+    <div class="page-header">
+      <div><h1>Fase <em style="color:var(--a)">Analyse</em></h1>
+        <p>Ishikawa · 5 Porquês · Priorização GUT · ECRS · Desconexões</p></div>
+      <select id="analyse-status" onchange="saveField('analyse','status',this.value);updateStatus()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .6rem;border-radius:4px;outline:none;">
+        <option value="todo">○ Não Iniciado</option><option value="wip">⧖ Em Andamento</option>
+        <option value="done">✓ Finalizado</option><option value="late">⚠ Atrasado</option>
+      </select>
+    </div>
+
+    <!-- ISHIKAWA -->
+    <div class="card">
+      <div class="card-title">🐟 Diagrama de Ishikawa (Causa e Efeito)</div>
+      <div class="field" style="margin-bottom:.8rem"><label>Efeito / Problema Principal</label>
+        <input id="ishi-efeito" oninput="saveField('analyse','ishiEfeito',this.value);renderIshikawa()" placeholder="Ex: Alta improdutividade da frota"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:1rem" id="ishi-cats"></div>
+      <div class="ishikawa-wrap"><canvas id="chart-ishikawa" height="340" class="chart"></canvas></div>
+    </div>
+
+    <!-- 5 PORQUÊS -->
+    <div class="card">
+      <div class="card-title">❓ 5 Porquês</div>
+      <div class="field" style="margin-bottom:.8rem"><label>Problema inicial</label>
+        <input id="cinco-problema" oninput="saveField('analyse','cincoProblema',this.value)" placeholder="Descreva o problema a ser analisado"></div>
+      <div id="cinco-rows"></div>
+      <div style="margin-top:.8rem;padding:.7rem;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.15);border-radius:5px">
+        <div style="font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:.3rem">Causa Raiz Identificada</div>
+        <input id="cinco-raiz" oninput="saveField('analyse','cincoRaiz',this.value)" placeholder="Conclusão após os 5 porquês..." style="background:transparent;border:none;border-bottom:1px solid rgba(52,211,153,.3);color:var(--success);font-family:'DM Mono',monospace;font-size:.82rem;outline:none;width:100%;padding:.2rem">
+      </div>
+    </div>
+
+    <!-- MATRIZ GUT -->
+    <div class="card">
+      <div class="card-title">⚖ Matriz de Priorização — GUT</div>
+      <div class="hint" style="margin-bottom:.8rem">G=Gravidade · U=Urgência · T=Tendência — notas de 1 a 5. GUT = G×U×T</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>Causa / Problema</th><th>G</th><th>U</th><th>T</th><th>GUT</th><th>Prioridade</th><th></th></tr></thead>
+        <tbody id="gut-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addGutRow()">+ Adicionar item</button>
+    </div>
+
+    <!-- ECRS -->
+    <div class="card">
+      <div class="card-title">🔧 ECRS — Eliminar, Combinar, Rearranjar, Simplificar</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>Ação</th><th>Processo / Atividade</th><th>Descrição da Melhoria</th><th>Responsável</th><th>Prazo</th><th></th></tr></thead>
+        <tbody id="ecrs-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addEcrsRow()">+ Adicionar ação</button>
+    </div>
+
+    <!-- DESCONEXÕES -->
+    <div class="card">
+      <div class="card-title">⚡ Desconexões do Processo</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>Etapa</th><th>Desconexão Identificada</th><th>Impacto</th><th>Causa Provável</th><th></th></tr></thead>
+        <tbody id="desc-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addDescRow()">+ Adicionar desconexão</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Conclusões da Análise</div>
+      <div class="field"><textarea id="a-conclusoes" rows="4" oninput="saveField('analyse','conclusoes',this.value)" placeholder="Principais causas raiz identificadas, evidências estatísticas, próximos passos..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- ══ IMPROVE ══ -->
+  <div id="page-improve" class="page">
+    <div class="page-header">
+      <div><h1>Fase <em style="color:var(--i)">Improve</em></h1>
+        <p>Plano de Ação 5W2H · PDSA · Implementação</p></div>
+      <select id="improve-status" onchange="saveField('improve','status',this.value);updateStatus()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .6rem;border-radius:4px;outline:none;">
+        <option value="todo">○ Não Iniciado</option><option value="wip">⧖ Em Andamento</option>
+        <option value="done">✓ Finalizado</option><option value="late">⚠ Atrasado</option>
+      </select>
+    </div>
+
+    <!-- 5W2H -->
+    <div class="card">
+      <div class="card-title">📋 Plano de Ação — 5W2H</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>#</th><th>O Quê? (What)</th><th>Por Quê? (Why)</th><th>Onde? (Where)</th><th>Quem? (Who)</th><th>Quando? (When)</th><th>Como? (How)</th><th>Custo? (How Much)</th><th>Status</th><th></th></tr></thead>
+        <tbody id="w5h2-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addW5H2Row()">+ Adicionar ação</button>
+    </div>
+
+    <!-- PDSA -->
+    <div class="card">
+      <div class="card-title">🔄 PDSA — Plan, Do, Study, Act</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--accent);margin-bottom:.4rem">📌 PLAN — Planejar</div>
+          <div class="field"><textarea id="pdsa-plan" rows="4" oninput="saveField('improve','pdsaPlan',this.value)" placeholder="O que vamos testar? Qual a hipótese?"></textarea></div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--accent2);margin-bottom:.4rem">▶ DO — Executar</div>
+          <div class="field"><textarea id="pdsa-do" rows="4" oninput="saveField('improve','pdsaDo',this.value)" placeholder="Como foi a execução? O que aconteceu?"></textarea></div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--purple);margin-bottom:.4rem">🔍 STUDY — Estudar</div>
+          <div class="field"><textarea id="pdsa-study" rows="4" oninput="saveField('improve','pdsaStudy',this.value)" placeholder="Os resultados confirmam a hipótese?"></textarea></div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.72rem;color:var(--success);margin-bottom:.4rem">✅ ACT — Agir</div>
+          <div class="field"><textarea id="pdsa-act" rows="4" oninput="saveField('improve','pdsaAct',this.value)" placeholder="Padronizar, ajustar ou recomeçar?"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Resultados Alcançados</div>
+      <div class="field"><textarea id="i-resultados" rows="4" oninput="saveField('improve','resultados',this.value)" placeholder="Descreva os resultados antes x depois, métricas alcançadas, ganhos financeiros..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- ══ CONTROL ══ -->
+  <div id="page-control" class="page">
+    <div class="page-header">
+      <div><h1>Fase <em style="color:var(--c)">Control</em></h1>
+        <p>Plano de Controle · Plano de Treinamento · Checklist de Encerramento</p></div>
+      <select id="control-status" onchange="saveField('control','status',this.value);updateStatus()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .6rem;border-radius:4px;outline:none;">
+        <option value="todo">○ Não Iniciado</option><option value="wip">⧖ Em Andamento</option>
+        <option value="done">✓ Finalizado</option><option value="late">⚠ Atrasado</option>
+      </select>
+    </div>
+
+    <!-- PLANO DE CONTROLE -->
+    <div class="card">
+      <div class="card-title">🎯 Plano de Controle</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>Nº Proc.</th><th>Passo do Processo</th><th>O que controlar?</th><th>E/S</th><th>Especificação</th><th>Método Medição</th><th>Método Controle</th><th>Amostra</th><th>Freq.</th><th>Quem?</th><th>Armazenamento</th><th>Ação Corretiva</th><th></th></tr></thead>
+        <tbody id="ctrl-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addCtrlRow()">+ Adicionar item de controle</button>
+    </div>
+
+    <!-- PLANO DE TREINAMENTO -->
+    <div class="card">
+      <div class="card-title">🎓 Plano de Treinamento</div>
+      <div class="tbl-wrap"><table class="dmaic-tbl">
+        <thead><tr><th>Módulo / Tema</th><th>Público-Alvo</th><th>Responsável</th><th>Formato</th><th>Data Prevista</th><th>Status</th><th></th></tr></thead>
+        <tbody id="train-body"></tbody>
+      </table></div>
+      <button class="btn-add-row" onclick="addTrainRow()">+ Adicionar treinamento</button>
+    </div>
+
+    <!-- CHECKLIST ENCERRAMENTO -->
+    <div class="card">
+      <div class="card-title">✅ Checklist de Encerramento</div>
+      <div id="encerramento-items"></div>
+      <div id="encerramento-verdict" style="font-family:'DM Mono',monospace;font-size:.75rem;margin-top:.8rem;text-align:center"></div>
+    </div>
+
+    <!-- LIÇÕES APRENDIDAS -->
+    <div class="card">
+      <div class="card-title">💡 Lições Aprendidas</div>
+      <div class="field"><textarea id="c-licoes" rows="4" oninput="saveField('control','licoes',this.value)" placeholder="O que aprendemos neste projeto? O que faríamos diferente?"></textarea></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="save-indicator" id="save-indicator">✓ Salvo</div>
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const STORAGE_KEY = 'dmaic_projects';
+let projects = {};
+let currentProject = null;
+
+const CHECKLIST_ITEMS = [
+  'O projeto está bem conectado com os objetivos estratégicos da organização?',
+  'A descrição do projeto exprime claramente uma necessidade de realizar melhorias?',
+  'O impacto esperado no negócio (custo, qualidade, produtividade) é claro?',
+  'A descrição do projeto é focada num processo, negócio, planta ou serviço específico?',
+  'A ligação com o cliente externo é clara e forte?',
+  'Os resultados esperados são claros. Será fácil dizer quando o time atingiu os objetivos?',
+  'Há dados disponíveis para avaliar a magnitude do problema?',
+  'Os objetivos numéricos são suportados por benchmark ou dados históricos?',
+  'Fica claro que o time terá de realizar mudanças para alcançar os objetivos?',
+  'As fronteiras do projeto de melhoria são claras?',
+  'O projeto está amarrado com um processo com início e fim claros e identificados?',
+  'O projeto pode ser razoavelmente completado em seis meses?',
+  'Os indicadores estão diretamente relacionados com a descrição do problema e objetivos?',
+  'Existem dados históricos sobre o desempenho atual do processo?',
+  'As medidas serão coletadas em intervalos suficientes para detectar impactos de mudanças?',
+  'Os impactos financeiros são fáceis de serem calculados e demonstrados pela área financeira?',
+  'O projeto tem um patrocinador com interesse claro na realização do projeto?',
+];
+
+const ENCERRAMENTO_ITEMS = [
+  'O Impacto no indicador de interesse foi medido?',
+  'Foi feita uma apresentação contando a história do projeto?',
+  'Essa apresentação foi documentada?',
+  'Os gerentes/donos do processo foram informados sobre a história?',
+  'A história está disponível para quem trabalha no novo processo?',
+  'Foi realizada uma reunião com a equipe para avaliar as lições aprendidas?',
+  'As lições foram documentadas e disponibilizadas para o escritório de projetos?',
+  'As possibilidades paralelas de melhoria foram documentadas?',
+  'Essas possibilidades foram entregues aos gerentes da área?',
+  'O plano de controle está sendo monitorado?',
+  'Foi feita uma celebração com a equipe?',
+];
+
+const ISHI_CATEGORIES = ['Mão de obra','Máquina','Método','Material','Meio Ambiente','Medição'];
+const ECRS_OPTIONS = ['Eliminar','Combinar','Rearranjar','Simplificar'];
+const STATUS_LABELS = {todo:'○ Não iniciado',wip:'⧖ Em andamento',done:'✓ Finalizado',late:'⚠ Atrasado',na:'— N/A'};
+
+// ── PROJECT MANAGEMENT ──
+function loadProjects() {
+  try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { projects = {}; }
+  refreshProjectSelect();
+  const last = localStorage.getItem('dmaic_last');
+  if (last && projects[last]) loadProject(last);
+}
+
+function refreshProjectSelect() {
+  const sel = document.getElementById('project-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Selecionar projeto —</option>';
+  Object.keys(projects).sort().forEach(id => {
+    const o = document.createElement('option');
+    o.value = id; o.textContent = projects[id].define?.nome || id;
+    sel.appendChild(o);
+  });
+  if (cur && projects[cur]) sel.value = cur;
+}
+
+function newProject() {
+  const name = prompt('Nome do novo projeto:');
+  if (!name) return;
+  const id = 'proj_' + Date.now();
+  projects[id] = { id, createdAt: new Date().toISOString(),
+    define:{ nome:name, status:'todo', sipoc:{s:[],i:[],p:[],o:[],c:[]}, voc:[], ctc:[], vars:[], checklist:{}, status:'todo' },
+    measure:{ status:'todo', tempos:[], paretoCats:'', paretoVals:'', obs:'' },
+    analyse:{ status:'todo', ishiEfeito:'', ishiCauses:{}, cincoRows:['','','','',''], cincoRaiz:'', gut:[], ecrs:[], desc:[], conclusoes:'' },
+    improve:{ status:'todo', w5h2:[], pdsaPlan:'', pdsaDo:'', pdsaStudy:'', pdsaAct:'', resultados:'' },
+    control:{ status:'todo', ctrl:[], train:[], encerramento:{}, licoes:'' }
+  };
+  persistAll();
+  refreshProjectSelect();
+  document.getElementById('project-select').value = id;
+  loadProject(id);
+}
+
+function loadProject(id) {
+  if (!id || !projects[id]) return;
+  currentProject = id;
+  localStorage.setItem('dmaic_last', id);
+  document.getElementById('project-select').value = id;
+  const p = projects[id];
+
+  // Define
+  const d = p.define || {};
+  setVal('d-nome', d.nome); setVal('d-processo', d.processo); setVal('d-patrocinador', d.patrocinador);
+  setVal('d-lider', d.lider); setVal('d-email', d.email); setVal('d-depto', d.depto);
+  setVal('d-inicio', d.inicio); setVal('d-fim', d.fim); setVal('d-ganho', d.ganho);
+  setVal('d-custo', d.custo); setVal('d-gb', d.gb); setVal('d-bb', d.bb);
+  setVal('d-contexto', d.contexto); setVal('d-incomodo', d.incomodo); setVal('d-objetivos', d.objetivos);
+  setVal('d-escopo-in', d.escopoIn); setVal('d-escopo-out', d.escopoOut);
+  setVal('d-restricoes', d.restricoes); setVal('d-riscos', d.riscos); setVal('d-pressupostos', d.pressupostos);
+  setSelectVal('define-status', d.status || 'todo');
+  renderSipoc(d.sipoc || {s:[],i:[],p:[],o:[],c:[]});
+  renderVoc(d.voc || []);
+  renderCtc(d.ctc || []);
+  renderVars(d.vars || []);
+  renderChecklist(d.checklist || {});
+
+  // Measure
+  const m = p.measure || {};
+  setSelectVal('measure-status', m.status || 'todo');
+  setVal('m-proc-nome', m.procNome);
+  renderTempos(m.tempos || []);
+  setVal('pareto-cats', m.paretoCats); setVal('pareto-vals', m.paretoVals);
+  setVal('m-obs', m.obs);
+  setTimeout(renderPareto, 100);
+
+  // Analyse
+  const a = p.analyse || {};
+  setSelectVal('analyse-status', a.status || 'todo');
+  setVal('ishi-efeito', a.ishiEfeito);
+  renderIshiCats(a.ishiCauses || {});
+  renderCinco(a.cincoRows || ['','','','',''], a.cincoProblema, a.cincoRaiz);
+  renderGut(a.gut || []);
+  renderEcrs(a.ecrs || []);
+  renderDesc(a.desc || []);
+  setVal('a-conclusoes', a.conclusoes);
+  setTimeout(renderIshikawa, 200);
+
+  // Improve
+  const i = p.improve || {};
+  setSelectVal('improve-status', i.status || 'todo');
+  renderW5H2(i.w5h2 || []);
+  setVal('pdsa-plan', i.pdsaPlan); setVal('pdsa-do', i.pdsaDo);
+  setVal('pdsa-study', i.pdsaStudy); setVal('pdsa-act', i.pdsaAct);
+  setVal('i-resultados', i.resultados);
+
+  // Control
+  const c = p.control || {};
+  setSelectVal('control-status', c.status || 'todo');
+  renderCtrl(c.ctrl || []);
+  renderTrain(c.train || []);
+  renderEncerramento(c.encerramento || {});
+  setVal('c-licoes', c.licoes);
+
+  updateStatus();
+  updateHomeInfo();
+  document.getElementById('footer-project').textContent = d.nome || id;
+}
+
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
+function setSelectVal(id, val) { const el = document.getElementById(id); if (el) el.value = val || 'todo'; }
+
+function saveField(phase, field, value) {
+  if (!currentProject || !projects[currentProject]) return;
+  if (!projects[currentProject][phase]) projects[currentProject][phase] = {};
+  projects[currentProject][phase][field] = value;
+  persistAll();
+}
+
+function saveNestedField(phase, subKey, idx, field, value) {
+  if (!currentProject) return;
+  const p = projects[currentProject];
+  if (!p[phase][subKey]) p[phase][subKey] = [];
+  if (!p[phase][subKey][idx]) p[phase][subKey][idx] = {};
+  p[phase][subKey][idx][field] = value;
+  persistAll();
+}
+
+function persistAll() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  const ind = document.getElementById('save-indicator');
+  ind.classList.add('show');
+  clearTimeout(ind._t);
+  ind._t = setTimeout(() => ind.classList.remove('show'), 2000);
+}
+
+function saveProject() { if (!currentProject) { alert('Selecione ou crie um projeto primeiro.'); return; } persistAll(); }
+
+function deleteProject() {
+  if (!currentProject) return;
+  const name = projects[currentProject]?.define?.nome || currentProject;
+  if (!confirm(`Excluir projeto "${name}"? Esta ação não pode ser desfeita.`)) return;
+  delete projects[currentProject];
+  currentProject = null;
+  persistAll();
+  refreshProjectSelect();
+  document.getElementById('project-select').value = '';
+  document.getElementById('home-project-name').textContent = 'Nenhum projeto selecionado';
+}
+
+function exportProject() {
+  if (!currentProject) { alert('Selecione um projeto para exportar.'); return; }
+  const p = projects[currentProject];
+  const blob = new Blob([JSON.stringify(p, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (p.define?.nome || 'projeto').replace(/[^a-z0-9]/gi,'_') + '_dmaic.json';
+  a.click();
+}
+
+function importProject(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      const id = p.id || ('proj_' + Date.now());
+      p.id = id;
+      projects[id] = p;
+      persistAll();
+      refreshProjectSelect();
+      document.getElementById('project-select').value = id;
+      loadProject(id);
+      alert('Projeto importado com sucesso!');
+    } catch(err) { alert('Erro ao importar: arquivo inválido.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── NAVIGATION ──
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'measure') setTimeout(renderPareto, 150);
+  if (id === 'analyse') setTimeout(renderIshikawa, 150);
+}
+
+// ── STATUS UPDATE ──
+function updateStatus() {
+  if (!currentProject || !projects[currentProject]) return;
+  const p = projects[currentProject];
+  const phases = ['define','measure','analyse','improve','control'];
+  const rmIds = ['rm-d','rm-m','rm-a','rm-i','rm-c'];
+  const stIds = ['st-define','st-measure','st-analyse','st-improve','st-control'];
+  phases.forEach((ph, i) => {
+    const st = p[ph]?.status || 'todo';
+    const label = STATUS_LABELS[st];
+    const col = st==='done'?'var(--success)':st==='wip'?'var(--accent2)':st==='late'?'var(--danger)':'var(--muted)';
+    document.getElementById(rmIds[i]).textContent = label;
+    document.getElementById(rmIds[i]).style.color = col;
+    document.getElementById(stIds[i]).textContent = st==='done'?'✓':st==='wip'?'⧖':st==='late'?'⚠':'○';
+    document.getElementById(stIds[i]).style.color = col;
+  });
+  updateHomeProgress(p, phases);
+}
+
+function updateHomeInfo() {
+  if (!currentProject || !projects[currentProject]) return;
+  const d = projects[currentProject].define || {};
+  const name = d.nome || '—';
+  document.getElementById('home-project-name').textContent = name;
+  document.getElementById('footer-project').textContent = name;
+  document.getElementById('home-info').innerHTML = `
+    <span style="color:var(--muted)">Patrocinador:</span> ${d.patrocinador||'—'}<br>
+    <span style="color:var(--muted)">Líder:</span> ${d.lider||'—'}<br>
+    <span style="color:var(--muted)">Início:</span> ${d.inicio||'—'}<br>
+    <span style="color:var(--muted)">Previsão:</span> ${d.fim||'—'}<br>
+    <span style="color:var(--muted)">Processo:</span> ${d.processo||'—'}
+  `;
+}
+
+function updateHomeProgress(p, phases) {
+  const counts = { done:0, wip:0, late:0 };
+  phases.forEach(ph => { const s = p[ph]?.status||'todo'; if(counts[s]!==undefined) counts[s]++; });
+  const pct = Math.round((counts.done / phases.length) * 100);
+  const col = pct===100?'var(--success)':pct>0?'var(--accent2)':'var(--muted)';
+  document.getElementById('home-progress').innerHTML = `
+    <div style="font-family:'DM Mono',monospace;font-size:1.8rem;font-weight:600;color:${col}">${pct}%</div>
+    <div style="font-size:.72rem;color:var(--muted2);margin:.3rem 0">${counts.done} de ${phases.length} fases concluídas</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${col}"></div></div>
+    <div style="display:flex;gap:1rem;margin-top:.5rem;font-size:.7rem;font-family:'DM Mono',monospace">
+      <span style="color:var(--success)">✓ ${counts.done} concluídas</span>
+      <span style="color:var(--accent2)">⧖ ${counts.wip} em andamento</span>
+      <span style="color:var(--danger)">⚠ ${counts.late} atrasadas</span>
+    </div>`;
+}
+
+// ── SIPOC ──
+function renderSipoc(sipoc) {
+  ['s','i','p','o','c'].forEach(col => {
+    const arr = sipoc[col] || [];
+    const container = document.getElementById('sipoc-' + col);
+    if (!container) return;
+    container.innerHTML = arr.map((item, idx) => `
+      <div class="sipoc-item">
+        <input value="${esc(item)}" placeholder="Adicionar..." oninput="updateSipocItem('${col}',${idx},this.value)">
+        <button class="btn-rm-row" onclick="removeSipocItem('${col}',${idx})">✕</button>
+      </div>`).join('');
+  });
+}
+
+function addSipocItem(col) {
+  if (!currentProject) return;
+  const p = projects[currentProject];
+  if (!p.define.sipoc) p.define.sipoc = {s:[],i:[],p:[],o:[],c:[]};
+  if (!p.define.sipoc[col]) p.define.sipoc[col] = [];
+  p.define.sipoc[col].push('');
+  renderSipoc(p.define.sipoc);
+  persistAll();
+}
+
+function updateSipocItem(col, idx, val) {
+  if (!currentProject) return;
+  projects[currentProject].define.sipoc[col][idx] = val;
+  persistAll();
+}
+
+function removeSipocItem(col, idx) {
+  if (!currentProject) return;
+  projects[currentProject].define.sipoc[col].splice(idx, 1);
+  renderSipoc(projects[currentProject].define.sipoc);
+  persistAll();
+}
+
+// ── VOC ──
+function renderVoc(rows) {
+  document.getElementById('voc-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted2);font-family:'DM Mono',monospace;font-size:.72rem">${i+1}</td>
+      <td><input value="${esc(r.cliente||'')}" oninput="saveNestedField('define','voc',${i},'cliente',this.value)"></td>
+      <td><textarea rows="2" oninput="saveNestedField('define','voc',${i},'voz',this.value)">${esc(r.voz||'')}</textarea></td>
+      <td><input value="${esc(r.dir||'')}" oninput="saveNestedField('define','voc',${i},'dir',this.value)"></td>
+      <td><input value="${esc(r.req||'')}" oninput="saveNestedField('define','voc',${i},'req',this.value)"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('define','voc',${i},renderVoc)">✕</button></td>
+    </tr>`).join('');
+}
+function addVocRow() { addRow('define','voc',{},renderVoc); }
+
+// ── CTC ──
+function renderCtc(rows) {
+  document.getElementById('ctc-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td><input value="${esc(r.saida||'')}" oninput="saveNestedField('define','ctc',${i},'saida',this.value)"></td>
+      <td><input value="${esc(r.dir||'')}" oninput="saveNestedField('define','ctc',${i},'dir',this.value)"></td>
+      <td><input value="${esc(r.var||'')}" oninput="saveNestedField('define','ctc',${i},'var',this.value)"></td>
+      <td><input value="${esc(r.ind||'')}" oninput="saveNestedField('define','ctc',${i},'ind',this.value)"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('define','ctc',${i},renderCtc)">✕</button></td>
+    </tr>`).join('');
+}
+function addCtcRow() { addRow('define','ctc',{},renderCtc); }
+
+// ── VARIÁVEIS ──
+function renderVars(rows) {
+  document.getElementById('vars-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted2);font-family:'DM Mono',monospace">${i+1}</td>
+      <td><input value="${esc(r.var||'')}" oninput="saveNestedField('define','vars',${i},'var',this.value)" style="min-width:120px"></td>
+      <td><textarea rows="2" oninput="saveNestedField('define','vars',${i},'def',this.value)" style="min-width:150px">${esc(r.def||'')}</textarea></td>
+      <td><input value="${esc(r.metodo||'')}" oninput="saveNestedField('define','vars',${i},'metodo',this.value)"></td>
+      <td><input value="${esc(r.idx||'')}" oninput="saveNestedField('define','vars',${i},'idx',this.value)"></td>
+      <td><input value="${esc(r.amost||'')}" oninput="saveNestedField('define','vars',${i},'amost',this.value)"></td>
+      <td><input value="${esc(r.resp||'')}" oninput="saveNestedField('define','vars',${i},'resp',this.value)"></td>
+      <td><input value="${esc(r.uso||'')}" oninput="saveNestedField('define','vars',${i},'uso',this.value)"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('define','vars',${i},renderVars)">✕</button></td>
+    </tr>`).join('');
+}
+function addVarRow() { addRow('define','vars',{},renderVars); }
+
+// ── CHECKLIST ──
+function renderChecklist(scores) {
+  const el = document.getElementById('checklist-items');
+  el.innerHTML = CHECKLIST_ITEMS.map((q, i) => {
+    const score = scores[i] ?? 0;
+    return `<div class="checklist-item">
+      <div class="q">${q}</div>
+      <div class="checklist-score">
+        ${[0,1,2,3,4,5].map(v => `<div class="score-btn ${score===v?'active':''}" onclick="setChecklistScore(${i},${v})">${v}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  updateChecklistTotal(scores);
+}
+
+function setChecklistScore(idx, val) {
+  if (!currentProject) return;
+  const p = projects[currentProject];
+  if (!p.define.checklist) p.define.checklist = {};
+  p.define.checklist[idx] = val;
+  renderChecklist(p.define.checklist);
+  persistAll();
+}
+
+function updateChecklistTotal(scores) {
+  const total = Object.values(scores).reduce((a,b)=>a+b,0);
+  const max = CHECKLIST_ITEMS.length * 5;
+  const pct = Math.round(total/max*100);
+  document.getElementById('checklist-score').textContent = `${total} / ${max} pts`;
+  document.getElementById('checklist-bar').style.width = pct + '%';
+  document.getElementById('checklist-bar').style.background = total>=72?'var(--success)':total>=55?'var(--accent2)':'var(--danger)';
+  const v = document.getElementById('checklist-verdict');
+  if(total>=72){v.style.color='var(--success)';v.textContent='✓ Projeto bem definido ('+total+' pts)';}
+  else if(total>=55){v.style.color='var(--accent2)';v.textContent='⚠ Patrocinador precisa fazer alterações ('+total+' pts)';}
+  else{v.style.color='var(--danger)';v.textContent='✗ Patrocinador precisa repensar o projeto ('+total+' pts)';}
+}
+
+// ── TEMPOS E MÉTODOS ──
+function renderTempos(rows) {
+  document.getElementById('tempos-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted2);font-family:'DM Mono',monospace">${i+1}</td>
+      <td><input value="${esc(r.nome||'')}" oninput="saveNestedField('measure','tempos',${i},'nome',this.value)" style="min-width:160px"></td>
+      <td><input type="number" value="${r.tempo||''}" oninput="saveNestedField('measure','tempos',${i},'tempo',this.value)" style="width:70px"></td>
+      <td><input value="${esc(r.resp||'')}" oninput="saveNestedField('measure','tempos',${i},'resp',this.value)"></td>
+      <td><select onchange="saveNestedField('measure','tempos',${i},'padrao',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;outline:none">
+        <option ${r.padrao==='Sim'?'selected':''}>Sim</option>
+        <option ${r.padrao==='Não'?'selected':''}>Não</option>
+      </select></td>
+      <td><select onchange="saveNestedField('measure','tempos',${i},'tipo',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;outline:none">
+        <option ${r.tipo==='AV'?'selected':''}>AV</option>
+        <option ${r.tipo==='NAV-N'?'selected':''}>NAV-N</option>
+        <option ${r.tipo==='NAV-D'?'selected':''}>NAV-D</option>
+      </select></td>
+      <td><input value="${esc(r.obs||'')}" oninput="saveNestedField('measure','tempos',${i},'obs',this.value)" style="min-width:160px"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('measure','tempos',${i},renderTempos)">✕</button></td>
+    </tr>`).join('');
+}
+function addTemposRow() { addRow('measure','tempos',{},renderTempos); }
+
+// ── PARETO ──
+function renderPareto() {
+  const cats = (document.getElementById('pareto-cats')?.value||'').split('\n').map(s=>s.trim()).filter(s=>s);
+  const vals = (document.getElementById('pareto-vals')?.value||'').split('\n').map(s=>parseFloat(s.trim())||0);
+  const canvas = document.getElementById('chart-pareto');
+  if (!canvas || !cats.length) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 700;
+  const H = 280;
+  canvas.style.height = H + 'px';
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = {top:20, right:60, bottom:60, left:55};
+  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
+
+  // Sort desc
+  const pairs = cats.map((c,i)=>({c,v:vals[i]||0})).sort((a,b)=>b.v-a.v);
+  const total = pairs.reduce((a,p)=>a+p.v, 0) || 1;
+  const cumPcts = [];
+  let cum = 0;
+  pairs.forEach(p => { cum += p.v / total * 100; cumPcts.push(cum); });
+
+  const maxVal = Math.max(...pairs.map(p=>p.v)) || 1;
+  const barW = pw / pairs.length;
+
+  // Grid
+  ctx.strokeStyle = '#1a2030'; ctx.lineWidth = 1;
+  for (let t = 0; t <= 5; t++) {
+    const y = pad.top + (t/5)*ph;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+pw, y); ctx.stroke();
+  }
+
+  // Bars
+  pairs.forEach((p, i) => {
+    const x = pad.left + i * barW;
+    const bh = (p.v / maxVal) * ph;
+    const y = pad.top + ph - bh;
+    const alpha = 0.7 - i * 0.06;
+    ctx.fillStyle = `rgba(62,207,207,${Math.max(0.2,alpha)})`;
+    ctx.strokeStyle = '#3ecfcf55';
+    ctx.fillRect(x+2, y, barW-4, bh);
+    ctx.strokeRect(x+2, y, barW-4, bh);
+    // Label
+    ctx.fillStyle = '#5a677f';
+    ctx.font = '9px DM Mono,monospace';
+    ctx.textAlign = 'center';
+    const lbl = p.c.length > 10 ? p.c.slice(0,10)+'…' : p.c;
+    ctx.save(); ctx.translate(x+barW/2, H-pad.bottom+10); ctx.rotate(-Math.PI/5);
+    ctx.fillText(lbl, 0, 0); ctx.restore();
+    // Value
+    ctx.fillStyle = '#3ecfcf';
+    ctx.font = '9px DM Mono,monospace'; ctx.textAlign = 'center';
+    ctx.fillText(p.v, x+barW/2, y-4);
+  });
+
+  // Pareto line
+  ctx.beginPath(); ctx.strokeStyle = '#f0a500'; ctx.lineWidth = 2;
+  cumPcts.forEach((pct, i) => {
+    const x = pad.left + (i+1)*barW - barW/2;
+    const y = pad.top + ph - (pct/100)*ph;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // 80% line
+  ctx.save(); ctx.strokeStyle = 'rgba(224,85,101,.5)'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+  const y80 = pad.top + ph - 0.8*ph;
+  ctx.beginPath(); ctx.moveTo(pad.left, y80); ctx.lineTo(pad.left+pw, y80); ctx.stroke();
+  ctx.setLineDash([]); ctx.restore();
+
+  // Y axis left (values)
+  ctx.fillStyle = '#5a677f'; ctx.font = '9.5px DM Mono,monospace'; ctx.textAlign = 'right';
+  for (let t=0; t<=5; t++) ctx.fillText(Math.round(maxVal*(1-t/5)), pad.left-5, pad.top+t/5*ph+4);
+  // Y axis right (%)
+  ctx.textAlign = 'left';
+  for (let t=0; t<=5; t++) ctx.fillText((100*(1-t/5)).toFixed(0)+'%', pad.left+pw+5, pad.top+t/5*ph+4);
+}
+
+// ── ISHIKAWA ──
+function renderIshiCats(causes) {
+  const cont = document.getElementById('ishi-cats');
+  if (!cont) return;
+  cont.innerHTML = ISHI_CATEGORIES.map((cat, ci) => `
+    <div class="card" style="padding:.75rem;margin:0">
+      <div style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--accent2);margin-bottom:.5rem">${cat}</div>
+      <div id="ishi-cat-${ci}">
+        ${(causes[ci]||[]).map((c,i)=>`
+          <div style="display:flex;align-items:center;gap:.3rem;margin-bottom:.3rem">
+            <input value="${esc(c)}" oninput="updateIshiCause(${ci},${i},this.value)" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.75rem;padding:.25rem .4rem;border-radius:3px;outline:none" placeholder="Causa...">
+            <button class="btn-rm-row" onclick="removeIshiCause(${ci},${i})">✕</button>
+          </div>`).join('')}
+      </div>
+      <button class="btn-add-row" style="margin-top:.3rem" onclick="addIshiCause(${ci})">+ causa</button>
+    </div>`).join('');
+}
+
+function addIshiCause(ci) {
+  if (!currentProject) return;
+  const a = projects[currentProject].analyse;
+  if (!a.ishiCauses) a.ishiCauses = {};
+  if (!a.ishiCauses[ci]) a.ishiCauses[ci] = [];
+  a.ishiCauses[ci].push('');
+  renderIshiCats(a.ishiCauses);
+  persistAll(); setTimeout(renderIshikawa, 100);
+}
+
+function removeIshiCause(ci, idx) {
+  if (!currentProject) return;
+  projects[currentProject].analyse.ishiCauses[ci].splice(idx, 1);
+  renderIshiCats(projects[currentProject].analyse.ishiCauses);
+  persistAll(); setTimeout(renderIshikawa, 100);
+}
+
+function updateIshiCause(ci, idx, val) {
+  if (!currentProject) return;
+  projects[currentProject].analyse.ishiCauses[ci][idx] = val;
+  saveField('analyse', 'ishiCauses', projects[currentProject].analyse.ishiCauses);
+  setTimeout(renderIshikawa, 200);
+}
+
+function renderIshikawa() {
+  const canvas = document.getElementById('chart-ishikawa');
+  if (!canvas) return;
+  const a = currentProject ? (projects[currentProject]?.analyse || {}) : {};
+  const efeito = (document.getElementById('ishi-efeito')?.value || a.ishiEfeito || 'Efeito').slice(0,40);
+  const causes = a.ishiCauses || {};
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.max(700, canvas.offsetWidth || canvas.parentElement?.offsetWidth || 800);
+  const H = 340;
+  canvas.style.height = H + 'px';
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, W, H);
+
+  const cx = W * 0.82, cy = H / 2;
+  const spineY = cy, spineX1 = 80, spineX2 = cx - 60;
+
+  // Spine
+  ctx.strokeStyle = '#3ecfcf'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(spineX1, spineY); ctx.lineTo(cx, spineY); ctx.stroke();
+  // Arrow
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx-15, cy-8); ctx.lineTo(cx-15, cy+8); ctx.closePath();
+  ctx.fillStyle = '#3ecfcf'; ctx.fill();
+  // Effect box
+  ctx.fillStyle = 'rgba(224,85,101,.15)'; ctx.strokeStyle = '#e05565'; ctx.lineWidth = 1.5;
+  ctx.fillRect(cx, cy-22, W-cx-10, 44); ctx.strokeRect(cx, cy-22, W-cx-10, 44);
+  ctx.fillStyle = '#e05565'; ctx.font = 'bold 11px DM Mono,monospace'; ctx.textAlign = 'center';
+  const efWords = efeito.split(' ');
+  ctx.fillText(efWords.slice(0,3).join(' '), cx+(W-cx-10)/2, cy-4);
+  if(efWords.length>3) ctx.fillText(efWords.slice(3).join(' '), cx+(W-cx-10)/2, cy+10);
+
+  // 6 bones (3 above, 3 below)
+  const positions = [
+    {x:spineX1+80, side:-1, cat:0}, {x:spineX1+200, side:-1, cat:1}, {x:spineX1+320, side:-1, cat:2},
+    {x:spineX1+80, side:1, cat:3}, {x:spineX1+200, side:1, cat:4}, {x:spineX1+320, side:1, cat:5},
+  ];
+  const boneLen = 80;
+
+  positions.forEach(({x, side, cat}) => {
+    if (x > spineX2) return;
+    const color = ['#3ecfcf','#f0a500','#a78bfa','#34d399','#f472b6','#fbbf24'][cat];
+    // Bone diagonal
+    const tx = x + (side === -1 ? -boneLen*0.6 : -boneLen*0.6);
+    const ty = spineY + side * boneLen;
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, spineY); ctx.lineTo(tx, ty); ctx.stroke();
+    // Category label
+    ctx.fillStyle = color; ctx.font = 'bold 9.5px DM Mono,monospace'; ctx.textAlign = 'center';
+    ctx.fillText(ISHI_CATEGORIES[cat], tx, ty + side*14);
+    // Sub-causes
+    const catCauses = causes[cat] || [];
+    catCauses.slice(0,4).forEach((c, ci) => {
+      if (!c) return;
+      const fx = tx - 50 + ci*25;
+      const fy = ty + side * (25 + ci*18);
+      ctx.strokeStyle = color + '88'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, fy); ctx.stroke();
+      ctx.fillStyle = '#dce4f0'; ctx.font = '8.5px DM Sans,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(c.length > 14 ? c.slice(0,14)+'…' : c, fx, fy + side*10);
+    });
+  });
+}
+
+// ── 5 PORQUÊS ──
+function renderCinco(rows, problema, raiz) {
+  setVal('cinco-problema', problema);
+  setVal('cinco-raiz', raiz);
+  const cont = document.getElementById('cinco-rows');
+  cont.innerHTML = rows.map((r, i) => `
+    <div class="why-row">
+      <div class="why-num">${i+1}</div>
+      <div class="field" style="flex:1">
+        <label>Por quê ${i===0?'o problema ocorre?':i===1?'isso acontece?':i===2?'esse fator existe?':i===3?'essa causa persiste?':'a causa raiz existe?'}</label>
+        <input value="${esc(r)}" oninput="updateCinco(${i},this.value)" placeholder="Por quê...">
+      </div>
+    </div>`).join('');
+}
+
+function updateCinco(idx, val) {
+  if (!currentProject) return;
+  const a = projects[currentProject].analyse;
+  if (!a.cincoRows) a.cincoRows = ['','','','',''];
+  a.cincoRows[idx] = val;
+  persistAll();
+}
+
+// ── GUT ──
+function renderGut(rows) {
+  document.getElementById('gut-body').innerHTML = rows.map((r, i) => {
+    const gut = (r.g||0)*(r.u||0)*(r.t||0);
+    const pri = gut >= 75 ? '🔴 Alta' : gut >= 27 ? '🟡 Média' : '🟢 Baixa';
+    return `<tr>
+      <td><input value="${esc(r.causa||'')}" oninput="saveNestedField('analyse','gut',${i},'causa',this.value)" style="min-width:180px"></td>
+      ${['g','u','t'].map(k=>`<td><input type="number" value="${r[k]||''}" min="1" max="5" style="width:50px" oninput="saveNestedField('analyse','gut',${i},'${k}',+this.value);renderGut(projects[currentProject].analyse.gut)"></td>`).join('')}
+      <td style="font-family:'DM Mono',monospace;color:var(--accent2);font-weight:600">${gut||'—'}</td>
+      <td>${pri}</td>
+      <td><button class="btn-rm-row" onclick="removeRow('analyse','gut',${i},renderGut)">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+function addGutRow() { addRow('analyse','gut',{},renderGut); }
+
+// ── ECRS ──
+function renderEcrs(rows) {
+  document.getElementById('ecrs-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td><select onchange="saveNestedField('analyse','ecrs',${i},'acao',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;outline:none">
+        ${ECRS_OPTIONS.map(o=>`<option ${r.acao===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><input value="${esc(r.proc||'')}" oninput="saveNestedField('analyse','ecrs',${i},'proc',this.value)" style="min-width:140px"></td>
+      <td><textarea rows="2" oninput="saveNestedField('analyse','ecrs',${i},'desc',this.value)" style="min-width:160px">${esc(r.desc||'')}</textarea></td>
+      <td><input value="${esc(r.resp||'')}" oninput="saveNestedField('analyse','ecrs',${i},'resp',this.value)"></td>
+      <td><input type="date" value="${r.prazo||''}" oninput="saveNestedField('analyse','ecrs',${i},'prazo',this.value)"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('analyse','ecrs',${i},renderEcrs)">✕</button></td>
+    </tr>`).join('');
+}
+function addEcrsRow() { addRow('analyse','ecrs',{acao:'Eliminar'},renderEcrs); }
+
+// ── DESCONEXÕES ──
+function renderDesc(rows) {
+  document.getElementById('desc-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td><input value="${esc(r.etapa||'')}" oninput="saveNestedField('analyse','desc',${i},'etapa',this.value)"></td>
+      <td><textarea rows="2" oninput="saveNestedField('analyse','desc',${i},'desc',this.value)">${esc(r.desc||'')}</textarea></td>
+      <td><input value="${esc(r.impacto||'')}" oninput="saveNestedField('analyse','desc',${i},'impacto',this.value)"></td>
+      <td><input value="${esc(r.causa||'')}" oninput="saveNestedField('analyse','desc',${i},'causa',this.value)"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('analyse','desc',${i},renderDesc)">✕</button></td>
+    </tr>`).join('');
+}
+function addDescRow() { addRow('analyse','desc',{},renderDesc); }
+
+// ── 5W2H ──
+function renderW5H2(rows) {
+  const STATUS_OPT = ['Pendente','Em andamento','Concluído','Atrasado'];
+  document.getElementById('w5h2-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted2);font-family:'DM Mono',monospace">${i+1}</td>
+      <td><textarea rows="2" oninput="saveNestedField('improve','w5h2',${i},'oque',this.value)" style="min-width:140px">${esc(r.oque||'')}</textarea></td>
+      <td><input value="${esc(r.pq||'')}" oninput="saveNestedField('improve','w5h2',${i},'pq',this.value)"></td>
+      <td><input value="${esc(r.onde||'')}" oninput="saveNestedField('improve','w5h2',${i},'onde',this.value)"></td>
+      <td><input value="${esc(r.quem||'')}" oninput="saveNestedField('improve','w5h2',${i},'quem',this.value)"></td>
+      <td><input type="date" value="${r.quando||''}" oninput="saveNestedField('improve','w5h2',${i},'quando',this.value)"></td>
+      <td><textarea rows="2" oninput="saveNestedField('improve','w5h2',${i},'como',this.value)" style="min-width:120px">${esc(r.como||'')}</textarea></td>
+      <td><input value="${esc(r.custo||'')}" oninput="saveNestedField('improve','w5h2',${i},'custo',this.value)" style="width:80px"></td>
+      <td><select onchange="saveNestedField('improve','w5h2',${i},'status',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.75rem;outline:none">
+        ${STATUS_OPT.map(o=>`<option ${r.status===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><button class="btn-rm-row" onclick="removeRow('improve','w5h2',${i},renderW5H2)">✕</button></td>
+    </tr>`).join('');
+}
+function addW5H2Row() { addRow('improve','w5h2',{},renderW5H2); }
+
+// ── CONTROLE ──
+function renderCtrl(rows) {
+  document.getElementById('ctrl-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td><input value="${esc(r.num||'P'+String(i+1).padStart(3,'0'))}" oninput="saveNestedField('control','ctrl',${i},'num',this.value)" style="width:70px"></td>
+      <td><input value="${esc(r.passo||'')}" oninput="saveNestedField('control','ctrl',${i},'passo',this.value)" style="min-width:130px"></td>
+      <td><input value="${esc(r.oque||'')}" oninput="saveNestedField('control','ctrl',${i},'oque',this.value)"></td>
+      <td><select onchange="saveNestedField('control','ctrl',${i},'es',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;outline:none">
+        <option ${r.es==='Entrada'?'selected':''}>Entrada</option><option ${r.es==='Saída'?'selected':''}>Saída</option>
+      </select></td>
+      <td><input value="${esc(r.espec||'')}" oninput="saveNestedField('control','ctrl',${i},'espec',this.value)"></td>
+      <td><input value="${esc(r.medicao||'')}" oninput="saveNestedField('control','ctrl',${i},'medicao',this.value)"></td>
+      <td><input value="${esc(r.controle||'')}" oninput="saveNestedField('control','ctrl',${i},'controle',this.value)"></td>
+      <td><input value="${esc(r.amostra||'')}" oninput="saveNestedField('control','ctrl',${i},'amostra',this.value)" style="width:70px"></td>
+      <td><input value="${esc(r.freq||'')}" oninput="saveNestedField('control','ctrl',${i},'freq',this.value)" style="width:80px"></td>
+      <td><input value="${esc(r.quem||'')}" oninput="saveNestedField('control','ctrl',${i},'quem',this.value)"></td>
+      <td><input value="${esc(r.arma||'')}" oninput="saveNestedField('control','ctrl',${i},'arma',this.value)"></td>
+      <td><input value="${esc(r.acao||'')}" oninput="saveNestedField('control','ctrl',${i},'acao',this.value)"></td>
+      <td><button class="btn-rm-row" onclick="removeRow('control','ctrl',${i},renderCtrl)">✕</button></td>
+    </tr>`).join('');
+}
+function addCtrlRow() { addRow('control','ctrl',{es:'Saída'},renderCtrl); }
+
+// ── TREINAMENTO ──
+function renderTrain(rows) {
+  const FMTS = ['Presencial','Online','EAD','OJT','Workshop','Leitura'];
+  document.getElementById('train-body').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td><input value="${esc(r.modulo||'')}" oninput="saveNestedField('control','train',${i},'modulo',this.value)" style="min-width:160px"></td>
+      <td><input value="${esc(r.publico||'')}" oninput="saveNestedField('control','train',${i},'publico',this.value)"></td>
+      <td><input value="${esc(r.resp||'')}" oninput="saveNestedField('control','train',${i},'resp',this.value)"></td>
+      <td><select onchange="saveNestedField('control','train',${i},'formato',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;outline:none">
+        ${FMTS.map(f=>`<option ${r.formato===f?'selected':''}>${f}</option>`).join('')}
+      </select></td>
+      <td><input type="date" value="${r.data||''}" oninput="saveNestedField('control','train',${i},'data',this.value)"></td>
+      <td><select onchange="saveNestedField('control','train',${i},'status',this.value)" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;outline:none">
+        <option ${r.status==='Pendente'?'selected':''}>Pendente</option>
+        <option ${r.status==='Realizado'?'selected':''}>Realizado</option>
+        <option ${r.status==='Cancelado'?'selected':''}>Cancelado</option>
+      </select></td>
+      <td><button class="btn-rm-row" onclick="removeRow('control','train',${i},renderTrain)">✕</button></td>
+    </tr>`).join('');
+}
+function addTrainRow() { addRow('control','train',{},renderTrain); }
+
+// ── CHECKLIST ENCERRAMENTO ──
+function renderEncerramento(checks) {
+  const el = document.getElementById('encerramento-items');
+  el.innerHTML = ENCERRAMENTO_ITEMS.map((q, i) => {
+    const val = checks[i] || 'Não';
+    return `<div class="checklist-item" style="gap:.6rem">
+      <div class="q">${q}</div>
+      <div style="display:flex;gap:.4rem">
+        ${['Sim','Não','N/A'].map(v => `
+          <div onclick="setEnc(${i},'${v}')" style="padding:.25rem .6rem;border-radius:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:.7rem;border:1px solid ${val===v?(v==='Sim'?'var(--success)':v==='Não'?'var(--danger)':'var(--border2)'):'var(--border2)'};background:${val===v?(v==='Sim'?'rgba(52,211,153,.1)':v==='Não'?'rgba(224,85,101,.1)':'var(--surface2)'):'transparent'};color:${val===v?(v==='Sim'?'var(--success)':v==='Não'?'var(--danger)':'var(--muted2)'):'var(--muted2)'}">${v}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  const sims = Object.values(checks).filter(v=>v==='Sim').length;
+  const total = ENCERRAMENTO_ITEMS.length;
+  const v = document.getElementById('encerramento-verdict');
+  const pct = Math.round(sims/total*100);
+  v.innerHTML = `<span style="color:${pct===100?'var(--success)':pct>=70?'var(--accent2)':'var(--danger)'}">${sims}/${total} itens concluídos (${pct}%)</span>`;
+}
+
+function setEnc(idx, val) {
+  if (!currentProject) return;
+  const c = projects[currentProject].control;
+  if (!c.encerramento) c.encerramento = {};
+  c.encerramento[idx] = val;
+  renderEncerramento(c.encerramento);
+  persistAll();
+}
+
+// ── GENERIC HELPERS ──
+function addRow(phase, subKey, defaults, renderFn) {
+  if (!currentProject) { alert('Selecione um projeto primeiro.'); return; }
+  const p = projects[currentProject];
+  if (!p[phase][subKey]) p[phase][subKey] = [];
+  p[phase][subKey].push({...defaults});
+  renderFn(p[phase][subKey]);
+  persistAll();
+}
+
+function removeRow(phase, subKey, idx, renderFn) {
+  if (!currentProject) return;
+  projects[currentProject][phase][subKey].splice(idx, 1);
+  renderFn(projects[currentProject][phase][subKey]);
+  persistAll();
+}
+
+function esc(s) {
+  if (!s && s !== 0) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  loadProjects();
+  showPage('home', document.querySelector('.nav-item'));
+});
+window.addEventListener('resize', () => {
+  renderPareto();
+  renderIshikawa();
+});
+</script>
+</body>
+</html>
