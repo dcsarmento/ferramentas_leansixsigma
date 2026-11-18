@@ -332,7 +332,7 @@ svg text{font-family:'DM Mono',monospace;}
    Firebase no futuro sem mexer nas telas.
    ===================================================================== */
 const STORE_KEY = 'atlas_db_v1';
-const DMAIC_KEY = 'dmaic_projects';   // mesma origem (github.io) → leitura direta do dmaic.html
+const DMAIC_KEY = 'dmaic_projects';   // mesma origem (domínio publicado) → leitura direta do dmaic.html
 const Store = {
   load() { try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return d && d.projects ? d : null; } catch (e) { return null; } },
   save(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); },
@@ -499,7 +499,7 @@ function seedExample() {
       objetivo: 'Usar o Atlas por 30 dias seguidos para gerir pelo menos 3 projetos reais.',
       dentro: 'Portfólio, TAP, Kanban com WIP, Scrum, riscos, partes interessadas, lições, integração DMAIC/CEP, backup JSON.',
       fora: 'Multiusuário, login, integrações externas, app nativo.',
-      premissas: 'GitHub Pages gratuito; backup JSON semanal.', restricoes: 'Sem servidor; manutenção com apoio de IA.',
+      premissas: 'Vercel gratuito (plano Hobby); backup JSON semanal.', restricoes: 'Sem servidor; manutenção com apoio de IA.',
       orcamento: 'R$ 0 (horas próprias)', criterios: '3 projetos cadastrados na 1ª semana; 30 dias de uso contínuo; nenhum backup com mais de 7 dias.'
     }
   });

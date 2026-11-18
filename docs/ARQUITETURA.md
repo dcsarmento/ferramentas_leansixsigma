@@ -1,7 +1,7 @@
 # Arquitetura — Atlas
 
 ## Visão geral
-Três páginas estáticas no GitHub Pages, mesma origem (`dcsarmento.github.io`), logo o mesmo `localStorage`:
+Três páginas estáticas publicadas no Vercel (ADR 10), mesma origem (o domínio de produção do projeto no Vercel), logo o mesmo `localStorage`:
 
 | Página | Lê | Grava |
 | --- | --- | --- |
@@ -10,6 +10,12 @@ Três páginas estáticas no GitHub Pages, mesma origem (`dcsarmento.github.io`)
 | `gestao.html` (Atlas) | `atlas_db_v1`, `dmaic_projects` | `atlas_db_v1`, `dmaic_last` (só para abrir um projeto no DMAIC) |
 
 O Atlas **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um backup e confirma.
+
+## Publicação (ADR 10)
+- O Vercel, ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
+- `vercel.json` roda `npm run build` (`tools/build.js`), que copia só as três páginas para `dist/` e falha se faltar alguma.
+- Os testes rodam no GitHub Actions; a regra de proteção da `main` exige o check **Testes** verde antes do merge.
+- Cada domínio tem seu próprio `localStorage`: prévia, produção e o antigo `github.io` não compartilham dados.
 
 ## Organização do `gestao.html`
 Arquivo único, dividido em blocos comentados, nesta ordem:
@@ -77,3 +83,4 @@ Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "
 | 7 | 18/11/2026 | Exceção ao gate: Diagnóstico de Processos (R3-A) entra antes dos 30 dias de uso da R1, dentro do `gestao.html` | Cadastro de processos reais é uso real; menor corte da R3. Decidido pelo dono | Manter o gate; página `processos.html` separada (duplicaria `Store` e backup). SIPOC, VSM e RACI (R3-B) continuam atrás do gate |
 | 8 | 18/11/2026 | Maturidade de processo em 5 níveis × 5 dimensões, nível geral = mínimo; OPM3 sai da R3 | Elo mais fraco (PEMM) não esconde lacunas; OPM3 mede gestão de projetos, não processos | Média das dimensões; nível único por processo; OPM3 como módulo de maturidade |
 | 9 | 18/11/2026 | Telas de Projetos agrupadas pelos 7 domínios de desempenho do PMBOK 8, com a área de conhecimento clássica como legenda; itens da R2/R3-B visíveis e desabilitados | Coerente com o ADR 2; o dono quer cada ferramenta na sua área; mostra o mapa sem antecipar o gate | 10 áreas de conhecimento da 6ª ed.; construir Gantt e Timeline antes do gate |
+| 10 | 18/11/2026 | Publicação no Vercel (Git integration: prévia por PR, produção na `main`), no molde do BI Frota; substitui o GitHub Pages do ADR 6 | Pedido do dono; mesmo fluxo do BI, prévia para revisar cada fatia antes do merge | Manter o GitHub Pages; rodar a suíte Playwright dentro do build do Vercel (Chromium instável na imagem de build) |
