@@ -1,6 +1,6 @@
 # Especificação — Atlas
 
-Versão 1.0 · 18/11/2026 · Dono: Diego Sarmento
+Versão 1.1 · 18/11/2026 · Dono: Diego Sarmento
 
 ## 1. Problema
 As ferramentas do repositório resolvem partes isoladas: o CEP (`index.html`) analisa estabilidade de processo e o DMAIC (`dmaic.html`) conduz projetos de melhoria. Não existe lugar para ver todos os projetos, gerir o fluxo de trabalho, acompanhar riscos e partes interessadas, nem tocar projetos que não são DMAIC.
@@ -47,5 +47,37 @@ O código entre colchetes é o mesmo do teste automatizado em `tests/`. Critéri
 | LSS-03 | Dados do DMAIC corrompidos não quebram o Atlas |
 | SMK | `index.html`, `dmaic.html` e `gestao.html` abrem sem erro de script; o CEP mantém os links para DMAIC e Atlas |
 
-## 6. Referências
-PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão).
+## 6. Release 3-A — Diagnóstico de Processos (exceção ao gate, ADR 7)
+
+**Problema.** Não há onde registrar os processos nem saber qual está mais frágil.
+**Objetivo.** Ter o inventário dos processos com o nível de maturidade de cada um e a evolução no tempo.
+**Resultado esperado.** Em 30 dias, ao menos 5 processos reais avaliados e um deles com ação definida para subir de nível.
+
+### Escala de maturidade
+Cinco níveis (nomes alinhados ao BPMM da OMG e ao CMMI) avaliados em cinco dimensões (inspiradas no PEMM de Hammer).
+**Nível geral = menor nível entre as dimensões** da avaliação mais recente (regra do elo mais fraco).
+Dimensão acima do nível 2 exige evidência escrita.
+
+| Dimensão | 1 · Inicial | 2 · Repetível | 3 · Padronizado | 4 · Medido | 5 · Otimizado |
+| --- | --- | --- | --- | --- | --- |
+| Desenho e documentação (`desenho`) | Na cabeça das pessoas | Passos principais escritos | Fluxo mapeado (BPMN/SIPOC) e procedimento aprovado | Documento revisado com base nos dados | Revisão periódica com ciclo de melhoria |
+| Dono e governança (`dono`) | Ninguém responde | Alguém cuida informalmente | Dono nomeado, com autoridade | Dono acompanha indicadores e responde por eles | Dono lidera melhoria entre áreas |
+| Executores e capacitação (`executores`) | Cada um faz do seu jeito | Quem faz conhece a rotina | Treinamento no padrão | Desempenho individual acompanhado | Executores propõem melhorias |
+| Indicadores e medição (`indicadores`) | Nenhum | Medido de vez em quando | Indicador definido, com meta e frequência | Medido com estabilidade conhecida (CEP) | Capacidade (Cp/Cpk) no alvo e comparada |
+| Controle e melhoria (`controle`) | Só corrige quando quebra | Correções repetem os mesmos erros | Desvios tratados com causa raiz | Plano de controle ativo | Melhoria contínua (DMAIC/PDSA) rodando |
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| PRC-01 | Criar processo exige nome; persiste após recarregar; edição e exclusão (com confirmação) funcionam |
+| PRC-02 | Menu tem a seção Processos; nela a barra esconde o seletor, "Novo projeto" e "Excluir" de projeto |
+| PRC-03 | Processo abre um projeto DMAIC no portfólio, vinculado por `processoId` |
+| MAT-01 | Nível geral = menor nível das 5 dimensões da avaliação mais recente; sem avaliação = "não avaliado" |
+| MAT-02 | Dimensão acima de 2 sem evidência é recusada com mensagem |
+| MAT-03 | Nova avaliação entra no histórico sem apagar as anteriores; tendência compara com a penúltima |
+| MAT-04 | Painel conta processos por nível e destaca processo de criticidade Alta em nível ≤ 2 e avaliação com mais de 180 dias |
+| DAD-04 | Backup exporta e restaura `processes`; backup antigo sem `processes` abre com `{}`; DAD-03 segue verde |
+| SEG-01 | Textos de processo e evidência passam por `esc()` (teste de XSS estendido) |
+
+## 7. Referências
+PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
