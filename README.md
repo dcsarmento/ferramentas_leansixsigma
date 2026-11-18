@@ -26,6 +26,13 @@ O aviso no topo aparece quando o último backup tem mais de 7 dias.
 
 No celular o quadro não aceita arrastar: abra o cartão e troque a coluna no campo **Coluna**.
 
+## Como o projeto é desenvolvido
+- `CLAUDE.md` — regras de trabalho (três leis e ciclo especificação → arquitetura → tarefa → teste → PR)
+- `docs/ESPECIFICACAO.md` — problema, objetivo, resultado esperado e critérios de aceite com código
+- `docs/ARQUITETURA.md` — estrutura, modelo de dados e registro de decisões
+- `docs/BACKLOG.md` — próximas releases fatiadas em tarefas pequenas
+- `tests/` — testes automatizados (`npm test`), rodando no GitHub Actions a cada pull request
+
 ## Próximas releases
 
 - **R2:** EAP, cronograma Gantt, valor agregado (VP, VA, CR, IDC, IDP), diagrama de fluxo cumulativo.
