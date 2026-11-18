@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Atlas · Gestão de Projetos e Processos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Mesma identidade visual do dmaic.html e do index.html (CEP) */
+:root{
+  --bg:#0b0e13;--surface:#111520;--surface2:#161b27;--border:#1e2535;--border2:#252d40;
+  --accent:#3ecfcf;--accent2:#f0a500;--danger:#e05565;--success:#34d399;--purple:#a78bfa;--warn:#f0a500;
+  --text:#dce4f0;--muted:#5a677f;--muted2:#8090aa;--sidebar-w:230px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;min-height:100vh;font-size:14px;}
+a{color:var(--accent);}
+
+/* SIDEBAR */
+#sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto;}
+.sidebar-logo{padding:1.2rem;border-bottom:1px solid var(--border);}
+.logo-text{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);letter-spacing:.04em;}
+.logo-sub{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem;}
+.sidebar-section{padding:.8rem .7rem .3rem;}
+.sidebar-section-label{font-size:.63rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-family:'DM Mono',monospace;padding:0 .4rem;margin-bottom:.3rem;}
+.nav-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;border-radius:5px;cursor:pointer;color:var(--muted2);font-size:.8rem;transition:all .15s;border:1px solid transparent;margin-bottom:2px;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(62,207,207,.08);border-color:rgba(62,207,207,.2);color:var(--accent);}
+.nav-icon{font-family:'DM Mono',monospace;font-size:.66rem;min-width:34px;background:var(--surface2);border:1px solid var(--border2);padding:2px 4px;border-radius:3px;text-align:center;}
+.nav-ext{background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.2);color:var(--accent2);}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid var(--border);font-size:.65rem;color:var(--muted);line-height:1.6;}
+
+/* TOPBAR */
+#main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0;}
+.project-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+.project-bar select{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.78rem;padding:.3rem .6rem;border-radius:4px;outline:none;flex:1;max-width:320px;}
+.btn-sm{font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .75rem;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted2);transition:all .15s;white-space:nowrap;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm.primary{background:var(--accent);color:#0b0e13;border-color:var(--accent);}
+.btn-sm.danger{border-color:var(--danger);color:var(--danger);}
+.chip{font-family:'DM Mono',monospace;font-size:.66rem;padding:.2rem .55rem;border-radius:20px;border:1px solid var(--border2);color:var(--muted2);white-space:nowrap;}
+.chip.ok{border-color:rgba(52,211,153,.4);color:var(--success);}
+.chip.warn{border-color:rgba(240,165,0,.45);color:var(--warn);}
+.chip.bad{border-color:rgba(224,85,101,.5);color:var(--danger);}
+.save-indicator{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--success);opacity:0;transition:opacity .3s;}
+.save-indicator.show{opacity:1;}
+.banner{margin:1rem 2.5rem 0;padding:.7rem 1rem;border:1px solid rgba(240,165,0,.4);background:rgba(240,165,0,.07);color:var(--warn);border-radius:6px;font-size:.78rem;display:none;align-items:center;gap:.8rem;flex-wrap:wrap;}
+.banner.show{display:flex;}
+
+/* PAGES */
+.page{display:none;padding:2rem 2.5rem;max-width:1280px;}
+.page.active{display:block;animation:fadein .2s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-header{margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.8rem;}
+.page-header h1{font-family:'DM Mono',monospace;font-size:1.3rem;font-weight:500;}
+.page-header p{font-size:.76rem;color:var(--muted2);margin-top:.3rem;max-width:720px;line-height:1.5;}
+.ref{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1.2rem;margin-bottom:1.2rem;}
+.card-title{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;justify-content:space-between;flex-wrap:wrap;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.form-grid.cols4{grid-template-columns:repeat(4,1fr);}
+.span2{grid-column:span 2;}
+.field{display:flex;flex-direction:column;gap:.3rem;}
+.field label{font-size:.66rem;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;}
+.field input,.field textarea,.field select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.45rem .65rem;font-family:'DM Mono',monospace;font-size:.8rem;border-radius:4px;outline:none;transition:border-color .15s;width:100%;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;line-height:1.6;font-family:'DM Sans',sans-serif;}
+.field select option{background:var(--surface2);}
+.hint{font-size:.68rem;color:var(--muted);line-height:1.45;}
+
+.btn{background:var(--accent);color:#0b0e13;border:none;padding:.5rem 1.1rem;font-family:'DM Mono',monospace;font-size:.77rem;font-weight:500;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--muted2);}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn.danger{background:var(--danger);color:#fff;}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem;}
+.btn-rm{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:.85rem;}
+.btn-rm:hover{color:var(--danger);}
+.btn-ic{background:transparent;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;padding:1px 7px;font-size:.72rem;border-radius:3px;font-family:'DM Mono',monospace;}
+.btn-ic:hover{border-color:var(--accent);color:var(--accent);}
+
+.tbl-wrap{overflow-x:auto;}
+table.tbl{width:100%;border-collapse:collapse;font-size:.78rem;}
+table.tbl th{padding:.5rem .7rem;text-align:left;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
+table.tbl td{padding:.5rem .7rem;border-bottom:1px solid var(--border);vertical-align:top;}
+table.tbl tr:last-child td{border-bottom:none;}
+table.tbl tr.click{cursor:pointer;}
+table.tbl tr.click:hover td{background:rgba(62,207,207,.04);}
+.num{font-family:'DM Mono',monospace;text-align:right;}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;margin-bottom:1.2rem;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:1rem;}
+.kpi-label{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.kpi-val{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;margin-top:.35rem;}
+.kpi-sub{font-size:.68rem;color:var(--muted2);margin-top:.2rem;}
+
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle;}
+.dot.verde{background:var(--success);}.dot.amarelo{background:var(--warn);}.dot.vermelho{background:var(--danger);}
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px;border:1px solid var(--border2);color:var(--muted2);margin-right:.25rem;white-space:nowrap;}
+.bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;min-width:70px;}
+.bar > div{height:100%;background:var(--accent);}
+
+/* KANBAN */
+.board{display:flex;gap:.8rem;overflow-x:auto;padding-bottom:1rem;align-items:flex-start;}
+.col{background:var(--surface);border:1px solid var(--border);border-radius:7px;min-width:240px;width:240px;flex-shrink:0;display:flex;flex-direction:column;max-height:72vh;}
+.col.over-wip{border-color:var(--danger);}
+.col.drag-over{border-color:var(--accent);background:rgba(62,207,207,.04);}
+.col-head{padding:.7rem .8rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:.4rem;}
+.col-name{font-family:'DM Mono',monospace;font-size:.74rem;font-weight:500;}
+.col-wip{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted2);}
+.col.over-wip .col-wip{color:var(--danger);font-weight:600;}
+.col-body{padding:.6rem;overflow-y:auto;flex:1;min-height:80px;}
+.kcard{background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--muted);border-radius:5px;padding:.55rem .6rem;margin-bottom:.5rem;cursor:grab;font-size:.78rem;}
+.kcard:hover{border-color:var(--accent);}
+.kcard.cls-expedite{border-left-color:var(--danger);}
+.kcard.cls-data{border-left-color:var(--warn);}
+.kcard.cls-padrao{border-left-color:var(--accent);}
+.kcard.cls-intangivel{border-left-color:var(--purple);}
+.kcard-title{line-height:1.35;margin-bottom:.35rem;}
+.kcard-meta{display:flex;flex-wrap:wrap;gap:.25rem;align-items:center;font-size:.64rem;color:var(--muted2);font-family:'DM Mono',monospace;}
+.aging{color:var(--warn);}
+.add-card{background:transparent;border:1px dashed var(--border2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:.7rem;padding:.35rem;border-radius:4px;cursor:pointer;width:100%;}
+.add-card:hover{border-color:var(--accent);color:var(--accent);}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.68rem;color:var(--muted2);margin-bottom:.8rem;}
+.legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle;background:var(--c);}
+
+/* MATRIZES */
+.matrix{display:grid;grid-template-columns:28px repeat(5,1fr);gap:3px;max-width:520px;}
+.mcell{aspect-ratio:1.6;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;font-family:'DM Mono',monospace;font-size:.62rem;padding:2px;color:#0b0e13;font-weight:600;}
+.maxis{display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:620px;}
+.qcell{border:1px solid var(--border2);border-radius:6px;padding:.7rem;min-height:120px;background:var(--surface2);}
+.qcell h4{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;font-weight:500;}
+.qcell.hot{border-color:rgba(224,85,101,.45);}
+.pill{display:inline-block;background:var(--bg);border:1px solid var(--border2);border-radius:12px;padding:.15rem .55rem;font-size:.7rem;margin:0 .25rem .3rem 0;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted2);font-size:.85rem;line-height:1.7;}
+.empty h2{font-family:'DM Mono',monospace;font-size:1rem;color:var(--text);margin-bottom:.5rem;font-weight:500;}
+svg text{font-family:'DM Mono',monospace;}
+
+/* MODAL */
+#modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-start;justify-content:center;z-index:200;padding:5vh 1rem;overflow-y:auto;}
+#modal-bg.show{display:flex;}
+#modal{background:var(--surface);border:1px solid var(--border2);border-radius:8px;width:100%;max-width:640px;padding:1.4rem;}
+#modal h3{font-family:'DM Mono',monospace;font-size:.95rem;font-weight:500;margin-bottom:1rem;}
+
+@media (max-width:860px){
+  #sidebar{position:static;width:100%;min-height:auto;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);}
+  .sidebar-logo{border-bottom:none;padding:.6rem .8rem;}
+  .logo-sub,.sidebar-section-label,.sidebar-footer{display:none;}
+  .sidebar-section{display:flex;gap:.3rem;padding:.4rem .2rem;}
+  .nav-item{white-space:nowrap;margin-bottom:0;}
+  .nav-icon{display:none;}
+  body{flex-direction:column;}
+  #main{margin-left:0;}
+  .page{padding:1.2rem 1rem;}
+  .form-grid,.form-grid.cols3,.form-grid.cols4,.grid2{grid-template-columns:1fr;}
+  .span2{grid-column:auto;}
+  .banner{margin:1rem 1rem 0;}
+}
+@media print{
+  #sidebar,.project-bar,.banner,.btn,.btn-row,.btn-rm,.no-print{display:none !important;}
+  #main{margin-left:0;}
+  body{background:#fff;color:#000;}
+  .page{display:none !important;}
+  .page.active{display:block !important;padding:0;}
+  .card{border:1px solid #bbb;background:#fff;}
+  .field input,.field textarea,.field select{border:none;color:#000;background:#fff;padding:0;}
+}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">ATLAS</div>
+    <div class="logo-sub">Projetos · Processos · Melhoria</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Portfólio</div>
+    <div class="nav-item active" data-page="painel" onclick="showPage('painel')"><span class="nav-icon">PORT</span>Painel do portfólio</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Projeto selecionado</div>
+    <div class="nav-item" data-page="tap" onclick="showPage('tap')"><span class="nav-icon">TAP</span>Termo de abertura</div>
+    <div class="nav-item" data-page="kanban" onclick="showPage('kanban')"><span class="nav-icon">KAN</span>Kanban</div>
+    <div class="nav-item" data-page="scrum" onclick="showPage('scrum')"><span class="nav-icon">SCR</span>Scrum</div>
+    <div class="nav-item" data-page="riscos" onclick="showPage('riscos')"><span class="nav-icon">RSK</span>Riscos</div>
+    <div class="nav-item" data-page="partes" onclick="showPage('partes')"><span class="nav-icon">STK</span>Partes interessadas</div>
+    <div class="nav-item" data-page="licoes" onclick="showPage('licoes')"><span class="nav-icon">LIÇ</span>Lições aprendidas</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Lean Six Sigma</div>
+    <div class="nav-item nav-ext" onclick="window.open('dmaic.html','_blank')"><span class="nav-icon">DMAIC</span>Projetos de melhoria</div>
+    <div class="nav-item nav-ext" onclick="window.open('index.html','_blank')"><span class="nav-icon">CEP</span>Gráficos de controle</div>
+  </div>
+  <div class="sidebar-footer">
+    PMBOK 8 · Kanban · Scrum · LSS<br>
+    <span id="footer-project" style="color:var(--accent)">—</span><br>
+    <span id="footer-backup">—</span>
+  </div>
+</nav>
+
+<div id="main">
+  <div class="project-bar">
+    <select id="project-select" onchange="selectProject(this.value)"></select>
+    <button class="btn-sm primary" onclick="newProjectDialog()">+ Novo projeto</button>
+    <button class="btn-sm danger" onclick="deleteProject()">Excluir</button>
+    <span style="flex:1"></span>
+    <span class="save-indicator" id="save-indicator">✓ salvo</span>
+    <span class="chip" id="backup-chip">backup: nunca</span>
+    <button class="btn-sm" onclick="exportBackup()">⬇ Backup JSON</button>
+    <label class="btn-sm" style="cursor:pointer">⬆ Restaurar<input type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"></label>
+  </div>
+  <div class="banner" id="backup-banner">
+    <span id="backup-banner-text"></span>
+    <button class="btn-sm" onclick="exportBackup()">Fazer backup agora</button>
+  </div>
+
+  <!-- PAINEL -->
+  <section class="page active" id="page-painel">
+    <div class="page-header">
+      <div>
+        <div class="ref">PMBOK 8 · Domínio Governança</div>
+        <h1>Painel do portfólio</h1>
+        <p>Todos os projetos num só lugar, incluindo os projetos DMAIC criados na ferramenta de melhoria. Clique numa linha para abrir o projeto.</p>
+      </div>
+    </div>
+    <div id="painel-body"></div>
+  </section>
+
+  <!-- TAP -->
+  <section class="page" id="page-tap">
+    <div class="page-header">
+      <div>
+        <div class="ref">PMBOK 8 · Governança · Escopo · Cronograma · Finanças</div>
+        <h1>Termo de abertura do projeto</h1>
+        <p>O TAP autoriza o projeto e fixa o que é sucesso. Objetivo sem número e prazo não é objetivo: use o formato SMART.</p>
+      </div>
+      <button class="btn ghost no-print" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+    <div id="tap-body"></div>
+  </section>
+
+  <!-- KANBAN -->
+  <section class="page" id="page-kanban">
+    <div class="page-header">
+      <div>
+        <div class="ref">Método Kanban · Anderson</div>
+        <h1>Kanban</h1>
+        <p>Arraste os cartões entre colunas. O limite de WIP é o que transforma uma lista de tarefas num sistema puxado: coluna estourada fica vermelha. Lead time conta do compromisso (saída do Backlog) à entrega; cycle time, do início do trabalho à entrega.</p>
+      </div>
+      <div class="btn-row no-print" style="margin-top:0">
+        <select id="kanban-filter" class="btn-sm" onchange="renderKanban()"></select>
+        <button class="btn ghost" onclick="editColumnsDialog()">Configurar colunas</button>
+      </div>
+    </div>
+    <div id="kanban-body"></div>
+  </section>
+
+  <!-- SCRUM -->
+  <section class="page" id="page-scrum">
+    <div class="page-header">
+      <div>
+        <div class="ref">Scrum Guide 2020</div>
+        <h1>Scrum</h1>
+        <p>Backlog priorizado, sprints com meta, burndown e velocidade. Os itens são os mesmos do Kanban: o que entra numa sprint aparece no quadro filtrado pela sprint ativa.</p>
+      </div>
+      <button class="btn no-print" onclick="sprintDialog()">+ Nova sprint</button>
+    </div>
+    <div id="scrum-body"></div>
+  </section>
+
+  <!-- RISCOS -->
+  <section class="page" id="page-riscos">
+    <div class="page-header">
+      <div>
+        <div class="ref">PMBOK 8 · Domínio Riscos</div>
+        <h1>Registro de riscos</h1>
+        <p>Pontuação = probabilidade × impacto (1–25). Acima de 15 é alto e exige resposta com dono e ação; abaixo de 6, aceitar e monitorar costuma bastar.</p>
+      </div>
+      <button class="btn no-print" onclick="riskDialog()">+ Novo risco</button>
+    </div>
+    <div id="riscos-body"></div>
+  </section>
+
+  <!-- PARTES -->
+  <section class="page" id="page-partes">
+    <div class="page-header">
+      <div>
+        <div class="ref">PMBOK 8 · Domínio Partes Interessadas</div>
+        <h1>Partes interessadas</h1>
+        <p>Matriz poder × interesse (Mendelow). A estratégia de engajamento sai do quadrante; a atitude registra se a pessoa apoia, é neutra ou resiste.</p>
+      </div>
+      <button class="btn no-print" onclick="stakeDialog()">+ Nova parte interessada</button>
+    </div>
+    <div id="partes-body"></div>
+  </section>
+
+  <!-- LIÇÕES -->
+  <section class="page" id="page-licoes">
+    <div class="page-header">
+      <div>
+        <div class="ref">PMBOK 8 · Encerramento · Retrospectivas</div>
+        <h1>Lições aprendidas</h1>
+        <p>Registre durante o projeto, não só no fim. Cada lição precisa de uma recomendação acionável; sem isso é desabafo, não conhecimento.</p>
+      </div>
+      <button class="btn no-print" onclick="lessonDialog()">+ Nova lição</button>
+    </div>
+    <div id="licoes-body"></div>
+  </section>
+</div>
+
+<div id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div id="modal"><h3 id="modal-title"></h3><div id="modal-content"></div>
+    <div class="btn-row" style="justify-content:flex-end">
+      <button class="btn danger" id="modal-del" style="display:none;margin-right:auto">Excluir</button>
+      <button class="btn ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn" id="modal-save">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   CAMADA DE DADOS — isolada para permitir trocar localStorage por
+   Firebase no futuro sem mexer nas telas.
+   ===================================================================== */
+const STORE_KEY = 'atlas_db_v1';
+const DMAIC_KEY = 'dmaic_projects';   // mesma origem (github.io) → leitura direta do dmaic.html
+const Store = {
+  load() { try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return d && d.projects ? d : null; } catch (e) { return null; } },
+  save(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); },
+  dmaic() { try { return JSON.parse(localStorage.getItem(DMAIC_KEY) || '{}') || {}; } catch (e) { return {}; } }
+};
+let db = Store.load() || { version: 1, projects: {}, meta: { lastBackup: null, current: null } };
+db.meta = db.meta || { lastBackup: null, current: null };
+
+/* ===================== UTILITÁRIOS ===================== */
+const DAY = 864e5;
+const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nowISO = () => new Date().toISOString();
+const today = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+const fmtD = iso => iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '—';
+const days = (a, b) => (new Date(b) - new Date(a)) / DAY;
+const avg = arr => arr.length ? arr.reduce((s, x) => s + x, 0) / arr.length : null;
+const f1 = n => n == null ? '—' : (Math.round(n * 10) / 10).toLocaleString('pt-BR');
+const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+const opts = (list, sel) => list.map(o => { const v = Array.isArray(o) ? o[0] : o, l = Array.isArray(o) ? o[1] : o; return `<option value="${esc(v)}"${String(v) === String(sel ?? '') ? ' selected' : ''}>${esc(l)}</option>`; }).join('');
+const cur = () => db.projects[db.meta.current] || null;
+
+let saveTimer;
+function persist() {
+  const t = nowISO();
+  db.meta.updatedAt = t;
+  if (cur()) cur().updatedAt = t;
+  try { Store.save(db); } catch (e) { alert('Não foi possível salvar no navegador (armazenamento cheio?). Faça um backup JSON agora.'); return; }
+  const el = document.getElementById('save-indicator');
+  el.classList.add('show'); clearTimeout(saveTimer); saveTimer = setTimeout(() => el.classList.remove('show'), 1200);
+  renderBackupStatus();
+}
+
+/* ===================== DOMÍNIO ===================== */
+const ABORDAGENS = ['Preditiva', 'Scrum', 'Kanban', 'DMAIC', 'Híbrida'];
+const STATUS = ['Ideia', 'Planejamento', 'Em execução', 'Pausado', 'Concluído', 'Cancelado'];
+const ATIVOS = ['Planejamento', 'Em execução'];
+const SAUDE = [['verde', 'Verde — no plano'], ['amarelo', 'Amarelo — atenção'], ['vermelho', 'Vermelho — fora do plano']];
+const PRIORIDADE = ['Alta', 'Média', 'Baixa'];
+const TIPOS = ['Tarefa', 'História', 'Entregável', 'Melhoria', 'Defeito'];
+const CLASSES = [['padrao', 'Padrão'], ['expedite', 'Urgente (expedite)'], ['data', 'Data fixa'], ['intangivel', 'Intangível']];
+const COL_TIPOS = [['backlog', 'Backlog (antes do compromisso)'], ['todo', 'Compromisso / a fazer'], ['doing', 'Trabalho em andamento'], ['done', 'Concluído']];
+const RESPOSTAS = ['Evitar', 'Mitigar', 'Transferir', 'Aceitar', 'Explorar', 'Melhorar', 'Compartilhar'];
+const CATEG_RISCO = ['Escopo', 'Prazo', 'Custo', 'Qualidade', 'Recursos', 'Técnico', 'Externo', 'Partes interessadas'];
+const ATITUDES = ['Apoia', 'Neutro', 'Resiste', 'Desconhecida'];
+const PH = [['define', 'D'], ['measure', 'M'], ['analyse', 'A'], ['improve', 'I'], ['control', 'C']];
+const DMAIC_ST = { todo: '○', wip: '⧖', done: '✓', late: '⚠', na: '—' };
+
+const defaultCols = () => [
+  { id: 'c_backlog', nome: 'Backlog', tipo: 'backlog', wip: 0 },
+  { id: 'c_todo', nome: 'A fazer', tipo: 'todo', wip: 5 },
+  { id: 'c_doing', nome: 'Em andamento', tipo: 'doing', wip: 3 },
+  { id: 'c_review', nome: 'Revisão', tipo: 'doing', wip: 2 },
+  { id: 'c_done', nome: 'Concluído', tipo: 'done', wip: 0 }
+];
+
+function makeProject(o) {
+  const t = nowISO();
+  return Object.assign({
+    id: uid('prj'), nome: 'Novo projeto', abordagem: 'Híbrida', status: 'Planejamento', saude: 'verde', prioridade: 'Média',
+    gerente: '', patrocinador: '', inicio: today(), fim: '', alinhamento: '', dmaicId: '',
+    tap: { justificativa: '', objetivo: '', dentro: '', fora: '', premissas: '', restricoes: '', orcamento: '', criterios: '' },
+    marcos: [], cols: defaultCols(), items: [], sprints: [], riscos: [], partes: [], licoes: [],
+    createdAt: t, updatedAt: t
+  }, o || {});
+}
+
+/* Normaliza projetos vindos de backups antigos ou incompletos */
+function normalize(p) {
+  const base = makeProject({ id: p.id });
+  for (const k in base) if (p[k] === undefined) p[k] = base[k];
+  p.tap = Object.assign(base.tap, p.tap || {});
+  if (!Array.isArray(p.cols) || !p.cols.length) p.cols = defaultCols();
+  return p;
+}
+Object.values(db.projects).forEach(normalize);
+
+const colOf = (p, id) => p.cols.find(c => c.id === id) || p.cols[0];
+const isDone = (p, it) => colOf(p, it.col).tipo === 'done';
+const activeSprint = p => p.sprints.find(s => s.status === 'ativa') || null;
+const riskScore = r => (+r.prob || 0) * (+r.imp || 0);
+const riskLevel = s => s >= 15 ? ['Alto', 'var(--danger)'] : s >= 6 ? ['Médio', 'var(--warn)'] : ['Baixo', 'var(--success)'];
+const progress = p => {
+  if (p.abordagem === 'DMAIC' && p.dmaicId) {
+    const d = Store.dmaic()[p.dmaicId];
+    if (d) return PH.filter(([k]) => d[k] && d[k].status === 'done').length / 5;
+  }
+  if (!p.items.length) return null;
+  return p.items.filter(it => isDone(p, it)).length / p.items.length;
+};
+const nextMilestone = p => p.marcos.filter(m => !m.feito && m.data).sort((a, b) => a.data.localeCompare(b.data))[0] || null;
+
+/* ===================== NAVEGAÇÃO ===================== */
+let currentPage = 'painel';
+const RENDER = { painel: renderPainel, tap: renderTap, kanban: renderKanban, scrum: renderScrum, riscos: renderRiscos, partes: renderPartes, licoes: renderLicoes };
+function showPage(id) {
+  currentPage = id;
+  document.querySelectorAll('.page').forEach(e => e.classList.toggle('active', e.id === 'page-' + id));
+  document.querySelectorAll('.nav-item[data-page]').forEach(e => e.classList.toggle('active', e.dataset.page === id));
+  RENDER[id]();
+  window.scrollTo(0, 0);
+}
+function rerender() { refreshSelect(); RENDER[currentPage](); }
+
+function needProject(el) {
+  if (cur()) return false;
+  document.getElementById(el).innerHTML = `<div class="card empty"><h2>Nenhum projeto selecionado</h2>Selecione um projeto na barra superior ou crie um novo.<div class="btn-row" style="justify-content:center"><button class="btn" onclick="newProjectDialog()">+ Novo projeto</button></div></div>`;
+  return true;
+}
+
+function refreshSelect() {
+  const sel = document.getElementById('project-select');
+  const list = Object.values(db.projects).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  sel.innerHTML = '<option value="">— Selecionar projeto —</option>' + list.map(p => `<option value="${p.id}"${p.id === db.meta.current ? ' selected' : ''}>${esc(p.nome)} · ${esc(p.abordagem)}</option>`).join('');
+  document.getElementById('footer-project').textContent = cur() ? cur().nome : '—';
+}
+function selectProject(id) { db.meta.current = db.projects[id] ? id : null; Store.save(db); rerender(); }
+
+/* ===================== MODAL ===================== */
+function openModal(title, html, onSave, onDelete) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-save').onclick = () => { if (onSave() !== false) closeModal(); };
+  const del = document.getElementById('modal-del');
+  del.style.display = onDelete ? '' : 'none';
+  del.onclick = () => { if (confirm('Excluir definitivamente?')) { onDelete(); closeModal(); } };
+  document.getElementById('modal-bg').classList.add('show');
+  const first = document.querySelector('#modal-content input, #modal-content textarea');
+  if (first) first.focus();
+}
+function closeModal() { document.getElementById('modal-bg').classList.remove('show'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ===================== PROJETOS ===================== */
+function newProjectDialog() {
+  openModal('Novo projeto', `
+    <div class="form-grid">
+      <div class="field span2"><label>Nome do projeto</label><input id="np-nome" placeholder="Ex.: Redução do tempo de preparação de veículos"></div>
+      <div class="field"><label>Abordagem</label><select id="np-abord">${opts(ABORDAGENS, 'Híbrida')}</select></div>
+      <div class="field"><label>Prioridade</label><select id="np-prio">${opts(PRIORIDADE, 'Média')}</select></div>
+    </div>
+    <p class="hint" style="margin-top:.8rem">Preditiva: escopo estável, entregas por marcos. Scrum: escopo emergente em sprints. Kanban: fluxo contínuo de demandas. DMAIC: problema de processo com causa desconhecida e dados disponíveis. Híbrida: combina marcos com quadro ágil.</p>`,
+    () => {
+      const nome = val('np-nome');
+      if (!nome) { alert('Informe o nome do projeto.'); return false; }
+      const p = makeProject({ nome, abordagem: val('np-abord'), prioridade: val('np-prio') });
+      db.projects[p.id] = p; db.meta.current = p.id; persist();
+      showPage('tap'); refreshSelect();
+    });
+}
+function deleteProject() {
+  const p = cur(); if (!p) return;
+  if (!confirm(`Excluir o projeto "${p.nome}" e todos os seus dados? Faça um backup antes, se tiver dúvida.`)) return;
+  delete db.projects[p.id]; db.meta.current = null; persist(); rerender();
+}
+
+function seedExample() {
+  const t = today();
+  const p = makeProject({
+    nome: 'Projeto Atlas · Ferramenta de gestão', abordagem: 'Híbrida', status: 'Em execução', prioridade: 'Alta',
+    gerente: 'Diego Sarmento', patrocinador: 'Diego Sarmento', alinhamento: 'Excelência operacional e portfólio profissional',
+    tap: {
+      justificativa: 'CEP e DMAIC existem como ilhas; falta portfólio, quadro de fluxo, riscos e partes interessadas integrados.',
+      objetivo: 'Usar o Atlas por 30 dias seguidos para gerir pelo menos 3 projetos reais.',
+      dentro: 'Portfólio, TAP, Kanban com WIP, Scrum, riscos, partes interessadas, lições, integração DMAIC/CEP, backup JSON.',
+      fora: 'Multiusuário, login, integrações externas, app nativo.',
+      premissas: 'GitHub Pages gratuito; backup JSON semanal.', restricoes: 'Sem servidor; manutenção com apoio de IA.',
+      orcamento: 'R$ 0 (horas próprias)', criterios: '3 projetos cadastrados na 1ª semana; 30 dias de uso contínuo; nenhum backup com mais de 7 dias.'
+    }
+  });
+  p.marcos = [
+    { id: uid('m'), nome: 'Release 1 em uso', data: new Date(Date.now() + 7 * DAY).toISOString().slice(0, 10), feito: false },
+    { id: uid('m'), nome: 'Revisão de 30 dias', data: new Date(Date.now() + 30 * DAY).toISOString().slice(0, 10), feito: false }
+  ];
+  const mk = (titulo, col, extra) => Object.assign({ id: uid('it'), titulo, desc: '', tipo: 'Entregável', pontos: 3, classe: 'padrao', resp: 'Diego', col, sprint: null, ordem: 0, criado: nowISO(), commit: null, inicio: null, fim: null, hist: [{ col, ts: nowISO() }] }, extra || {});
+  p.items = [
+    mk('Cadastrar os 3 projetos reais no portfólio', 'c_todo', { classe: 'data', commit: nowISO() }),
+    mk('Migrar tarefas do quadro atual para o Kanban', 'c_todo', { commit: nowISO() }),
+    mk('Fazer o primeiro backup JSON e guardar no Drive', 'c_doing', { classe: 'expedite', commit: nowISO(), inicio: nowISO() }),
+    mk('R2 · EAP hierárquica', 'c_backlog', { pontos: 5 }),
+    mk('R2 · Cronograma Gantt com dependências', 'c_backlog', { pontos: 8 }),
+    mk('R2 · Valor agregado (VP, VA, CR, IDC, IDP)', 'c_backlog', { pontos: 5 }),
+    mk('R2 · Diagrama de fluxo cumulativo (CFD)', 'c_backlog', { pontos: 3 }),
+    mk('R3 · Autoavaliação de maturidade (OPM3)', 'c_backlog', { pontos: 5, classe: 'intangivel' }),
+    mk('R3 · Cadastro de processos com SIPOC e VSM', 'c_backlog', { pontos: 8 })
+  ];
+  p.items.forEach((it, i) => it.ordem = i);
+  p.riscos = [
+    { id: uid('r'), desc: 'Escopo cresce antes de a R1 estar em uso', categoria: 'Escopo', prob: 4, imp: 5, resposta: 'Mitigar', acao: 'Nenhuma release nova sem 30 dias de uso da anterior', dono: 'Diego', status: 'Aberto' },
+    { id: uid('r'), desc: 'Perda de dados por limpeza do navegador', categoria: 'Técnico', prob: 3, imp: 5, resposta: 'Mitigar', acao: 'Backup JSON semanal com cópia no Drive', dono: 'Diego', status: 'Aberto' }
+  ];
+  p.partes = [{ id: uid('s'), nome: 'Diego Sarmento', papel: 'Patrocinador e usuário', poder: 5, interesse: 5, atitude: 'Apoia', obs: '' }];
+  db.projects[p.id] = p; db.meta.current = p.id; persist(); refreshSelect(); showPage('painel');
+}
+
+/* ===================== PAINEL ===================== */
+function renderPainel() {
+  const el = document.getElementById('painel-body');
+  const list = Object.values(db.projects);
+  const dm = Store.dmaic();
+  const dmList = Object.values(dm).filter(d => d && d.id);
+  if (!list.length && !dmList.length) {
+    el.innerHTML = `<div class="card empty"><h2>Portfólio vazio</h2>Crie o primeiro projeto ou carregue o exemplo: o próprio Projeto Atlas, já com backlog das próximas releases, riscos e marcos.
+      <div class="btn-row" style="justify-content:center"><button class="btn" onclick="newProjectDialog()">+ Novo projeto</button><button class="btn ghost" onclick="seedExample()">Carregar exemplo</button></div></div>`;
+    return;
+  }
+  const ativos = list.filter(p => ATIVOS.includes(p.status));
+  const vermelhos = ativos.filter(p => p.saude === 'vermelho').length;
+  const riscosAltos = list.reduce((s, p) => s + p.riscos.filter(r => r.status !== 'Encerrado' && riskScore(r) >= 15).length, 0);
+  const wip = list.reduce((s, p) => s + p.items.filter(it => colOf(p, it.col).tipo === 'doing').length, 0);
+  const atrasados = ativos.filter(p => p.fim && p.fim < today()).length;
+  const prioOrder = { Alta: 0, 'Média': 1, Baixa: 2 };
+  const rows = list.sort((a, b) => (ATIVOS.includes(b.status) - ATIVOS.includes(a.status)) || (prioOrder[a.prioridade] - prioOrder[b.prioridade]) || a.nome.localeCompare(b.nome))
+    .map(p => {
+      const pr = progress(p), nm = nextMilestone(p);
+      const ra = p.riscos.filter(r => r.status !== 'Encerrado' && riskScore(r) >= 15).length;
+      const late = p.fim && p.fim < today() && ATIVOS.includes(p.status);
+      return `<tr class="click" onclick="selectProject('${p.id}');showPage('tap')">
+        <td><span class="dot ${esc(p.saude)}"></span>${esc(p.nome)}${p.id === db.meta.current ? ' <span class="tag">atual</span>' : ''}</td>
+        <td><span class="tag">${esc(p.abordagem)}</span></td><td>${esc(p.status)}</td><td>${esc(p.prioridade)}</td>
+        <td>${pr == null ? '—' : `<div style="display:flex;align-items:center;gap:.4rem"><div class="bar" style="flex:1"><div style="width:${Math.round(pr * 100)}%"></div></div><span class="num">${Math.round(pr * 100)}%</span></div>`}</td>
+        <td class="num">${ra ? `<span style="color:var(--danger)">${ra}</span>` : '0'}</td>
+        <td>${nm ? `${esc(nm.nome)} · ${fmtD(nm.data)}` : '—'}</td>
+        <td class="num"${late ? ' style="color:var(--danger)"' : ''}>${fmtD(p.fim)}</td></tr>`;
+    }).join('');
+  const linked = new Set(list.map(p => p.dmaicId).filter(Boolean));
+  const dmRows = dmList.map(d => `<tr>
+      <td>${esc(d.define?.nome || d.id)}</td>
+      <td style="font-family:'DM Mono',monospace">${PH.map(([k, l]) => `<span title="${k}" style="margin-right:.4rem">${l} ${DMAIC_ST[d[k]?.status] || '○'}</span>`).join('')}</td>
+      <td>${linked.has(d.id) ? '<span class="chip ok">vinculado</span>' : '<span class="chip">sem vínculo</span>'}</td>
+      <td style="white-space:nowrap"><button class="btn-ic" onclick="openDmaic('${esc(d.id)}')">Abrir no DMAIC ↗</button>
+      ${linked.has(d.id) ? '' : ` <button class="btn-ic" onclick="importDmaic('${esc(d.id)}')">+ Portfólio</button>`}</td></tr>`).join('');
+  el.innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Projetos ativos</div><div class="kpi-val">${ativos.length}</div><div class="kpi-sub">${list.length} no portfólio</div></div>
+      <div class="kpi"><div class="kpi-label">Saúde vermelha</div><div class="kpi-val" style="color:${vermelhos ? 'var(--danger)' : 'var(--success)'}">${vermelhos}</div><div class="kpi-sub">entre os ativos</div></div>
+      <div class="kpi"><div class="kpi-label">Prazo vencido</div><div class="kpi-val" style="color:${atrasados ? 'var(--danger)' : 'var(--success)'}">${atrasados}</div><div class="kpi-sub">término previsto passou</div></div>
+      <div class="kpi"><div class="kpi-label">Riscos altos abertos</div><div class="kpi-val" style="color:${riscosAltos ? 'var(--danger)' : 'var(--success)'}">${riscosAltos}</div><div class="kpi-sub">P × I ≥ 15</div></div>
+      <div class="kpi"><div class="kpi-label">Itens em andamento</div><div class="kpi-val">${wip}</div><div class="kpi-sub">WIP somado do portfólio</div></div>
+    </div>
+    <div class="card"><div class="card-title">Projetos<span><button class="btn-ic" onclick="newProjectDialog()">+ Novo</button></span></div>
+      ${list.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Projeto</th><th>Abordagem</th><th>Status</th><th>Prioridade</th><th>Progresso</th><th>Riscos altos</th><th>Próximo marco</th><th>Término</th></tr></thead><tbody>${rows}</tbody></table></div>`
+        : `<p class="hint">Nenhum projeto ainda. Crie um, traga um projeto DMAIC abaixo para o portfólio ou carregue o exemplo.</p><div class="btn-row"><button class="btn" onclick="newProjectDialog()">+ Novo projeto</button><button class="btn ghost" onclick="seedExample()">Carregar exemplo</button></div>`}
+    </div>
+    <div class="card"><div class="card-title">Projetos DMAIC (dmaic.html)<span class="hint" style="text-transform:none;letter-spacing:0">lidos do mesmo navegador</span></div>
+      ${dmList.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Projeto</th><th>Fases</th><th>Portfólio</th><th></th></tr></thead><tbody>${dmRows}</tbody></table></div>`
+        : '<p class="hint">Nenhum projeto DMAIC neste navegador. Os projetos criados em <a href="dmaic.html" target="_blank">dmaic.html</a> aparecem aqui automaticamente.</p>'}
+    </div>`;
+}
+function openDmaic(id) { localStorage.setItem('dmaic_last', id); window.open('dmaic.html', '_blank'); }
+function importDmaic(id) {
+  const d = Store.dmaic()[id]; if (!d) return;
+  const p = makeProject({ nome: d.define?.nome || 'Projeto DMAIC', abordagem: 'DMAIC', status: 'Em execução', dmaicId: id });
+  p.tap.objetivo = d.define?.objetivos || '';
+  p.tap.justificativa = d.define?.incomodo || d.define?.contexto || '';
+  db.projects[p.id] = p; db.meta.current = p.id; persist(); rerender();
+}
+
+/* ===================== TAP ===================== */
+function setP(field, v) { const p = cur(); if (!p) return; p[field] = v; persist(); if (field === 'nome' || field === 'abordagem') refreshSelect(); }
+function setTap(field, v) { const p = cur(); if (!p) return; p.tap[field] = v; persist(); }
+function renderTap() {
+  if (needProject('tap-body')) return;
+  const p = cur();
+  const dm = Store.dmaic();
+  const dmOpts = [['', '— nenhum —']].concat(Object.values(dm).filter(d => d && d.id).map(d => [d.id, d.define?.nome || d.id]));
+  const tf = (k, label, ph, rows) => `<div class="field"><label>${label}</label><textarea rows="${rows || 3}" placeholder="${esc(ph)}" oninput="setTap('${k}',this.value)">${esc(p.tap[k])}</textarea></div>`;
+  const marcos = p.marcos.slice().sort((a, b) => (a.data || '9').localeCompare(b.data || '9'));
+  document.getElementById('tap-body').innerHTML = `
+    <div class="card"><div class="card-title">Identificação · Governança</div>
+      <div class="form-grid cols4">
+        <div class="field span2"><label>Nome do projeto</label><input value="${esc(p.nome)}" oninput="setP('nome',this.value)"></div>
+        <div class="field"><label>Abordagem</label><select onchange="setP('abordagem',this.value);renderTap()">${opts(ABORDAGENS, p.abordagem)}</select></div>
+        <div class="field"><label>Status</label><select onchange="setP('status',this.value)">${opts(STATUS, p.status)}</select></div>
+        <div class="field"><label>Saúde</label><select onchange="setP('saude',this.value)">${opts(SAUDE, p.saude)}</select></div>
+        <div class="field"><label>Prioridade</label><select onchange="setP('prioridade',this.value)">${opts(PRIORIDADE, p.prioridade)}</select></div>
+        <div class="field"><label>Início</label><input type="date" value="${esc(p.inicio)}" onchange="setP('inicio',this.value)"></div>
+        <div class="field"><label>Término previsto</label><input type="date" value="${esc(p.fim)}" onchange="setP('fim',this.value)"></div>
+        <div class="field"><label>Patrocinador</label><input value="${esc(p.patrocinador)}" oninput="setP('patrocinador',this.value)"></div>
+        <div class="field"><label>Gerente do projeto</label><input value="${esc(p.gerente)}" oninput="setP('gerente',this.value)"></div>
+        <div class="field span2"><label>Alinhamento estratégico</label><input value="${esc(p.alinhamento)}" placeholder="Qual objetivo estratégico este projeto move?" oninput="setP('alinhamento',this.value)"></div>
+        ${p.abordagem === 'DMAIC' ? `<div class="field span2"><label>Projeto no DMAIC</label><select onchange="setP('dmaicId',this.value);renderTap()">${opts(dmOpts, p.dmaicId)}</select></div>
+        <div class="field span2" style="justify-content:flex-end">${p.dmaicId ? `<button class="btn ghost" onclick="openDmaic('${esc(p.dmaicId)}')">Abrir fases D-M-A-I-C ↗</button>` : '<span class="hint">Crie o projeto em dmaic.html e vincule aqui; o progresso do portfólio passa a seguir as fases.</span>'}</div>` : ''}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Por que e para quê</div>
+      <div class="form-grid">
+        ${tf('justificativa', 'Justificativa / problema de negócio', 'Qual dor ou oportunidade justifica o investimento?')}
+        ${tf('objetivo', 'Objetivo SMART', 'Ex.: reduzir o tempo de preparação de 6 h para 3 h até 31/03/2027')}
+        ${tf('criterios', 'Critérios de sucesso / aceite', 'Como o patrocinador vai dizer que deu certo?')}
+        ${tf('orcamento', 'Orçamento e recursos', 'Valor, horas, equipe', 3)}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Escopo · Premissas · Restrições</div>
+      <div class="form-grid">
+        ${tf('dentro', 'Dentro do escopo', 'Entregáveis incluídos')}
+        ${tf('fora', 'Fora do escopo', 'O que explicitamente não será feito')}
+        ${tf('premissas', 'Premissas', 'O que se assume verdadeiro sem prova')}
+        ${tf('restricoes', 'Restrições', 'Prazo, custo, tecnologia, normas')}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Marcos<span><button class="btn-ic no-print" onclick="addMarco()">+ Marco</button></span></div>
+      ${marcos.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px">Feito</th><th>Marco</th><th>Data</th><th></th></tr></thead><tbody>
+      ${marcos.map(m => `<tr><td><input type="checkbox" ${m.feito ? 'checked' : ''} onchange="setMarco('${m.id}','feito',this.checked)"></td>
+        <td><input style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-size:.78rem;padding:.2rem" value="${esc(m.nome)}" oninput="setMarco('${m.id}','nome',this.value)"></td>
+        <td><input type="date" style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:${!m.feito && m.data && m.data < today() ? 'var(--danger)' : 'var(--text)'};font-family:'DM Mono',monospace;font-size:.76rem" value="${esc(m.data)}" onchange="setMarco('${m.id}','data',this.value);renderTap()"></td>
+        <td><button class="btn-rm" onclick="delMarco('${m.id}')">✕</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="hint">Sem marcos. Projetos preditivos e híbridos precisam de pelo menos início, entregas-chave e encerramento.</p>'}
+    </div>`;
+}
+function addMarco() { const p = cur(); p.marcos.push({ id: uid('m'), nome: 'Novo marco', data: '', feito: false }); persist(); renderTap(); }
+function setMarco(id, k, v) { const m = cur().marcos.find(x => x.id === id); if (m) { m[k] = v; persist(); } }
+function delMarco(id) { const p = cur(); p.marcos = p.marcos.filter(x => x.id !== id); persist(); renderTap(); }
+
+/* ===================== ITENS (Kanban + Scrum) ===================== */
+function moveItem(p, it, colId) {
+  if (it.col === colId) return;
+  const c = colOf(p, colId), t = nowISO();
+  it.col = colId; it.hist = it.hist || []; it.hist.push({ col: colId, ts: t });
+  if (c.tipo !== 'backlog' && !it.commit) it.commit = t;
+  if (c.tipo === 'doing' && !it.inicio) it.inicio = t;
+  if (c.tipo === 'done') { it.fim = t; if (!it.inicio) it.inicio = t; if (!it.commit) it.commit = t; }
+  else it.fim = null;
+}
+function wipOk(p, colId, excludeId) {
+  const c = colOf(p, colId);
+  if (!c.wip) return true;
+  const n = p.items.filter(i => i.col === colId && i.id !== excludeId).length;
+  if (n < c.wip) return true;
+  return confirm(`A coluna "${c.nome}" já está no limite de WIP (${n}/${c.wip}).\nPuxar mais trabalho aumenta o lead time. Mover mesmo assim?`);
+}
+function itemDialog(id, presetCol) {
+  const p = cur(); if (!p) return;
+  const it = id ? p.items.find(x => x.id === id) : null;
+  const sprintOpts = [['', '— sem sprint —']].concat(p.sprints.filter(s => s.status !== 'concluída' || (it && it.sprint === s.id)).map(s => [s.id, `${s.nome} (${s.status})`]));
+  openModal(it ? 'Editar item' : 'Novo item', `
+    <div class="form-grid">
+      <div class="field span2"><label>Título</label><input id="it-titulo" value="${esc(it?.titulo)}" placeholder="Verbo + resultado"></div>
+      <div class="field span2"><label>Descrição / critério de aceite</label><textarea id="it-desc" rows="3">${esc(it?.desc)}</textarea></div>
+      <div class="field"><label>Tipo</label><select id="it-tipo">${opts(TIPOS, it?.tipo || 'Tarefa')}</select></div>
+      <div class="field"><label>Classe de serviço</label><select id="it-classe">${opts(CLASSES, it?.classe || 'padrao')}</select></div>
+      <div class="field"><label>Coluna</label><select id="it-col">${opts(p.cols.map(c => [c.id, c.nome]), it?.col || presetCol || p.cols[0].id)}</select></div>
+      <div class="field"><label>Sprint</label><select id="it-sprint">${opts(sprintOpts, it?.sprint || '')}</select></div>
+      <div class="field"><label>Pontos / esforço</label><input id="it-pontos" type="number" min="0" step="1" value="${esc(it?.pontos ?? 1)}"></div>
+      <div class="field"><label>Responsável</label><input id="it-resp" value="${esc(it?.resp)}"></div>
+      <div class="field"><label>Data limite (opcional)</label><input id="it-prazo" type="date" value="${esc(it?.prazo)}"></div>
+    </div>
+    ${it ? `<p class="hint" style="margin-top:.8rem">Criado ${fmtD(it.criado)} · compromisso ${fmtD(it.commit)} · início ${fmtD(it.inicio)} · entrega ${fmtD(it.fim)}${it.fim && it.commit ? ` · lead time ${f1(days(it.commit, it.fim))} d` : ''}</p>` : ''}`,
+    () => {
+      const titulo = val('it-titulo');
+      if (!titulo) { alert('Informe o título.'); return false; }
+      const colId = val('it-col');
+      const target = it || { id: uid('it'), criado: nowISO(), commit: null, inicio: null, fim: null, hist: [], col: null, ordem: p.items.length };
+      if (target.col !== colId && !wipOk(p, colId, target.id)) return false;
+      Object.assign(target, { titulo, desc: val('it-desc'), tipo: val('it-tipo'), classe: val('it-classe'), sprint: val('it-sprint') || null, pontos: Math.max(0, +val('it-pontos') || 0), resp: val('it-resp'), prazo: val('it-prazo') });
+      if (!it) { target.col = null; p.items.push(target); }
+      moveItem(p, target, colId);
+      persist(); RENDER[currentPage]();
+    },
+    it ? () => { p.items = p.items.filter(x => x.id !== it.id); persist(); RENDER[currentPage](); } : null);
+}
+
+/* ===================== KANBAN ===================== */
+let dragId = null;
+function flowMetrics(p, items) {
+  const done = items.filter(it => it.fim);
+  const now = Date.now();
+  const lead = done.filter(it => it.commit).map(it => days(it.commit, it.fim));
+  const cycle = done.filter(it => it.inicio).map(it => days(it.inicio, it.fim));
+  const weeks = Array.from({ length: 8 }, (_, w) => {
+    const end = now - w * 7 * DAY, start = end - 7 * DAY;
+    return { label: w === 0 ? 'esta' : `-${w}`, n: done.filter(it => { const t = new Date(it.fim).getTime(); return t > start && t <= end; }).length };
+  }).reverse();
+  const doing = items.filter(it => colOf(p, it.col).tipo === 'doing');
+  const cyc = avg(cycle);
+  const agingLimit = Math.max(7, cyc ? cyc * 2 : 7);
+  const aging = doing.filter(it => it.inicio && days(it.inicio, now) > agingLimit);
+  return { lead: avg(lead), cycle: cyc, weeks, wip: doing.length, aging, agingLimit, thr4: weeks.slice(-4).reduce((s, w) => s + w.n, 0) / 4 };
+}
+function renderKanban() {
+  if (needProject('kanban-body')) { document.getElementById('kanban-filter').style.display = 'none'; return; }
+  const p = cur();
+  const fsel = document.getElementById('kanban-filter');
+  const sp = activeSprint(p);
+  const prev = fsel.value;
+  fsel.innerHTML = opts([['all', 'Todos os itens']].concat(sp ? [[sp.id, 'Sprint ativa: ' + sp.nome]] : []), prev);
+  fsel.style.display = sp ? '' : 'none';
+  const filterSprint = sp && fsel.value === sp.id ? sp.id : null;
+  const items = p.items.filter(it => !filterSprint || it.sprint === filterSprint);
+  const m = flowMetrics(p, items);
+  const maxW = Math.max(1, ...m.weeks.map(w => w.n));
+  const littles = m.thr4 > 0 ? m.wip / (m.thr4 / 7) : null; // Lei de Little: WIP / vazão diária
+  const cols = p.cols.map(c => {
+    let list = items.filter(it => it.col === c.id);
+    if (c.tipo === 'done') list.sort((a, b) => (b.fim || '').localeCompare(a.fim || ''));
+    else list.sort((a, b) => (a.classe === 'expedite' ? -1 : 0) - (b.classe === 'expedite' ? -1 : 0) || (a.ordem || 0) - (b.ordem || 0));
+    const total = list.length, hidden = c.tipo === 'done' && total > 15 ? total - 15 : 0;
+    if (hidden) list = list.slice(0, 15);
+    const over = c.wip && total > c.wip;
+    const cards = list.map(it => {
+      const age = c.tipo === 'doing' && it.inicio ? days(it.inicio, Date.now()) : null;
+      const sprint = it.sprint ? p.sprints.find(s => s.id === it.sprint) : null;
+      const late = it.prazo && !it.fim && it.prazo < today();
+      return `<div class="kcard cls-${esc(it.classe)}" draggable="true" ondragstart="dragId='${it.id}'" onclick="itemDialog('${it.id}')">
+        <div class="kcard-title">${esc(it.titulo)}</div>
+        <div class="kcard-meta"><span class="tag">${esc(it.tipo)}</span>${it.pontos ? `<span class="tag">${esc(it.pontos)} pt</span>` : ''}${sprint ? `<span class="tag">${esc(sprint.nome)}</span>` : ''}
+        ${it.resp ? `<span>${esc(it.resp)}</span>` : ''}${age != null ? `<span class="${age > m.agingLimit ? 'aging' : ''}">· ${f1(age)} d</span>` : ''}${late ? `<span style="color:var(--danger)">· venceu ${fmtD(it.prazo)}</span>` : ''}</div></div>`;
+    }).join('');
+    return `<div class="col${over ? ' over-wip' : ''}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="this.classList.remove('drag-over');dropOn('${c.id}')">
+      <div class="col-head"><span class="col-name">${esc(c.nome)}</span><span class="col-wip">${total}${c.wip ? ' / ' + c.wip : ''}</span></div>
+      <div class="col-body">${cards}${hidden ? `<p class="hint" style="text-align:center">+${hidden} entregues anteriormente</p>` : ''}
+      ${c.tipo !== 'done' ? `<button class="add-card no-print" onclick="itemDialog(null,'${c.id}')">+ item</button>` : ''}</div></div>`;
+  }).join('');
+  document.getElementById('kanban-body').innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">WIP atual</div><div class="kpi-val">${m.wip}</div><div class="kpi-sub">itens em trabalho</div></div>
+      <div class="kpi"><div class="kpi-label">Vazão</div><div class="kpi-val">${f1(m.thr4)}</div><div class="kpi-sub">itens/semana (média 4 sem.)</div></div>
+      <div class="kpi"><div class="kpi-label">Lead time médio</div><div class="kpi-val">${f1(m.lead)}</div><div class="kpi-sub">dias, compromisso → entrega</div></div>
+      <div class="kpi"><div class="kpi-label">Cycle time médio</div><div class="kpi-val">${f1(m.cycle)}</div><div class="kpi-sub">dias, início → entrega</div></div>
+      <div class="kpi"><div class="kpi-label">Envelhecendo</div><div class="kpi-val" style="color:${m.aging.length ? 'var(--warn)' : 'var(--success)'}">${m.aging.length}</div><div class="kpi-sub">em trabalho há &gt; ${f1(m.agingLimit)} d</div></div>
+    </div>
+    <div class="legend"><span style="--c:var(--danger)">Urgente</span><span style="--c:var(--warn)">Data fixa</span><span style="--c:var(--accent)">Padrão</span><span style="--c:var(--purple)">Intangível</span></div>
+    <div class="board">${cols}</div>
+    <div class="card" style="margin-top:.4rem"><div class="card-title">Vazão semanal · últimas 8 semanas</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:110px">${m.weeks.map(w => `<div style="flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted2)"><div style="margin-bottom:3px">${w.n}</div><div style="height:${Math.round(w.n / maxW * 70)}px;min-height:2px;background:var(--accent);border-radius:3px 3px 0 0;opacity:.8"></div><div style="margin-top:4px">${w.label}</div></div>`).join('')}</div>
+      <p class="hint" style="margin-top:.8rem">${littles != null ? `Pela Lei de Little, com WIP ${m.wip} e vazão de ${f1(m.thr4)}/semana, um item novo leva cerca de <b>${f1(littles)} dias</b> para sair. Para entregar mais rápido, reduza o WIP antes de acelerar.` : 'A Lei de Little (lead time ≈ WIP ÷ vazão) aparece aqui quando houver entregas nas últimas 4 semanas.'}</p>
+    </div>`;
+}
+function dropOn(colId) {
+  const p = cur(); if (!p || !dragId) return;
+  const it = p.items.find(x => x.id === dragId); dragId = null;
+  if (!it || it.col === colId) return;
+  if (!wipOk(p, colId, it.id)) return;
+  moveItem(p, it, colId); persist(); renderKanban();
+}
+function editColumnsDialog() {
+  const p = cur(); if (!p) return;
+  let cols = JSON.parse(JSON.stringify(p.cols));
+  const draw = () => {
+    document.getElementById('cols-list').innerHTML = cols.map((c, i) => `
+      <div class="form-grid cols4" style="margin-bottom:.6rem;align-items:end">
+        <div class="field"><label>Nome</label><input value="${esc(c.nome)}" oninput="window._cols[${i}].nome=this.value"></div>
+        <div class="field span2"><label>Tipo</label><select onchange="window._cols[${i}].tipo=this.value">${opts(COL_TIPOS, c.tipo)}</select></div>
+        <div class="field"><label>WIP (0 = livre)</label><div style="display:flex;gap:.3rem"><input type="number" min="0" value="${c.wip}" oninput="window._cols[${i}].wip=Math.max(0,+this.value||0)">
+          <button class="btn-ic" title="Subir" onclick="window._colMove(${i},-1)">↑</button><button class="btn-rm" title="Remover" onclick="window._colDel(${i})">✕</button></div></div>
+      </div>`).join('') + `<button class="add-card" onclick="window._colAdd()">+ coluna</button>`;
+  };
+  window._cols = cols;
+  window._colAdd = () => { cols.splice(cols.length - 1, 0, { id: uid('c'), nome: 'Nova coluna', tipo: 'doing', wip: 2 }); draw(); };
+  window._colDel = i => { if (p.items.some(it => it.col === cols[i].id)) { alert('Esvazie a coluna antes de removê-la.'); return; } cols.splice(i, 1); draw(); };
+  window._colMove = (i, d) => { const j = i + d; if (j < 0 || j >= cols.length) return; [cols[i], cols[j]] = [cols[j], cols[i]]; draw(); };
+  openModal('Configurar colunas', `<p class="hint" style="margin-bottom:1rem">O tipo define as métricas: a saída do Backlog marca o compromisso (início do lead time); a primeira coluna "em andamento" marca o início do cycle time; "Concluído" encerra os dois. WIP limita só colunas de trabalho.</p><div id="cols-list"></div>`,
+    () => {
+      if (!cols.some(c => c.tipo === 'done')) { alert('É preciso ao menos uma coluna do tipo Concluído.'); return false; }
+      if (cols.some(c => !c.nome.trim())) { alert('Toda coluna precisa de nome.'); return false; }
+      p.cols = cols; persist(); renderKanban();
+    });
+  draw();
+}
+
+/* ===================== SCRUM ===================== */
+function sprintDialog(id) {
+  const p = cur(); if (!p) { newProjectDialog(); return; }
+  const s = id ? p.sprints.find(x => x.id === id) : null;
+  const n = p.sprints.length + 1;
+  const ini = s?.inicio || today();
+  const fim = s?.fim || new Date(new Date(ini).getTime() + 13 * DAY).toISOString().slice(0, 10);
+  openModal(s ? 'Editar sprint' : 'Nova sprint', `
+    <div class="form-grid">
+      <div class="field"><label>Nome</label><input id="sp-nome" value="${esc(s?.nome || 'Sprint ' + n)}"></div>
+      <div class="field"><label>Status</label><select id="sp-status">${opts(['planejada', 'ativa', 'concluída'], s?.status || 'planejada')}</select></div>
+      <div class="field span2"><label>Meta da sprint</label><input id="sp-meta" value="${esc(s?.meta)}" placeholder="O resultado que dá sentido à sprint, em uma frase"></div>
+      <div class="field"><label>Início</label><input id="sp-ini" type="date" value="${esc(ini)}"></div>
+      <div class="field"><label>Fim</label><input id="sp-fim" type="date" value="${esc(fim)}"></div>
+    </div>`,
+    () => {
+      const st = val('sp-status');
+      if (val('sp-fim') < val('sp-ini')) { alert('O fim não pode ser antes do início.'); return false; }
+      if (st === 'ativa' && p.sprints.some(x => x.status === 'ativa' && x.id !== s?.id)) { alert('Já existe uma sprint ativa. Conclua-a antes de iniciar outra.'); return false; }
+      const t = s || { id: uid('sp'), retro: { bom: '', melhorar: '', acoes: '' }, compromisso: null, velocidade: null };
+      const wasActive = t.status === 'ativa';
+      Object.assign(t, { nome: val('sp-nome') || 'Sprint ' + n, status: st, meta: val('sp-meta'), inicio: val('sp-ini'), fim: val('sp-fim') });
+      if (st === 'ativa' && !wasActive && t.compromisso == null) t.compromisso = sprintPoints(p, t.id).total;
+      if (!s) p.sprints.push(t);
+      persist(); renderScrum();
+    },
+    s ? () => { p.items.forEach(it => { if (it.sprint === s.id) it.sprint = null; }); p.sprints = p.sprints.filter(x => x.id !== s.id); persist(); renderScrum(); } : null);
+}
+function sprintPoints(p, sid) {
+  const its = p.items.filter(it => it.sprint === sid);
+  const total = its.reduce((a, it) => a + (+it.pontos || 0), 0);
+  const done = its.filter(it => isDone(p, it)).reduce((a, it) => a + (+it.pontos || 0), 0);
+  return { its, total, done };
+}
+function startSprint(id) {
+  const p = cur(), s = p.sprints.find(x => x.id === id);
+  if (p.sprints.some(x => x.status === 'ativa')) { alert('Já existe uma sprint ativa.'); return; }
+  const sp = sprintPoints(p, id);
+  if (!sp.its.length && !confirm('A sprint não tem itens. Iniciar mesmo assim?')) return;
+  s.status = 'ativa'; s.compromisso = sp.total; if (!s.inicio) s.inicio = today(); persist(); renderScrum();
+}
+function closeSprint(id) {
+  const p = cur(), s = p.sprints.find(x => x.id === id);
+  const sp = sprintPoints(p, id);
+  const pend = sp.its.filter(it => !isDone(p, it));
+  if (!confirm(`Concluir ${s.nome}?\n${sp.done} de ${sp.total} pontos entregues.${pend.length ? `\n${pend.length} item(ns) não concluído(s) voltam para o backlog do produto.` : ''}`)) return;
+  pend.forEach(it => it.sprint = null);
+  s.status = 'concluída'; s.velocidade = sp.done; s.fechadaEm = today();
+  persist(); renderScrum();
+}
+function setRetro(id, k, v) { const s = cur().sprints.find(x => x.id === id); s.retro = s.retro || {}; s.retro[k] = v; persist(); }
+function assignSprint(itemId, sid) { const it = cur().items.find(x => x.id === itemId); it.sprint = sid || null; persist(); renderScrum(); }
+function reorder(itemId, d) {
+  const p = cur();
+  const bl = backlogItems(p);
+  const i = bl.findIndex(x => x.id === itemId), j = i + d;
+  if (j < 0 || j >= bl.length) return;
+  [bl[i], bl[j]] = [bl[j], bl[i]];
+  bl.forEach((it, k) => it.ordem = k);
+  persist(); renderScrum();
+}
+const backlogItems = p => p.items.filter(it => !it.sprint && !isDone(p, it)).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+function burndownSVG(p, s) {
+  const sp = sprintPoints(p, s.id);
+  const total = Math.max(sp.total, s.compromisso || 0);
+  const d0 = new Date(s.inicio + 'T00:00:00'), d1 = new Date(s.fim + 'T00:00:00');
+  const n = Math.max(1, Math.round((d1 - d0) / DAY));
+  const W = 640, H = 220, L = 40, R = 16, T = 14, B = 30;
+  const X = i => L + i / n * (W - L - R), Y = v => T + (1 - (total ? v / total : 0)) * (H - T - B);
+  const todayIdx = Math.min(n, Math.floor((new Date(today() + 'T00:00:00') - d0) / DAY));
+  const pts = [];
+  for (let i = 0; i <= Math.min(n, todayIdx); i++) {
+    const endDay = d0.getTime() + (i + 1) * DAY;
+    const doneByDay = sp.its.filter(it => isDone(p, it) && it.fim && new Date(it.fim).getTime() < endDay).reduce((a, it) => a + (+it.pontos || 0), 0);
+    pts.push([X(i), Y(total - doneByDay)]);
+  }
+  const ticks = [0, Math.round(total / 2), total].filter((v, i, a) => a.indexOf(v) === i);
+  const xl = [0, Math.round(n / 2), n];
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">
+    ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--border)"/><text x="${L - 6}" y="${Y(v) + 3}" text-anchor="end" font-size="10" fill="var(--muted2)">${v}</text>`).join('')}
+    ${xl.map(i => `<text x="${X(i)}" y="${H - 10}" text-anchor="middle" font-size="10" fill="var(--muted2)">${fmtD(new Date(d0.getTime() + i * DAY).toISOString()).slice(0, 5)}</text>`).join('')}
+    <line x1="${X(0)}" y1="${Y(total)}" x2="${X(n)}" y2="${Y(0)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
+    ${pts.length ? `<polyline fill="none" stroke="var(--accent)" stroke-width="2" points="${pts.map(q => q.join(',')).join(' ')}"/>${pts.map(q => `<circle cx="${q[0]}" cy="${q[1]}" r="2.5" fill="var(--accent)"/>`).join('')}` : ''}
+    <text x="${W - R}" y="${T + 4}" text-anchor="end" font-size="10" fill="var(--muted2)">— real   - - ideal</text>
+  </svg>`;
+}
+function renderScrum() {
+  if (needProject('scrum-body')) return;
+  const p = cur();
+  const act = activeSprint(p);
+  const planned = p.sprints.filter(s => s.status === 'planejada');
+  const closed = p.sprints.filter(s => s.status === 'concluída');
+  const vel = closed.map(s => s.velocidade || 0);
+  const velAvg = avg(vel.slice(-3));
+  const bl = backlogItems(p);
+  const blPts = bl.reduce((a, it) => a + (+it.pontos || 0), 0);
+  const targets = [['', '—']].concat(p.sprints.filter(s => s.status !== 'concluída').map(s => [s.id, s.nome]));
+  const sprintCard = s => {
+    const sp = sprintPoints(p, s.id);
+    const isAct = s.status === 'ativa';
+    return `<div class="card"><div class="card-title"><span>${esc(s.nome)} · ${esc(s.status)} · ${fmtD(s.inicio)} → ${fmtD(s.fim)}</span>
+      <span class="no-print">${s.status === 'planejada' ? `<button class="btn-ic" onclick="startSprint('${s.id}')">▶ Iniciar</button> ` : ''}${isAct ? `<button class="btn-ic" onclick="closeSprint('${s.id}')">■ Concluir</button> ` : ''}<button class="btn-ic" onclick="sprintDialog('${s.id}')">Editar</button></span></div>
+      <p style="margin-bottom:.8rem"><b>Meta:</b> ${s.meta ? esc(s.meta) : '<span style="color:var(--warn)">sem meta definida — sprint sem meta vira lista de tarefas</span>'}</p>
+      <div class="kpis"><div class="kpi"><div class="kpi-label">Pontos</div><div class="kpi-val">${sp.done}/${sp.total}</div><div class="kpi-sub">${s.compromisso != null ? `compromisso inicial ${s.compromisso}` : 'ainda não iniciada'}</div></div>
+      ${velAvg != null && !isAct ? `<div class="kpi"><div class="kpi-label">Capacidade sugerida</div><div class="kpi-val">${f1(velAvg)}</div><div class="kpi-sub">média das últimas sprints</div></div>` : ''}</div>
+      ${isAct ? burndownSVG(p, s) : ''}
+      <div class="tbl-wrap" style="margin-top:.6rem"><table class="tbl"><thead><tr><th>Item</th><th>Coluna</th><th class="num">Pts</th><th></th></tr></thead><tbody>
+      ${sp.its.map(it => `<tr><td><a href="#" onclick="itemDialog('${it.id}');return false">${esc(it.titulo)}</a></td><td>${esc(colOf(p, it.col).nome)}</td><td class="num">${esc(it.pontos)}</td>
+        <td>${isDone(p, it) ? '✓' : `<button class="btn-ic" title="Devolver ao backlog" onclick="assignSprint('${it.id}','')">↩</button>`}</td></tr>`).join('') || '<tr><td colspan="4" class="hint">Sem itens. Puxe do backlog abaixo.</td></tr>'}
+      </tbody></table></div></div>`;
+  };
+  document.getElementById('scrum-body').innerHTML = `
+    ${act ? sprintCard(act) : `<div class="card empty" style="padding:1.5rem">Nenhuma sprint ativa.${planned.length ? ' Inicie uma sprint planejada abaixo.' : ''}<div class="btn-row" style="justify-content:center"><button class="btn" onclick="sprintDialog()">+ Nova sprint</button></div></div>`}
+    ${planned.map(sprintCard).join('')}
+    <div class="card"><div class="card-title"><span>Backlog do produto · ${bl.length} itens · ${blPts} pts${velAvg ? ` · ≈ ${f1(blPts / velAvg)} sprints` : ''}</span><span><button class="btn-ic no-print" onclick="itemDialog()">+ Item</button></span></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:70px">Ordem</th><th>Item</th><th>Tipo</th><th class="num">Pts</th><th>Sprint</th></tr></thead><tbody>
+      ${bl.map((it, i) => `<tr><td style="white-space:nowrap"><button class="btn-ic" onclick="reorder('${it.id}',-1)" ${i === 0 ? 'disabled' : ''}>↑</button> <button class="btn-ic" onclick="reorder('${it.id}',1)" ${i === bl.length - 1 ? 'disabled' : ''}>↓</button></td>
+        <td><a href="#" onclick="itemDialog('${it.id}');return false">${esc(it.titulo)}</a></td><td><span class="tag">${esc(it.tipo)}</span></td><td class="num">${esc(it.pontos)}</td>
+        <td><select class="btn-sm" onchange="assignSprint('${it.id}',this.value)">${opts(targets, '')}</select></td></tr>`).join('') || '<tr><td colspan="5" class="hint">Backlog vazio.</td></tr>'}
+      </tbody></table></div>
+      <p class="hint" style="margin-top:.6rem">A ordem aqui é a prioridade. Itens sem pontos distorcem a velocidade: estime antes de puxar para a sprint.</p></div>
+    ${closed.length ? `<div class="grid2">
+      <div class="card"><div class="card-title">Velocidade por sprint</div>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:120px">${closed.map(s => { const mx = Math.max(1, ...vel); return `<div style="flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted2)"><div>${s.velocidade || 0}</div><div style="height:${Math.round((s.velocidade || 0) / mx * 80)}px;min-height:2px;background:var(--purple);border-radius:3px 3px 0 0"></div><div style="margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.nome)}</div></div>`; }).join('')}</div>
+        <p class="hint" style="margin-top:.6rem">Média das últimas 3: <b>${f1(velAvg)}</b> pts. Use-a como capacidade da próxima sprint, não como meta.</p></div>
+      <div class="card"><div class="card-title">Retrospectiva</div>
+        <div class="field" style="margin-bottom:.6rem"><label>Sprint</label><select id="retro-sel" onchange="renderRetro()">${opts(closed.slice().reverse().map(s => [s.id, s.nome]), '')}</select></div>
+        <div id="retro-body"></div></div>
+    </div>` : ''}`;
+  if (closed.length) renderRetro();
+}
+function renderRetro() {
+  const s = cur().sprints.find(x => x.id === document.getElementById('retro-sel').value); if (!s) return;
+  const r = s.retro || {};
+  const f = (k, l) => `<div class="field" style="margin-bottom:.6rem"><label>${l}</label><textarea rows="2" oninput="setRetro('${s.id}','${k}',this.value)">${esc(r[k])}</textarea></div>`;
+  document.getElementById('retro-body').innerHTML = f('bom', 'O que funcionou') + f('melhorar', 'O que atrapalhou') + f('acoes', 'Ações para a próxima sprint (com dono)');
+}
+
+/* ===================== RISCOS ===================== */
+function riskDialog(id) {
+  const p = cur(); if (!p) { newProjectDialog(); return; }
+  const r = id ? p.riscos.find(x => x.id === id) : null;
+  const scale = l => [[1, '1 · ' + l[0]], [2, '2 · ' + l[1]], [3, '3 · ' + l[2]], [4, '4 · ' + l[3]], [5, '5 · ' + l[4]]];
+  openModal(r ? 'Editar risco' : 'Novo risco', `
+    <div class="form-grid">
+      <div class="field span2"><label>Risco (causa → evento → efeito)</label><textarea id="rk-desc" rows="2" placeholder="Devido a [causa], pode ocorrer [evento], resultando em [efeito]">${esc(r?.desc)}</textarea></div>
+      <div class="field"><label>Categoria</label><select id="rk-cat">${opts(CATEG_RISCO, r?.categoria || 'Escopo')}</select></div>
+      <div class="field"><label>Status</label><select id="rk-st">${opts(['Aberto', 'Ocorreu', 'Encerrado'], r?.status || 'Aberto')}</select></div>
+      <div class="field"><label>Probabilidade</label><select id="rk-p">${opts(scale(['Rara', 'Improvável', 'Possível', 'Provável', 'Quase certa']), r?.prob || 3)}</select></div>
+      <div class="field"><label>Impacto</label><select id="rk-i">${opts(scale(['Mínimo', 'Menor', 'Moderado', 'Maior', 'Crítico']), r?.imp || 3)}</select></div>
+      <div class="field"><label>Resposta</label><select id="rk-resp">${opts(RESPOSTAS, r?.resposta || 'Mitigar')}</select></div>
+      <div class="field"><label>Dono</label><input id="rk-dono" value="${esc(r?.dono)}"></div>
+      <div class="field span2"><label>Ação de resposta</label><input id="rk-acao" value="${esc(r?.acao)}" placeholder="O que será feito, por quem e até quando"></div>
+    </div>`,
+    () => {
+      if (!val('rk-desc')) { alert('Descreva o risco.'); return false; }
+      const t = r || { id: uid('r') };
+      Object.assign(t, { desc: val('rk-desc'), categoria: val('rk-cat'), status: val('rk-st'), prob: +val('rk-p'), imp: +val('rk-i'), resposta: val('rk-resp'), dono: val('rk-dono'), acao: val('rk-acao') });
+      if (!r) p.riscos.push(t);
+      persist(); renderRiscos();
+    },
+    r ? () => { p.riscos = p.riscos.filter(x => x.id !== r.id); persist(); renderRiscos(); } : null);
+}
+function renderRiscos() {
+  if (needProject('riscos-body')) return;
+  const p = cur();
+  const list = p.riscos.slice().sort((a, b) => (a.status === 'Encerrado') - (b.status === 'Encerrado') || riskScore(b) - riskScore(a));
+  const code = r => 'R' + (p.riscos.indexOf(r) + 1);
+  const open = list.filter(r => r.status !== 'Encerrado');
+  let matrix = '';
+  for (let pr = 5; pr >= 1; pr--) {
+    matrix += `<div class="maxis">${pr}</div>`;
+    for (let im = 1; im <= 5; im++) {
+      const s = pr * im, c = riskLevel(s)[1];
+      const here = open.filter(r => +r.prob === pr && +r.imp === im);
+      matrix += `<div class="mcell" style="background:${c};opacity:${here.length ? 1 : .28}" title="P${pr} × I${im} = ${s}">${here.map(code).join(' ')}</div>`;
+    }
+  }
+  matrix += `<div></div>${[1, 2, 3, 4, 5].map(i => `<div class="maxis">${i}</div>`).join('')}`;
+  const noOwner = open.filter(r => riskScore(r) >= 15 && (!r.dono || !r.acao)).length;
+  document.getElementById('riscos-body').innerHTML = `
+    <div class="grid2">
+      <div class="card"><div class="card-title">Matriz probabilidade × impacto (riscos abertos)</div>
+        <div style="display:flex;gap:.5rem;align-items:center"><div class="maxis" style="writing-mode:vertical-rl;transform:rotate(180deg)">Probabilidade</div><div style="flex:1"><div class="matrix">${matrix}</div><div class="maxis" style="margin-top:.3rem;max-width:520px">Impacto</div></div></div></div>
+      <div class="card"><div class="card-title">Resumo</div>
+        <div class="kpis" style="grid-template-columns:1fr 1fr">
+          <div class="kpi"><div class="kpi-label">Abertos</div><div class="kpi-val">${open.length}</div></div>
+          <div class="kpi"><div class="kpi-label">Altos (≥15)</div><div class="kpi-val" style="color:var(--danger)">${open.filter(r => riskScore(r) >= 15).length}</div></div>
+          <div class="kpi"><div class="kpi-label">Médios (6–14)</div><div class="kpi-val" style="color:var(--warn)">${open.filter(r => riskScore(r) >= 6 && riskScore(r) < 15).length}</div></div>
+          <div class="kpi"><div class="kpi-label">Exposição total</div><div class="kpi-val">${open.reduce((a, r) => a + riskScore(r), 0)}</div></div>
+        </div>
+        ${noOwner ? `<p style="color:var(--danger);font-size:.78rem">⚠ ${noOwner} risco(s) alto(s) sem dono ou sem ação definida. Risco alto sem dono é risco aceito por omissão.</p>` : ''}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Registro</div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Risco</th><th>Categoria</th><th class="num">P</th><th class="num">I</th><th class="num">P×I</th><th>Resposta</th><th>Ação</th><th>Dono</th><th>Status</th></tr></thead><tbody>
+      ${list.map(r => { const s = riskScore(r), lv = riskLevel(s); return `<tr class="click" onclick="riskDialog('${r.id}')" style="${r.status === 'Encerrado' ? 'opacity:.5' : ''}"><td class="num">${code(r)}</td><td>${esc(r.desc)}</td><td>${esc(r.categoria)}</td><td class="num">${r.prob}</td><td class="num">${r.imp}</td><td class="num" style="color:${lv[1]};font-weight:600">${s}</td><td>${esc(r.resposta)}</td><td>${esc(r.acao)}</td><td>${esc(r.dono)}</td><td>${esc(r.status)}</td></tr>`; }).join('') || '<tr><td colspan="10" class="hint">Nenhum risco registrado. Todo projeto tem riscos; não registrar não os elimina.</td></tr>'}
+      </tbody></table></div></div>`;
+}
+
+/* ===================== PARTES INTERESSADAS ===================== */
+const quadrant = s => (+s.poder >= 3 ? (+s.interesse >= 3 ? 'gerenciar' : 'satisfeito') : (+s.interesse >= 3 ? 'informado' : 'monitorar'));
+const QUAD = { gerenciar: 'Gerenciar de perto', satisfeito: 'Manter satisfeito', informado: 'Manter informado', monitorar: 'Monitorar' };
+function stakeDialog(id) {
+  const p = cur(); if (!p) { newProjectDialog(); return; }
+  const s = id ? p.partes.find(x => x.id === id) : null;
+  const sc = [1, 2, 3, 4, 5].map(n => [n, String(n)]);
+  openModal(s ? 'Editar parte interessada' : 'Nova parte interessada', `
+    <div class="form-grid">
+      <div class="field"><label>Nome</label><input id="sk-nome" value="${esc(s?.nome)}"></div>
+      <div class="field"><label>Papel / área</label><input id="sk-papel" value="${esc(s?.papel)}"></div>
+      <div class="field"><label>Poder (1–5)</label><select id="sk-poder">${opts(sc, s?.poder || 3)}</select></div>
+      <div class="field"><label>Interesse (1–5)</label><select id="sk-int">${opts(sc, s?.interesse || 3)}</select></div>
+      <div class="field"><label>Atitude</label><select id="sk-at">${opts(ATITUDES, s?.atitude || 'Neutro')}</select></div>
+      <div class="field"><label>Expectativa / como engajar</label><input id="sk-obs" value="${esc(s?.obs)}"></div>
+    </div>`,
+    () => {
+      if (!val('sk-nome')) { alert('Informe o nome.'); return false; }
+      const t = s || { id: uid('s') };
+      Object.assign(t, { nome: val('sk-nome'), papel: val('sk-papel'), poder: +val('sk-poder'), interesse: +val('sk-int'), atitude: val('sk-at'), obs: val('sk-obs') });
+      if (!s) p.partes.push(t);
+      persist(); renderPartes();
+    },
+    s ? () => { p.partes = p.partes.filter(x => x.id !== s.id); persist(); renderPartes(); } : null);
+}
+function renderPartes() {
+  if (needProject('partes-body')) return;
+  const p = cur();
+  const by = q => p.partes.filter(s => quadrant(s) === q).map(s => `<span class="pill" style="cursor:pointer;${s.atitude === 'Resiste' ? 'border-color:var(--danger)' : s.atitude === 'Apoia' ? 'border-color:var(--success)' : ''}" onclick="stakeDialog('${s.id}')">${esc(s.nome)}</span>`).join('') || '<span class="hint">—</span>';
+  const risky = p.partes.filter(s => quadrant(s) === 'gerenciar' && s.atitude === 'Resiste');
+  document.getElementById('partes-body').innerHTML = `
+    <div class="card"><div class="card-title">Poder × interesse</div>
+      <div style="display:flex;gap:.5rem"><div class="maxis" style="writing-mode:vertical-rl;transform:rotate(180deg)">Poder ↑</div>
+      <div style="flex:1"><div class="quad">
+        <div class="qcell"><h4>Manter satisfeito</h4>${by('satisfeito')}</div>
+        <div class="qcell hot"><h4>Gerenciar de perto</h4>${by('gerenciar')}</div>
+        <div class="qcell"><h4>Monitorar</h4>${by('monitorar')}</div>
+        <div class="qcell"><h4>Manter informado</h4>${by('informado')}</div>
+      </div><div class="maxis" style="max-width:620px;margin-top:.3rem">Interesse →</div></div></div>
+      <p class="hint" style="margin-top:.6rem">Borda verde: apoia · vermelha: resiste.${risky.length ? ` <span style="color:var(--danger)">⚠ ${risky.map(s => esc(s.nome)).join(', ')}: alto poder, alto interesse e resistência. Trate como risco do projeto (Kotter: sem coalizão, a mudança não se sustenta).</span>` : ''}</p>
+    </div>
+    <div class="card"><div class="card-title">Registro</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Papel</th><th class="num">Poder</th><th class="num">Interesse</th><th>Atitude</th><th>Estratégia</th><th>Expectativa / engajamento</th></tr></thead><tbody>
+      ${p.partes.map(s => `<tr class="click" onclick="stakeDialog('${s.id}')"><td>${esc(s.nome)}</td><td>${esc(s.papel)}</td><td class="num">${s.poder}</td><td class="num">${s.interesse}</td><td>${esc(s.atitude)}</td><td>${QUAD[quadrant(s)]}</td><td>${esc(s.obs)}</td></tr>`).join('') || '<tr><td colspan="7" class="hint">Nenhuma parte interessada registrada.</td></tr>'}
+    </tbody></table></div></div>`;
+}
+
+/* ===================== LIÇÕES ===================== */
+function lessonDialog(id) {
+  const p = cur(); if (!p) { newProjectDialog(); return; }
+  const l = id ? p.licoes.find(x => x.id === id) : null;
+  openModal(l ? 'Editar lição' : 'Nova lição aprendida', `
+    <div class="form-grid">
+      <div class="field"><label>Data</label><input id="ls-data" type="date" value="${esc(l?.data || today())}"></div>
+      <div class="field"><label>Tipo</label><select id="ls-tipo">${opts(['Positiva (repetir)', 'Negativa (evitar)'], l?.tipo || 'Positiva (repetir)')}</select></div>
+      <div class="field span2"><label>Área de conhecimento</label><select id="ls-cat">${opts(['Governança', 'Escopo', 'Cronograma', 'Finanças', 'Partes interessadas', 'Recursos', 'Riscos', 'Fluxo / Kanban', 'Scrum', 'Qualidade / LSS'], l?.categoria || 'Governança')}</select></div>
+      <div class="field span2"><label>O que aconteceu</label><textarea id="ls-oque" rows="2">${esc(l?.oque)}</textarea></div>
+      <div class="field span2"><label>Recomendação acionável</label><textarea id="ls-rec" rows="2" placeholder="Nos próximos projetos, fazer X antes de Y">${esc(l?.rec)}</textarea></div>
+    </div>`,
+    () => {
+      if (!val('ls-oque') || !val('ls-rec')) { alert('Preencha o que aconteceu e a recomendação.'); return false; }
+      const t = l || { id: uid('l') };
+      Object.assign(t, { data: val('ls-data'), tipo: val('ls-tipo'), categoria: val('ls-cat'), oque: val('ls-oque'), rec: val('ls-rec') });
+      if (!l) p.licoes.push(t);
+      persist(); renderLicoes();
+    },
+    l ? () => { p.licoes = p.licoes.filter(x => x.id !== l.id); persist(); renderLicoes(); } : null);
+}
+function renderLicoes() {
+  if (needProject('licoes-body')) return;
+  const p = cur();
+  const all = Object.values(db.projects).reduce((a, x) => a + x.licoes.length, 0);
+  document.getElementById('licoes-body').innerHTML = `
+    <div class="card"><div class="card-title"><span>${esc(p.nome)} · ${p.licoes.length} lições</span><span class="hint" style="text-transform:none;letter-spacing:0">${all} no portfólio inteiro</span></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Tipo</th><th>Área</th><th>O que aconteceu</th><th>Recomendação</th></tr></thead><tbody>
+      ${p.licoes.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).map(l => `<tr class="click" onclick="lessonDialog('${l.id}')"><td class="num">${fmtD(l.data)}</td><td style="color:${l.tipo.startsWith('Pos') ? 'var(--success)' : 'var(--danger)'}">${l.tipo.startsWith('Pos') ? '▲ repetir' : '▼ evitar'}</td><td>${esc(l.categoria)}</td><td>${esc(l.oque)}</td><td>${esc(l.rec)}</td></tr>`).join('') || '<tr><td colspan="5" class="hint">Nenhuma lição registrada ainda.</td></tr>'}
+      </tbody></table></div></div>`;
+}
+
+/* ===================== BACKUP ===================== */
+function renderBackupStatus() {
+  const lb = db.meta.lastBackup;
+  const has = Object.keys(db.projects).length > 0;
+  const age = lb ? days(lb, Date.now()) : null;
+  const chip = document.getElementById('backup-chip');
+  chip.className = 'chip ' + (!has ? '' : age == null || age > 7 ? 'bad' : age > 5 ? 'warn' : 'ok');
+  chip.textContent = 'backup: ' + (lb ? (age < 1 ? 'hoje' : `há ${Math.floor(age)} d`) : 'nunca');
+  document.getElementById('footer-backup').textContent = lb ? 'Último backup ' + fmtD(lb) : 'Sem backup';
+  const show = has && (age == null || age > 7);
+  document.getElementById('backup-banner').classList.toggle('show', show);
+  document.getElementById('backup-banner-text').textContent = age == null
+    ? '⚠ Seus dados estão só neste navegador. Limpar o cache apaga tudo: faça um backup JSON e guarde no Drive.'
+    : `⚠ Último backup há ${Math.floor(age)} dias. A regra do projeto é no máximo 7.`;
+}
+function exportBackup() {
+  db.meta.lastBackup = nowISO();
+  Store.save(db);
+  const data = { app: 'atlas', version: 1, exportedAt: db.meta.lastBackup, atlas: db, dmaic: Store.dmaic() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `atlas-backup-${today()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  renderBackupStatus();
+}
+function importBackup(e) {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    let data;
+    try { data = JSON.parse(ev.target.result); } catch (err) { alert('Arquivo inválido: não é JSON.'); return; }
+    if (!data || data.app !== 'atlas' || !data.atlas || !data.atlas.projects) { alert('Este arquivo não é um backup do Atlas.'); return; }
+    const n = Object.keys(data.atlas.projects).length;
+    if (!confirm(`Restaurar backup de ${fmtD(data.exportedAt)} com ${n} projeto(s)?\nOs dados atuais do Atlas neste navegador serão substituídos.`)) return;
+    db = data.atlas; db.meta = db.meta || {};
+    Object.values(db.projects).forEach(normalize);
+    if (!db.projects[db.meta.current]) db.meta.current = Object.keys(db.projects)[0] || null;
+    Store.save(db);
+    const dn = data.dmaic ? Object.keys(data.dmaic).length : 0;
+    if (dn && confirm(`O backup também contém ${dn} projeto(s) DMAIC. Restaurar no dmaic.html também (substitui os atuais)?`)) localStorage.setItem(DMAIC_KEY, JSON.stringify(data.dmaic));
+    renderBackupStatus(); rerender();
+  };
+  r.readAsText(file);
+}
+
+/* ===================== INÍCIO ===================== */
+// Sincroniza se o dmaic.html for alterado em outra aba
+window.addEventListener('storage', e => { if (e.key === DMAIC_KEY && (currentPage === 'painel' || currentPage === 'tap')) RENDER[currentPage](); });
+refreshSelect();
+renderBackupStatus();
+showPage('painel');
+</script>
+</body>
+</html>
