@@ -2,7 +2,9 @@
 
 O nome Enki, deus sumério da sabedoria e dos ofícios, substituiu o nome provisório Atlas em 19/11/2026.
 
-Ferramentas web estáticas, publicadas no Vercel (produção a partir da `main`, prévia em cada pull request). No Vercel, o projeto se chama **enki** (o repositório continua `ferramentas_leansixsigma`); o endereço de produção entra aqui depois da primeira publicação.
+Ferramentas web estáticas, publicadas no Vercel (produção a partir da `main`, prévia em cada pull request). No Vercel, o projeto se chama **enki** (o repositório continua `ferramentas_leansixsigma`).
+
+**Produção:** https://enkipro.vercel.app (CEP) · Enki: https://enkipro.vercel.app/gestao.html · DMAIC: https://enkipro.vercel.app/dmaic.html
 
 Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcsarmento.github.io` deve exportar os projetos lá e importar no endereço do Vercel.
 

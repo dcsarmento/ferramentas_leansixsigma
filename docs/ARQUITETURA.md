@@ -14,7 +14,7 @@ O Enki **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um
 Nome técnico (ADR 12): a ferramenta se chamava Atlas. A chave `atlas_db_v1`, os campos `app: 'atlas'` e `atlas` do backup e o nome dos testes temporários continuam como estão: são identificadores, não texto de tela. Trocar exigiria migração e quebraria a restauração de backups já feitos. Só o nome do arquivo baixado mudou (`enki-backup-AAAA-MM-DD.json`).
 
 ## Publicação (ADR 10)
-- O projeto no Vercel se chama **enki** (importado como atlas e renomeado no ADR 12; o repositório continua `ferramentas_leansixsigma`). Ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
+- O projeto no Vercel se chama **enki** (importado como atlas e renomeado no ADR 12; o repositório continua `ferramentas_leansixsigma`). Domínio de produção: `enkipro.vercel.app` (o Enki fica em `/gestao.html`). Ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
 - `vercel.json` roda `npm run build` (`tools/build.js`), que copia só as três páginas para `dist/` e falha se faltar alguma.
 - Os testes rodam no GitHub Actions (`testes.yml`).
 - Merge automático (ADR 11): `merge-automatico.yml` dispara no fim de **Testes**; `tools/merge-automatico.js` decide (`podeMesclar`) e faz merge, redireciona os empilhados para a `main`, reexecuta os testes deles e apaga a branch. Rascunho ou rótulo `segurar` impedem o merge.
