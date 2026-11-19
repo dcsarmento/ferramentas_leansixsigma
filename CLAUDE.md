@@ -16,7 +16,7 @@ Dono e decisor final: Diego Sarmento. Mesmas práticas do projeto BI Frota.
 5. **Entrega.** Commit com mensagem descritiva (`feat:`, `fix:`, `test:`, `docs:`, `refactor:`) e push numa branch, com pull request para a `main`. Nunca commit direto na `main`: o Vercel publica a `main` em produção (ADR 10). Cada PR ganha uma prévia no Vercel. Com a suíte **Testes** verde, o PR para a `main` é mesclado automaticamente (ADR 11); para revisar antes, abra como rascunho ou ponha o rótulo `segurar`. Este passo nunca é omitido.
 
 ## Padrões técnicos
-- Páginas HTML autocontidas, mesmo visual (tokens CSS, DM Sans/DM Mono) do `index.html` e do `dmaic.html`.
+- Páginas HTML autocontidas, cores só em tokens CSS. O Enki usa o tema claro do ADR 13 (DM Sans; DM Mono só em números); `index.html` e `dmaic.html` seguem escuros até a fatia LAY-04 do backlog.
 - No Enki, todo acesso ao `localStorage` passa pelo objeto `Store`.
 - Todo texto do usuário exibido na tela passa por `esc()`.
 - Regras de negócio em funções puras no bloco Domínio, para poderem ser testadas.

@@ -152,5 +152,18 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 | NOM-01 | `gestao.html` tem título começando por "Enki ·" e logotipo ENKI; o atalho do CEP mostra ENKI; nenhum texto da página (telas ocultas incluídas, vazia ou com o exemplo "Projeto Enki") contém "Atlas" |
 | NOM-02 | Dados em `atlas_db_v1` abrem e continuam gravados na mesma chave, sem criar outra; o backup baixa como `enki-backup-AAAA-MM-DD.json` com `app: 'atlas'`; backup antigo restaura |
 
-## 11. Referências
-PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
+## 11. Visual de software de gestão (fatia LAY-01, ADR 13)
+**Problema.** O Enki herdou o tema escuro e monoespaçado do CEP e do DMAIC. Rótulos em caixa-alta, fonte de terminal e códigos de texto no menu (PORT, KAN, SCR) davam "cara de DOS" e dificultavam a leitura no uso diário.
+**Objetivo.** Aproximar o Enki do padrão das ferramentas de gestão de projetos que o dono conhece (Asana, Monday, ClickUp, Linear, Jira, MS Project): fundo claro, menu lateral limpo com ícones, cartões e tabelas legíveis, tipografia proporcional.
+**Resultado esperado.** Mesmas telas, mesmos dados, mesmo comportamento; só muda a aparência. Fatia LAY-01 cobre tokens de cor, tipografia, componentes (botões, campos, tabelas, cartões, Kanban, modal) e ícones do menu. Cabeçalho com contexto do projeto, modo escuro opcional e o mesmo visual no DMAIC e no CEP ficam para fatias seguintes (BACKLOG).
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| LAY-01 | Fundo da página claro; os tokens de texto (`--text`, `--muted2`, `--muted`) e de estado (`--accent`, `--danger`, `--success`, `--warn`) têm contraste ≥ 4,5:1 (WCAG AA) sobre `--surface` e `--bg`; o texto do botão principal tem ≥ 4,5:1 sobre `--accent` |
+| LAY-02 | Todo ícone do menu lateral é um desenho (SVG) e não mostra código de texto; o código continua em `data-icon` |
+| LAY-03 | Títulos de tela e de cartão, rótulos de indicador e de campo, cabeçalhos de tabela, legendas do menu e botões não usam caixa-alta nem DM Mono (DM Mono só em números e códigos) |
+| LAY-04 | Todas as telas de `RENDER` abrem sem erro de script com o projeto de exemplo, a 1400 px e a 390 px de largura, sem rolagem horizontal da página |
+
+## 12. Referências
+PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

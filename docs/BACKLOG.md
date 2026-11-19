@@ -50,6 +50,15 @@ Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, po
 | --- | --- | --- | --- |
 | NOM-01 ✓ | Atlas → Enki na tela (título, logotipo, atalho do CEP, exemplo, mensagens, arquivo de backup) e nos docs; chave e formato do backup mantidos | Ver NOM-01 e NOM-02 | NOM-01, NOM-02 (`tests/nome.test.js`) |
 
+## Visual de software de gestão (ADR 13)
+Fora do gate: muda só a aparência, sem função nova. Uma fatia por PR, cada uma com prévia no Vercel para o dono aprovar.
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| LAY-01 | Tema claro no `gestao.html`: tokens, tipografia DM Sans, componentes e ícones SVG no menu (`NAV_ICONS`, `hydrateNavIcons`) | Ver LAY-01 a LAY-04 | LAY-01 a LAY-04 (`tests/layout.test.js`) |
+| LAY-02 | Cabeçalho do projeto: nome, status, saúde, progresso e próximo marco no topo das telas de projeto; backup e restauração num menu compacto; "Excluir projeto" sai da barra para a TAP | A definir na especificação da fatia | — |
+| LAY-03 | Modo escuro opcional (alternador no menu, preferência gravada pelo `Store`, padrão segue o sistema) | A definir | — |
+| LAY-04 | Mesmo visual no `dmaic.html` e no `index.html` (CEP), para a regra "mesmo visual nas três páginas" voltar a valer | A definir | — |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
