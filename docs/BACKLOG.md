@@ -1,4 +1,4 @@
-# Backlog incremental — Atlas
+# Backlog incremental — Enki
 
 Cada tarefa cabe em **uma sessão / um prompt**, mexe no mínimo de código possível e só é dada como pronta com teste novo verde e suíte inteira verde.
 A R2 só começa depois do gate da R1: 30 dias de uso real com 3 projetos (ver ESPECIFICACAO.md).
@@ -44,6 +44,11 @@ Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, po
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
 | AUT-01 | `merge-automatico.yml` + `tools/merge-automatico.js`; `workflow_dispatch` em `testes.yml`; docs | Ver AUT-01 a AUT-04 | AUT-01 a AUT-04 |
+
+## Novo nome: Enki (ADR 12)
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| NOM-01 ✓ | Atlas → Enki na tela (título, logotipo, atalho do CEP, exemplo, mensagens, arquivo de backup) e nos docs; chave e formato do backup mantidos | Ver NOM-01 e NOM-02 | NOM-01, NOM-02 (`tests/nome.test.js`) |
 
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |

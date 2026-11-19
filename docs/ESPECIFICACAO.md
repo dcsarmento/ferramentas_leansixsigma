@@ -1,4 +1,4 @@
-# Especificação — Atlas
+# Especificação — Enki
 
 Versão 1.1 · 18/11/2026 · Dono: Diego Sarmento
 
@@ -39,13 +39,13 @@ O código entre colchetes é o mesmo do teste automatizado em `tests/`. Critéri
 | RSK-02 | Risco alto sem dono ou sem ação gera alerta; risco encerrado sai da matriz |
 | STK-01 | Quadrante pela matriz poder × interesse (corte em 3); alerta para alto poder + alto interesse + resistência |
 | SEG-01 | Todo texto digitado é escapado; nenhum HTML do usuário é executado |
-| DAD-01 | Backup JSON exporta tudo (Atlas + DMAIC); restaurar recupera os dados; data do backup atualizada |
-| DAD-02 | Arquivo que não é backup do Atlas é recusado sem apagar dados |
+| DAD-01 | Backup JSON exporta tudo (Enki + DMAIC); restaurar recupera os dados; data do backup atualizada |
+| DAD-02 | Arquivo que não é backup do Enki é recusado sem apagar dados |
 | DAD-03 | Dados de versão antiga ou incompletos são normalizados sem erro |
 | LSS-01 | Projetos do `dmaic.html` aparecem no portfólio; importar cria projeto DMAIC vinculado; progresso = fases concluídas ÷ 5 |
 | LSS-02 | "Abrir no DMAIC" abre o projeto certo |
-| LSS-03 | Dados do DMAIC corrompidos não quebram o Atlas |
-| SMK | `index.html`, `dmaic.html` e `gestao.html` abrem sem erro de script; o CEP mantém os links para DMAIC e Atlas |
+| LSS-03 | Dados do DMAIC corrompidos não quebram o Enki |
+| SMK | `index.html`, `dmaic.html` e `gestao.html` abrem sem erro de script; o CEP mantém os links para DMAIC e Enki |
 
 ## 6. Release 3-A — Diagnóstico de Processos (exceção ao gate, ADR 7)
 
@@ -109,8 +109,8 @@ Regras: um só conjunto de dados com várias visões (ADR 4); a Timeline sai do 
 | NAV-07 | Em tela baixa o menu lateral rola e a seção Processos continua alcançável |
 
 ## 8. Publicação no Vercel (fatia PUB-01, ADR 10)
-**Problema.** O Atlas não está no ar. O plano previa o GitHub Pages, mas o dono quer o mesmo molde do BI Frota: Vercel ligado ao GitHub, com prévia em cada pull request e produção a partir da `main`.
-**Objetivo.** Publicar as três páginas (CEP, DMAIC, Atlas) no Vercel sem mudar nenhuma tela.
+**Problema.** O Enki não está no ar. O plano previa o GitHub Pages, mas o dono quer o mesmo molde do BI Frota: Vercel ligado ao GitHub, com prévia em cada pull request e produção a partir da `main`.
+**Objetivo.** Publicar as três páginas (CEP, DMAIC, Enki) no Vercel sem mudar nenhuma tela.
 **Resultado esperado.** Cada PR ganha uma URL de prévia; o merge na `main` atualiza a produção. Só as páginas vão ao ar: `docs/`, `tests/`, `CLAUDE.md` e `package.json` ficam fora.
 
 Diferença em relação ao BI Frota: lá o Vercel roda `npm test && npm run build`. Aqui a suíte usa Playwright com Chromium, que não roda de forma confiável na imagem de build do Vercel. O portão de qualidade fica no GitHub Actions (obrigatório no PR) e o build do Vercel só monta `dist/`, recusando publicação incompleta.
@@ -141,5 +141,16 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 | AUT-03 | Depois do merge, os PRs empilhados passam a ter base `main` e têm os testes reexecutados antes de a branch ser apagada; execução manual dos testes acha o PR pela branch e pelo commit |
 | AUT-04 | O workflow dispara no fim de **Testes**, só age em sucesso, roda o código da `main` (nunca o do PR) e pede só `contents`, `pull-requests` e `actions` |
 
-## 10. Referências
+## 10. Novo nome: Enki (fatia NOM-01, ADR 12)
+**Problema.** O nome Atlas era provisório. O dono escolheu Enki, deus sumério da sabedoria e dos ofícios.
+**Objetivo.** Trocar o nome em tudo que o usuário vê (título da aba, logotipo, atalho no CEP, projeto de exemplo, mensagens, nome do arquivo de backup) e na documentação.
+**Resultado esperado.** Nenhum texto de tela diz Atlas. Os dados já salvos no navegador e os backups antigos continuam abrindo, porque a chave `atlas_db_v1` e o formato do backup (`app: 'atlas'`) não mudam: são identificadores internos, e trocá-los exigiria migração sem ganho para o usuário.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| NOM-01 | `gestao.html` tem título começando por "Enki ·" e logotipo ENKI; o atalho do CEP mostra ENKI; nenhum texto da página (telas ocultas incluídas, vazia ou com o exemplo "Projeto Enki") contém "Atlas" |
+| NOM-02 | Dados em `atlas_db_v1` abrem e continuam gravados na mesma chave, sem criar outra; o backup baixa como `enki-backup-AAAA-MM-DD.json` com `app: 'atlas'`; backup antigo restaura |
+
+## 11. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

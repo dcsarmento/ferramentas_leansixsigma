@@ -1,4 +1,4 @@
-# Arquitetura — Atlas
+# Arquitetura — Enki
 
 ## Visão geral
 Três páginas estáticas publicadas no Vercel (ADR 10), mesma origem (o domínio de produção do projeto no Vercel), logo o mesmo `localStorage`:
@@ -7,12 +7,14 @@ Três páginas estáticas publicadas no Vercel (ADR 10), mesma origem (o domíni
 | --- | --- | --- |
 | `index.html` (CEP) | — | — |
 | `dmaic.html` | `dmaic_projects`, `dmaic_last` | `dmaic_projects`, `dmaic_last` |
-| `gestao.html` (Atlas) | `atlas_db_v1`, `dmaic_projects` | `atlas_db_v1`, `dmaic_last` (só para abrir um projeto no DMAIC) |
+| `gestao.html` (Enki) | `atlas_db_v1`, `dmaic_projects` | `atlas_db_v1`, `dmaic_last` (só para abrir um projeto no DMAIC) |
 
-O Atlas **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um backup e confirma.
+O Enki **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um backup e confirma.
+
+Nome técnico (ADR 12): a ferramenta se chamava Atlas. A chave `atlas_db_v1`, os campos `app: 'atlas'` e `atlas` do backup e o nome dos testes temporários continuam como estão: são identificadores, não texto de tela. Trocar exigiria migração e quebraria a restauração de backups já feitos. Só o nome do arquivo baixado mudou (`enki-backup-AAAA-MM-DD.json`).
 
 ## Publicação (ADR 10)
-- O projeto no Vercel se chama **atlas** (nome definido na importação; o repositório continua `ferramentas_leansixsigma`). Ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
+- O projeto no Vercel se chama **enki** (importado como atlas e renomeado no ADR 12; o repositório continua `ferramentas_leansixsigma`). Domínio de produção: `enkipro.vercel.app` (o Enki fica em `/gestao.html`). Ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
 - `vercel.json` roda `npm run build` (`tools/build.js`), que copia só as três páginas para `dist/` e falha se faltar alguma.
 - Os testes rodam no GitHub Actions (`testes.yml`).
 - Merge automático (ADR 11): `merge-automatico.yml` dispara no fim de **Testes**; `tools/merge-automatico.js` decide (`podeMesclar`) e faz merge, redireciona os empilhados para a `main`, reexecuta os testes deles e apaga a branch. Rascunho ou rótulo `segurar` impedem o merge.
@@ -86,3 +88,4 @@ Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "
 | 9 | 18/11/2026 | Telas de Projetos agrupadas pelos 7 domínios de desempenho do PMBOK 8, com a área de conhecimento clássica como legenda; itens da R2/R3-B visíveis e desabilitados | Coerente com o ADR 2; o dono quer cada ferramenta na sua área; mostra o mapa sem antecipar o gate | 10 áreas de conhecimento da 6ª ed.; construir Gantt e Timeline antes do gate |
 | 10 | 18/11/2026 | Publicação no Vercel (Git integration: prévia por PR, produção na `main`), no molde do BI Frota; substitui o GitHub Pages do ADR 6 | Pedido do dono; mesmo fluxo do BI, prévia para revisar cada fatia antes do merge | Manter o GitHub Pages; rodar a suíte Playwright dentro do build do Vercel (Chromium instável na imagem de build) |
 | 11 | 19/11/2026 | Merge automático por GitHub Actions quando **Testes** fica verde no último commit de um PR para a `main`; merge commit; empilhados redirecionados e retestados; branch apagada | Pedido do dono (mesmo fluxo do BI Frota, sem merge manual); o workflow não depende de configurar o repositório e só mescla depois do CI, ao contrário do BI | Auto-merge nativo do GitHub (exige ligar a opção e a proteção da `main` nas configurações); merge logo ao abrir o PR, como no BI (pula o CI); squash (quebra PRs empilhados) |
+| 12 | 19/11/2026 | Nome da ferramenta passa de Atlas para Enki (deus sumério da sabedoria e dos ofícios) em tudo que aparece na tela e na documentação; chave `atlas_db_v1` e formato do backup (`app: 'atlas'`) mantidos | Pedido do dono; manter os identificadores preserva os dados salvos e os backups existentes sem código de migração | Renomear a chave para `enki_db_v1` com migração (risco de perder dados se falhar, sem ganho para o usuário); aceitar dois formatos de backup |

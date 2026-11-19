@@ -17,11 +17,11 @@ Dono e decisor final: Diego Sarmento. Mesmas práticas do projeto BI Frota.
 
 ## Padrões técnicos
 - Páginas HTML autocontidas, mesmo visual (tokens CSS, DM Sans/DM Mono) do `index.html` e do `dmaic.html`.
-- No Atlas, todo acesso ao `localStorage` passa pelo objeto `Store`.
+- No Enki, todo acesso ao `localStorage` passa pelo objeto `Store`.
 - Todo texto do usuário exibido na tela passa por `esc()`.
 - Regras de negócio em funções puras no bloco Domínio, para poderem ser testadas.
 - Campo novo no modelo: padrão em `makeProject` + tratamento em `normalize` + teste DAD-03 verde.
-- O Atlas não grava em `dmaic_projects` (só em restauração de backup confirmada).
+- O Enki não grava em `dmaic_projects` (só em restauração de backup confirmada).
 - Gate de release: R2 só começa após 30 dias de uso real da R1 com 3 projetos. Pedido de R2 antes disso deve ser questionado.
 
 ## Rodar os testes

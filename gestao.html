@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Atlas · Gestão de Projetos e Processos</title>
+<title>Enki · Gestão de Projetos e Processos</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Mesma identidade visual do dmaic.html e do index.html (CEP) */
@@ -187,7 +187,7 @@ svg text{font-family:'DM Mono',monospace;}
 
 <nav id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-text">ATLAS</div>
+    <div class="logo-text">ENKI</div>
     <div class="logo-sub">Projetos · Processos · Melhoria</div>
   </div>
   <div class="sidebar-section">
@@ -357,6 +357,7 @@ svg text{font-family:'DM Mono',monospace;}
    CAMADA DE DADOS — isolada para permitir trocar localStorage por
    Firebase no futuro sem mexer nas telas.
    ===================================================================== */
+// Identificadores técnicos herdados do nome Atlas (ADR 12): mudar apagaria os dados e invalidaria os backups.
 const STORE_KEY = 'atlas_db_v1';
 const DMAIC_KEY = 'dmaic_projects';   // mesma origem (domínio publicado) → leitura direta do dmaic.html
 const Store = {
@@ -645,11 +646,11 @@ function deleteProject() {
 function seedExample() {
   const t = today();
   const p = makeProject({
-    nome: 'Projeto Atlas · Ferramenta de gestão', abordagem: 'Híbrida', status: 'Em execução', prioridade: 'Alta',
+    nome: 'Projeto Enki · Ferramenta de gestão', abordagem: 'Híbrida', status: 'Em execução', prioridade: 'Alta',
     gerente: 'Diego Sarmento', patrocinador: 'Diego Sarmento', alinhamento: 'Excelência operacional e portfólio profissional',
     tap: {
       justificativa: 'CEP e DMAIC existem como ilhas; falta portfólio, quadro de fluxo, riscos e partes interessadas integrados.',
-      objetivo: 'Usar o Atlas por 30 dias seguidos para gerir pelo menos 3 projetos reais.',
+      objetivo: 'Usar o Enki por 30 dias seguidos para gerir pelo menos 3 projetos reais.',
       dentro: 'Portfólio, TAP, Kanban com WIP, Scrum, riscos, partes interessadas, lições, integração DMAIC/CEP, backup JSON.',
       fora: 'Multiusuário, login, integrações externas, app nativo.',
       premissas: 'Vercel gratuito (plano Hobby); backup JSON semanal.', restricoes: 'Sem servidor; manutenção com apoio de IA.',
@@ -688,7 +689,7 @@ function renderPainel() {
   const dm = Store.dmaic();
   const dmList = Object.values(dm).filter(d => d && d.id);
   if (!list.length && !dmList.length) {
-    el.innerHTML = `<div class="card empty"><h2>Portfólio vazio</h2>Crie o primeiro projeto ou carregue o exemplo: o próprio Projeto Atlas, já com backlog das próximas releases, riscos e marcos.
+    el.innerHTML = `<div class="card empty"><h2>Portfólio vazio</h2>Crie o primeiro projeto ou carregue o exemplo: o próprio Projeto Enki, já com backlog das próximas releases, riscos e marcos.
       <div class="btn-row" style="justify-content:center"><button class="btn" onclick="newProjectDialog()">+ Novo projeto</button><button class="btn ghost" onclick="seedExample()">Carregar exemplo</button></div></div>`;
     return;
   }
@@ -1361,7 +1362,7 @@ function exportBackup() {
   const data = { app: 'atlas', version: 1, exportedAt: db.meta.lastBackup, atlas: db, dmaic: Store.dmaic() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = `atlas-backup-${today()}.json`;
+  a.href = URL.createObjectURL(blob); a.download = `enki-backup-${today()}.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   renderBackupStatus();
@@ -1373,10 +1374,10 @@ function importBackup(e) {
   r.onload = ev => {
     let data;
     try { data = JSON.parse(ev.target.result); } catch (err) { alert('Arquivo inválido: não é JSON.'); return; }
-    if (!data || data.app !== 'atlas' || !data.atlas || !data.atlas.projects) { alert('Este arquivo não é um backup do Atlas.'); return; }
+    if (!data || data.app !== 'atlas' || !data.atlas || !data.atlas.projects) { alert('Este arquivo não é um backup do Enki.'); return; }
     const n = Object.keys(data.atlas.projects).length;
     const np = data.atlas.processes ? Object.keys(data.atlas.processes).length : 0;
-    if (!confirm(`Restaurar backup de ${fmtD(data.exportedAt)} com ${n} projeto(s) e ${np} processo(s)?\nOs dados atuais do Atlas neste navegador serão substituídos.`)) return;
+    if (!confirm(`Restaurar backup de ${fmtD(data.exportedAt)} com ${n} projeto(s) e ${np} processo(s)?\nOs dados atuais do Enki neste navegador serão substituídos.`)) return;
     db = data.atlas; db.meta = db.meta || {};
     Object.values(db.projects).forEach(normalize);
     normalizeProcesses(db);
