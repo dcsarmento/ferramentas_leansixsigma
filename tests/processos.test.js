@@ -147,7 +147,7 @@ describe('Maturidade', () => {
   test('[MAT-02] dimensão acima de 2 sem evidência é recusada com mensagem', async () => {
     const { page, context, dialogLog } = await openPage(browser, URL);
     await page.evaluate(() => { const p = makeProcess({ nome: 'Faturamento' }); db.processes[p.id] = p; persist(); showPage('processos'); });
-    await page.click('#processos-body >> text=Avaliar');
+    await page.click('#processos-body tbody button:has-text("Avaliar")');
     await page.selectOption('#av-n-desenho', '3');
     await page.click('#modal-save');
     assert.match(dialogLog.at(-1), /Desenho e documentação: nível 3 exige evidência/);
@@ -165,7 +165,7 @@ describe('Maturidade', () => {
     const { page, context } = await openPage(browser, URL);
     const id = await processoAvaliado(page, [{ data: '2026-10-01', n: [2, 2, 2, 2, 2] }]);
     assert.equal(await page.evaluate(id => maturityTrend(db.processes[id]), id), null, 'com uma avaliação não há tendência');
-    await page.click(`#processos-body tr[data-proc="${id}"] >> text=Avaliar`);
+    await page.click(`#processos-body tr[data-proc="${id}"] button:has-text("Avaliar")`);
     assert.equal(await page.inputValue('#av-n-dono'), '2', 'a avaliação anterior vem preenchida');
     for (const k of ['desenho', 'dono', 'executores', 'indicadores', 'controle']) await page.selectOption('#av-n-' + k, '3');
     await page.click('#modal-save');
@@ -182,6 +182,41 @@ describe('Maturidade', () => {
     const restam = await page.evaluate(id => db.processes[id].avaliacoes.map(a => a.data), id);
     assert.equal(restam.length, 1, 'excluir apaga só a avaliação escolhida');
     assert.equal(await page.locator('#mat-box .mat-hist tbody tr').count(), 1);
+    await context.close();
+  });
+});
+
+describe('Painel do diagnóstico', () => {
+  test('[MAT-04] painel conta processos por nível e destaca crítico em nível ≤ 2 e avaliação com mais de 180 dias', async () => {
+    const { page, context, errors } = await openPage(browser, URL);
+    const ids = await page.evaluate(() => {
+      const ks = MAT_DIMS.map(m => m.k);
+      const av = (data, n) => ({ id: uid('av'), data, niveis: Object.fromEntries(ks.map(k => [k, n])), evidencias: Object.fromEntries(ks.map(k => [k, 'ev'])) });
+      const mk = (nome, criticidade, avs, status = 'Ativo') => { const p = makeProcess({ nome, criticidade, status, avaliacoes: avs }); db.processes[p.id] = p; return p.id; };
+      const r = {
+        fragil: mk('Crítico frágil', 'Alta', [av(today(), 2)]),
+        altaMadura: mk('Alta madura', 'Alta', [av(today(), 3)]),
+        mediaFraca: mk('Média fraca', 'Média', [av(today(), 1)]),
+        vencida: mk('Avaliado há muito', 'Baixa', [av(new Date(Date.now() - 200 * 864e5).toISOString().slice(0, 10), 4)]),
+        nunca: mk('Nunca avaliado', 'Alta', []),
+        desativado: mk('Desativado', 'Alta', [av('2020-01-01', 1)], 'Desativado')
+      };
+      persist(); showPage('processos'); return r;
+    });
+    const sm = await page.evaluate(() => { const s = diagnosticSummary(Object.values(db.processes)); return { total: s.total, porNivel: s.porNivel, frageis: s.frageis, vencidas: s.vencidas }; });
+    assert.equal(sm.total, 5, 'desativado fica fora');
+    assert.deepEqual(sm.porNivel, [1, 1, 1, 1, 1, 0]);
+    assert.deepEqual(sm.frageis, [ids.fragil]);
+    assert.deepEqual(sm.vencidas, [ids.vencida]);
+    assert.match(await page.textContent('#kpi-frageis'), /Críticos frágeis\s*1/);
+    assert.match(await page.textContent('#kpi-vencidas'), /Reavaliar\s*1/);
+    assert.match(await page.textContent('#mat-painel .mat-dist[data-nivel="0"]'), /Não avaliado\s*1/);
+    assert.match(await page.textContent('#mat-painel'), /Prioridade de melhoria: Crítico frágil/);
+    assert.equal(await page.locator(`#processos-body tr[data-proc="${ids.fragil}"] .flag-fragil`).count(), 1);
+    assert.equal(await page.locator(`#processos-body tr[data-proc="${ids.altaMadura}"] .flag-fragil`).count(), 0);
+    assert.equal(await page.locator(`#processos-body tr[data-proc="${ids.vencida}"] .flag-vencida`).count(), 1);
+    assert.equal(await page.evaluate(() => diagnosticSummary(Object.values(db.processes), '2026-01-01').vencidas.length), 0, 'data de referência controla o vencimento');
+    assert.deepEqual(errors, []);
     await context.close();
   });
 });
