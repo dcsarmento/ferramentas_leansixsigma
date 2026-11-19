@@ -106,5 +106,21 @@ Regras: um só conjunto de dados com várias visões (ADR 4); a Timeline sai do 
 | NAV-04 | A última tela aberta é lembrada por projeto (`meta.lastPage`) e restaurada ao trocar de projeto; backup sem `meta.lastPage` abre normalmente e DAD-03 segue verde |
 | NAV-05 | Os testes da R1 continuam verdes sem alteração |
 
-## 8. Referências
+## 8. Publicação no Vercel (fatia PUB-01, ADR 10)
+**Problema.** O Atlas não está no ar. O plano previa o GitHub Pages, mas o dono quer o mesmo molde do BI Frota: Vercel ligado ao GitHub, com prévia em cada pull request e produção a partir da `main`.
+**Objetivo.** Publicar as três páginas (CEP, DMAIC, Atlas) no Vercel sem mudar nenhuma tela.
+**Resultado esperado.** Cada PR ganha uma URL de prévia; o merge na `main` atualiza a produção. Só as páginas vão ao ar: `docs/`, `tests/`, `CLAUDE.md` e `package.json` ficam fora.
+
+Diferença em relação ao BI Frota: lá o Vercel roda `npm test && npm run build`. Aqui a suíte usa Playwright com Chromium, que não roda de forma confiável na imagem de build do Vercel. O portão de qualidade fica no GitHub Actions (obrigatório no PR) e o build do Vercel só monta `dist/`, recusando publicação incompleta.
+
+**Atenção à origem dos dados.** O `localStorage` pertence ao domínio. O que estiver salvo em `dcsarmento.github.io` (projetos DMAIC) não aparece no endereço do Vercel: exporte no endereço antigo e importe no novo. As prévias de PR também têm domínio próprio, logo dados próprios; uso real só na produção.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| PUB-01 | `npm run build` gera `dist/` com `index.html`, `dmaic.html` e `gestao.html`, idênticos aos da raiz, e nada mais |
+| PUB-02 | `vercel.json` publica `dist/` via `npm run build`; nenhuma página tem link absoluto para `github.io` |
+| PUB-03 | Faltando uma página, o build sai com erro e não cria `dist/` |
+
+## 9. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

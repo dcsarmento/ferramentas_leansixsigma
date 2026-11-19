@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "installCommand": "echo 'sem dependências de produção'",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
+}

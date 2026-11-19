@@ -35,6 +35,11 @@ Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, po
 | P-00 | Documentação: especificação seção 7, ADR 9, backlog | Docs revisados pelo dono | — |
 | P-01 | Sub-menu de Projetos agrupado pelos 7 domínios do PMBOK 8, lista `DOMAINS` no bloco Domínio, previstos desabilitados, `meta.lastPage` por projeto | Ver NAV-01 a NAV-05 | NAV-01 a NAV-05, DAD-03 |
 
+## Publicação (ADR 10)
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| PUB-01 | `vercel.json`, script `build` e `tools/build.js`; docs atualizados para o Vercel | Ver PUB-01 a PUB-03 | PUB-01, PUB-02, PUB-03 |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
