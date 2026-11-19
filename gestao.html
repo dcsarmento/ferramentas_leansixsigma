@@ -17,7 +17,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 a{color:var(--accent);}
 
 /* SIDEBAR */
-#sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto;}
+#sidebar{width:var(--sidebar-w);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto;}
 .sidebar-logo{padding:1.2rem;border-bottom:1px solid var(--border);}
 .logo-text{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);letter-spacing:.04em;}
 .logo-sub{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem;}
@@ -28,6 +28,11 @@ a{color:var(--accent);}
 .nav-item.active{background:rgba(62,207,207,.08);border-color:rgba(62,207,207,.2);color:var(--accent);}
 .nav-icon{font-family:'DM Mono',monospace;font-size:.66rem;min-width:34px;background:var(--surface2);border:1px solid var(--border2);padding:2px 4px;border-radius:3px;text-align:center;}
 .nav-ext{background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.2);color:var(--accent2);}
+.nav-group-label{font-size:.68rem;color:var(--muted2);font-weight:600;padding:.45rem .4rem .15rem;}
+.nav-group-label .nav-legend{font-weight:400;font-style:italic;color:var(--muted);margin-left:.3rem;}
+.nav-item.planned{opacity:.45;cursor:not-allowed;}
+.nav-item.planned:hover{background:transparent;color:var(--muted2);}
+.nav-release{margin-left:auto;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);}
 .sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid var(--border);font-size:.65rem;color:var(--muted);line-height:1.6;}
 
 /* TOPBAR */
@@ -150,9 +155,9 @@ svg text{font-family:'DM Mono',monospace;}
 #modal h3{font-family:'DM Mono',monospace;font-size:.95rem;font-weight:500;margin-bottom:1rem;}
 
 @media (max-width:860px){
-  #sidebar{position:static;width:100%;min-height:auto;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);}
+  #sidebar{position:static;width:100%;height:auto;min-height:auto;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);}
   .sidebar-logo{border-bottom:none;padding:.6rem .8rem;}
-  .logo-sub,.sidebar-section-label,.sidebar-footer{display:none;}
+  .logo-sub,.sidebar-section-label,.sidebar-footer,.nav-group-label,.nav-item.planned,.nav-item.nav-dup{display:none;}
   .sidebar-section{display:flex;gap:.3rem;padding:.4rem .2rem;}
   .nav-item{white-space:nowrap;margin-bottom:0;}
   .nav-icon{display:none;}
@@ -187,12 +192,7 @@ svg text{font-family:'DM Mono',monospace;}
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Projetos</div>
-    <div class="nav-item" data-page="tap" onclick="showPage('tap')"><span class="nav-icon">TAP</span>Termo de abertura</div>
-    <div class="nav-item" data-page="kanban" onclick="showPage('kanban')"><span class="nav-icon">KAN</span>Kanban</div>
-    <div class="nav-item" data-page="scrum" onclick="showPage('scrum')"><span class="nav-icon">SCR</span>Scrum</div>
-    <div class="nav-item" data-page="riscos" onclick="showPage('riscos')"><span class="nav-icon">RSK</span>Riscos</div>
-    <div class="nav-item" data-page="partes" onclick="showPage('partes')"><span class="nav-icon">STK</span>Partes interessadas</div>
-    <div class="nav-item" data-page="licoes" onclick="showPage('licoes')"><span class="nav-icon">LIÇ</span>Lições aprendidas</div>
+    <div id="nav-projetos"></div><!-- montado por renderProjectNav() a partir de DOMAINS (P-01) -->
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Processos</div>
@@ -445,6 +445,26 @@ function normalizeProcesses(d) {
   return d;
 }
 
+/* Telas de Projetos agrupadas pelos 7 domínios de desempenho do PMBOK 8 (P-01, ADR 9).
+   legenda = área de conhecimento clássica, só quando o nome difere; item sem page = previsto (release). */
+const DOMAINS = [
+  { id: 'atalhos', nome: 'Uso diário', itens: [{ page: 'kanban', nome: 'Kanban', icon: 'KAN' }, { page: 'scrum', nome: 'Scrum', icon: 'SCR' }] },
+  { id: 'governanca', nome: 'Governança', legenda: 'Integração', itens: [{ page: 'tap', nome: 'TAP e marcos', icon: 'TAP' }, { page: 'licoes', nome: 'Lições aprendidas', icon: 'LIÇ' }] },
+  { id: 'escopo', nome: 'Escopo', itens: [{ page: 'scrum', nome: 'Backlog', icon: 'BKL' }, { nome: 'EAP', icon: 'EAP', release: 'R2' }] },
+  { id: 'cronograma', nome: 'Cronograma', legenda: 'Tempo', itens: [{ page: 'kanban', nome: 'Kanban e fluxo', icon: 'KAN' }, { page: 'scrum', nome: 'Sprints', icon: 'SCR' }, { nome: 'Gantt e Timeline', icon: 'GNT', release: 'R2' }, { nome: 'Fluxo cumulativo', icon: 'CFD', release: 'R2' }] },
+  { id: 'financas', nome: 'Finanças', legenda: 'Custos', itens: [{ nome: 'Valor agregado', icon: 'EVM', release: 'R2' }] },
+  { id: 'partes', nome: 'Partes interessadas', legenda: 'Comunicações', itens: [{ page: 'partes', nome: 'Matriz de partes', icon: 'STK' }] },
+  { id: 'recursos', nome: 'Recursos', itens: [{ nome: 'Matriz RACI', icon: 'RACI', release: 'R3-B' }] },
+  { id: 'riscos', nome: 'Riscos', itens: [{ page: 'riscos', nome: 'Registro e matriz', icon: 'RSK' }] }
+];
+const PROJECT_PAGES = ['tap', 'kanban', 'scrum', 'riscos', 'partes', 'licoes'];
+/* Garante db.meta.lastPage (última tela por projeto) em dados de versões anteriores (NAV-04) */
+function normalizeMeta(d) {
+  d.meta = d.meta || {};
+  if (!d.meta.lastPage || typeof d.meta.lastPage !== 'object' || Array.isArray(d.meta.lastPage)) d.meta.lastPage = {};
+  return d;
+}
+
 /* Normaliza projetos vindos de backups antigos ou incompletos */
 function normalize(p) {
   const base = makeProject({ id: p.id });
@@ -455,6 +475,7 @@ function normalize(p) {
 }
 Object.values(db.projects).forEach(normalize);
 normalizeProcesses(db);
+normalizeMeta(db);
 
 const colOf = (p, id) => p.cols.find(c => c.id === id) || p.cols[0];
 const isDone = (p, it) => colOf(p, it.col).tipo === 'done';
@@ -475,8 +496,21 @@ const nextMilestone = p => p.marcos.filter(m => !m.feito && m.data).sort((a, b) 
 let currentPage = 'painel';
 const RENDER = { painel: renderPainel, tap: renderTap, kanban: renderKanban, scrum: renderScrum, riscos: renderRiscos, partes: renderPartes, licoes: renderLicoes, processos: renderProcessos };
 const PROCESS_PAGES = ['processos'];   // telas da seção Processos: a barra troca os controles de projeto (PRC-02)
+/* Monta o menu de Projetos a partir de DOMAINS; a 2ª aparição de uma tela é marcada nav-dup (some no celular) */
+function renderProjectNav() {
+  const seen = new Set();
+  document.getElementById('nav-projetos').innerHTML = DOMAINS.map(d => `<div class="nav-group" data-domain="${d.id}">
+    <div class="nav-group-label">${esc(d.nome)}${d.legenda ? `<span class="nav-legend">${esc(d.legenda)}</span>` : ''}</div>
+    ${d.itens.map(it => {
+      if (!it.page) return `<div class="nav-item planned" aria-disabled="true" title="Previsto na ${esc(it.release)}"><span class="nav-icon">${esc(it.icon)}</span>${esc(it.nome)}<span class="nav-release">${esc(it.release)}</span></div>`;
+      const dup = seen.has(it.page); seen.add(it.page);
+      return `<div class="nav-item${dup ? ' nav-dup' : ''}" data-page="${it.page}" onclick="showPage('${it.page}')"><span class="nav-icon">${esc(it.icon)}</span>${esc(it.nome)}</div>`;
+    }).join('')}
+  </div>`).join('');
+}
 function showPage(id) {
   currentPage = id;
+  if (PROJECT_PAGES.includes(id) && cur() && db.meta.lastPage[cur().id] !== id) { db.meta.lastPage[cur().id] = id; Store.save(db); }
   document.querySelectorAll('.page').forEach(e => e.classList.toggle('active', e.id === 'page-' + id));
   document.querySelectorAll('.nav-item[data-page]').forEach(e => e.classList.toggle('active', e.dataset.page === id));
   const proc = PROCESS_PAGES.includes(id);
@@ -499,7 +533,13 @@ function refreshSelect() {
   sel.innerHTML = '<option value="">— Selecionar projeto —</option>' + list.map(p => `<option value="${p.id}"${p.id === db.meta.current ? ' selected' : ''}>${esc(p.nome)} · ${esc(p.abordagem)}</option>`).join('');
   document.getElementById('footer-project').textContent = cur() ? cur().nome : '—';
 }
-function selectProject(id) { db.meta.current = db.projects[id] ? id : null; Store.save(db); rerender(); }
+function selectProject(id) {
+  db.meta.current = db.projects[id] ? id : null; Store.save(db);
+  const last = cur() && db.meta.lastPage[cur().id];
+  // NAV-04: estando numa tela de projeto, volta para a última tela aberta no projeto escolhido
+  if (PROJECT_PAGES.includes(currentPage) && PROJECT_PAGES.includes(last) && last !== currentPage) { refreshSelect(); showPage(last); }
+  else rerender();
+}
 
 /* ===================== MODAL ===================== */
 function openModal(title, html, onSave, onDelete) {
@@ -1210,6 +1250,7 @@ function importBackup(e) {
     db = data.atlas; db.meta = db.meta || {};
     Object.values(db.projects).forEach(normalize);
     normalizeProcesses(db);
+    normalizeMeta(db);
     if (!db.projects[db.meta.current]) db.meta.current = Object.keys(db.projects)[0] || null;
     Store.save(db);
     const dn = data.dmaic ? Object.keys(data.dmaic).length : 0;
@@ -1222,6 +1263,7 @@ function importBackup(e) {
 /* ===================== INÍCIO ===================== */
 // Sincroniza se o dmaic.html for alterado em outra aba
 window.addEventListener('storage', e => { if (e.key === DMAIC_KEY && (currentPage === 'painel' || currentPage === 'tap')) RENDER[currentPage](); });
+renderProjectNav();
 refreshSelect();
 renderBackupStatus();
 showPage('painel');

@@ -102,9 +102,11 @@ Regras: um só conjunto de dados com várias visões (ADR 4); a Timeline sai do 
 | --- | --- |
 | NAV-01 | As 6 telas atuais aparecem no seu domínio e abrem a mesma tela de hoje; Kanban e Scrum também como atalho |
 | NAV-02 | Itens previstos mostram o rótulo da release, ficam desabilitados e o clique não muda a tela |
-| NAV-03 | Cada grupo mostra a área de conhecimento clássica como legenda (Governança → Integração) |
+| NAV-03 | Cada grupo mostra a área de conhecimento clássica como legenda quando o nome difere (Governança → Integração, Cronograma → Tempo, Finanças → Custos, Partes interessadas → Comunicações) |
 | NAV-04 | A última tela aberta é lembrada por projeto (`meta.lastPage`) e restaurada ao trocar de projeto; backup sem `meta.lastPage` abre normalmente e DAD-03 segue verde |
-| NAV-05 | Os testes da R1 continuam verdes sem alteração |
+| NAV-05 | Os testes da R1 e da R3-A1 continuam verdes sem alteração |
+| NAV-06 | No celular cada tela de Projetos aparece uma vez (sem repetições nem previstos) |
+| NAV-07 | Em tela baixa o menu lateral rola e a seção Processos continua alcançável |
 
 ## 8. Publicação no Vercel (fatia PUB-01, ADR 10)
 **Problema.** O Atlas não está no ar. O plano previa o GitHub Pages, mas o dono quer o mesmo molde do BI Frota: Vercel ligado ao GitHub, com prévia em cada pull request e produção a partir da `main`.

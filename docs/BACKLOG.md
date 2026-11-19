@@ -33,7 +33,7 @@ Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, po
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
 | P-00 | Documentação: especificação seção 7, ADR 9, backlog | Docs revisados pelo dono | — |
-| P-01 | Sub-menu de Projetos agrupado pelos 7 domínios do PMBOK 8, lista `DOMAINS` no bloco Domínio, previstos desabilitados, `meta.lastPage` por projeto | Ver NAV-01 a NAV-05 | NAV-01 a NAV-05, DAD-03 |
+| P-01 | Sub-menu de Projetos agrupado pelos 7 domínios do PMBOK 8, lista `DOMAINS` no bloco Domínio, previstos desabilitados, `meta.lastPage` por projeto | Ver NAV-01 a NAV-07 | NAV-01 a NAV-07 (`tests/navegacao.test.js`), DAD-03 |
 
 ## Publicação (ADR 10)
 | # | Tarefa | Critério de aceite | Teste |
