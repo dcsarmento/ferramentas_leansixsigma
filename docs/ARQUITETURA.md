@@ -14,7 +14,8 @@ O Atlas **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura u
 ## Publicação (ADR 10)
 - O projeto no Vercel se chama **atlas** (nome definido na importação; o repositório continua `ferramentas_leansixsigma`). Ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
 - `vercel.json` roda `npm run build` (`tools/build.js`), que copia só as três páginas para `dist/` e falha se faltar alguma.
-- Os testes rodam no GitHub Actions; a regra de proteção da `main` exige o check **Testes** verde antes do merge.
+- Os testes rodam no GitHub Actions (`testes.yml`).
+- Merge automático (ADR 11): `merge-automatico.yml` dispara no fim de **Testes**; `tools/merge-automatico.js` decide (`podeMesclar`) e faz merge, redireciona os empilhados para a `main`, reexecuta os testes deles e apaga a branch. Rascunho ou rótulo `segurar` impedem o merge.
 - Cada domínio tem seu próprio `localStorage`: prévia, produção e o antigo `github.io` não compartilham dados.
 
 ## Organização do `gestao.html`
@@ -84,3 +85,4 @@ Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "
 | 8 | 18/11/2026 | Maturidade de processo em 5 níveis × 5 dimensões, nível geral = mínimo; OPM3 sai da R3 | Elo mais fraco (PEMM) não esconde lacunas; OPM3 mede gestão de projetos, não processos | Média das dimensões; nível único por processo; OPM3 como módulo de maturidade |
 | 9 | 18/11/2026 | Telas de Projetos agrupadas pelos 7 domínios de desempenho do PMBOK 8, com a área de conhecimento clássica como legenda; itens da R2/R3-B visíveis e desabilitados | Coerente com o ADR 2; o dono quer cada ferramenta na sua área; mostra o mapa sem antecipar o gate | 10 áreas de conhecimento da 6ª ed.; construir Gantt e Timeline antes do gate |
 | 10 | 18/11/2026 | Publicação no Vercel (Git integration: prévia por PR, produção na `main`), no molde do BI Frota; substitui o GitHub Pages do ADR 6 | Pedido do dono; mesmo fluxo do BI, prévia para revisar cada fatia antes do merge | Manter o GitHub Pages; rodar a suíte Playwright dentro do build do Vercel (Chromium instável na imagem de build) |
+| 11 | 19/11/2026 | Merge automático por GitHub Actions quando **Testes** fica verde no último commit de um PR para a `main`; merge commit; empilhados redirecionados e retestados; branch apagada | Pedido do dono (mesmo fluxo do BI Frota, sem merge manual); o workflow não depende de configurar o repositório e só mescla depois do CI, ao contrário do BI | Auto-merge nativo do GitHub (exige ligar a opção e a proteção da `main` nas configurações); merge logo ao abrir o PR, como no BI (pula o CI); squash (quebra PRs empilhados) |

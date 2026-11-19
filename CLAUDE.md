@@ -13,7 +13,7 @@ Dono e decisor final: Diego Sarmento. Mesmas práticas do projeto BI Frota.
 2. **Planejamento e arquitetura.** Dizer quais arquivos e funções mudam e por quê, conferindo `docs/ARQUITETURA.md`. Mudança no modelo de dados atualiza o modelo documentado. Decisão estrutural vira uma linha no registro de decisões (ADR).
 3. **Implementação incremental.** Uma tarefa do backlog por vez. Nada de "já que estou aqui".
 4. **Testes automatizados.** Todo critério novo ganha teste em `tests/`, com o código do critério no nome. A suíte inteira precisa ficar verde (`npm test`) antes do commit.
-5. **Entrega.** Commit com mensagem descritiva (`feat:`, `fix:`, `test:`, `docs:`, `refactor:`) e push numa branch, com pull request para a `main`. Nunca commit direto na `main`: o Vercel publica a `main` em produção (ADR 10). Cada PR ganha uma prévia no Vercel para revisão antes do merge. Este passo nunca é omitido.
+5. **Entrega.** Commit com mensagem descritiva (`feat:`, `fix:`, `test:`, `docs:`, `refactor:`) e push numa branch, com pull request para a `main`. Nunca commit direto na `main`: o Vercel publica a `main` em produção (ADR 10). Cada PR ganha uma prévia no Vercel. Com a suíte **Testes** verde, o PR para a `main` é mesclado automaticamente (ADR 11); para revisar antes, abra como rascunho ou ponha o rótulo `segurar`. Este passo nunca é omitido.
 
 ## Padrões técnicos
 - Páginas HTML autocontidas, mesmo visual (tokens CSS, DM Sans/DM Mono) do `index.html` e do `dmaic.html`.
