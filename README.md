@@ -24,7 +24,8 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 
 - **Diagnóstico de processos:** inventário dos processos contínuos com macroprocesso, dono, cliente, objetivo, indicador, meta, criticidade e status; alerta de processo sem dono ou sem indicador. A barra superior troca os controles de projeto por "+ Novo processo". Os processos entram no backup JSON.
 - **Avaliação de maturidade:** botão "Avaliar" em cada processo; 5 dimensões (desenho, dono, executores, indicadores, controle) × 5 níveis (Inicial, Repetível, Padronizado, Medido, Otimizado), cada nível com seu descritor. Nível geral = menor dimensão (elo fraco destacado); acima do nível 2 a dimensão exige evidência. Histórico de avaliações com tendência (↑ ↓ =) em relação à anterior.
-- **Próximas fatias:** painel do diagnóstico (distribuição por nível e alertas) e ponte com o DMAIC.
+- **Painel do diagnóstico:** distribuição dos processos por nível (1 a 5 e não avaliado), alerta de "crítico frágil" (criticidade Alta em nível ≤ 2) e de "reavaliar" (última avaliação há mais de 180 dias). Processos desativados ficam fora da conta.
+- **Próxima fatia:** ponte com o DMAIC (abrir projeto de melhoria a partir do processo).
 
 ## Dados e backup
 

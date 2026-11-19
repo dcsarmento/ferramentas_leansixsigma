@@ -484,6 +484,23 @@ function validateAssessment(av) {
   return erros;
 }
 
+/* Resumo do diagnóstico (MAT-04): só processos não desativados.
+   porNivel[0] = não avaliados; frageis = criticidade Alta em nível ≤ 2; vencidas = última avaliação há mais de MAT_VALIDADE_DIAS */
+const MAT_VALIDADE_DIAS = 180;
+function diagnosticSummary(procs, hoje) {
+  const ref = hoje || today();
+  const vivos = procs.filter(x => x.status !== 'Desativado');
+  const porNivel = [0, 0, 0, 0, 0, 0];
+  const frageis = [], vencidas = [];
+  for (const x of vivos) {
+    const m = maturity(x);
+    porNivel[m && m.nivel ? m.nivel : 0]++;
+    if (m && m.nivel && m.nivel <= 2 && x.criticidade === 'Alta') frageis.push(x.id);
+    if (m && m.avaliacao.data && days(m.avaliacao.data, ref) > MAT_VALIDADE_DIAS) vencidas.push(x.id);
+  }
+  return { total: vivos.length, porNivel, frageis, vencidas };
+}
+
 /* Garante db.processes em dados de versões anteriores (DAD-04) */
 function normalizeProcesses(d) {
   if (!d.processes || typeof d.processes !== 'object' || Array.isArray(d.processes)) d.processes = {};
@@ -1204,15 +1221,26 @@ function renderProcessos() {
   const semDono = list.filter(x => x.status !== 'Desativado' && !x.dono).length;
   const semInd = list.filter(x => x.status !== 'Desativado' && !x.indicador).length;
   const critCor = c => c === 'Alta' ? 'var(--danger)' : c === 'Média' ? 'var(--warn)' : 'var(--muted2)';
+  const sm = diagnosticSummary(list);
+  const maxN = Math.max(1, ...sm.porNivel);
+  const distrib = [1, 2, 3, 4, 5, 0].map(n => `<div class="mat-row mat-dist" data-nivel="${n}"><span>${n ? `${n} · ${MAT_NIVEIS[n - 1]}` : 'Não avaliado'}</span><div class="bar"><div style="width:${Math.round(sm.porNivel[n] / maxN * 100)}%;background:${matColor(n)}"></div></div><span class="mat-lvl">${sm.porNivel[n]}</span></div>`).join('');
+  const nomes = ids => ids.map(id => esc(db.processes[id].nome)).join(' · ');
   body.innerHTML = `
     <div class="kpis">
       <div class="kpi"><div class="kpi-label">Processos</div><div class="kpi-val">${list.length}</div><div class="kpi-sub">${list.filter(x => x.status === 'Ativo').length} ativos</div></div>
       <div class="kpi"><div class="kpi-label">Sem dono</div><div class="kpi-val" style="color:${semDono ? 'var(--danger)' : 'var(--success)'}">${semDono}</div><div class="kpi-sub">processo sem dono não amadurece</div></div>
       <div class="kpi"><div class="kpi-label">Sem indicador</div><div class="kpi-val" style="color:${semInd ? 'var(--warn)' : 'var(--success)'}">${semInd}</div><div class="kpi-sub">o que não se mede não se gerencia</div></div>
+      <div class="kpi" id="kpi-frageis"><div class="kpi-label">Críticos frágeis</div><div class="kpi-val" style="color:${sm.frageis.length ? 'var(--danger)' : 'var(--success)'}">${sm.frageis.length}</div><div class="kpi-sub">criticidade Alta em nível ≤ 2</div></div>
+      <div class="kpi" id="kpi-vencidas"><div class="kpi-label">Reavaliar</div><div class="kpi-val" style="color:${sm.vencidas.length ? 'var(--warn)' : 'var(--success)'}">${sm.vencidas.length}</div><div class="kpi-sub">última avaliação há mais de ${MAT_VALIDADE_DIAS} dias</div></div>
+    </div>
+    <div class="card" id="mat-painel"><div class="card-title"><span>Distribuição por nível de maturidade</span><span class="hint" style="text-transform:none;letter-spacing:0">${sm.total} processos não desativados</span></div>
+      ${distrib}
+      ${sm.frageis.length ? `<p style="margin-top:.7rem;font-size:.76rem;color:var(--danger)">⚠ Prioridade de melhoria: ${nomes(sm.frageis)}</p>` : ''}
+      ${sm.vencidas.length ? `<p style="margin-top:.4rem;font-size:.76rem;color:var(--warn)">⟳ Reavaliar: ${nomes(sm.vencidas)}</p>` : ''}
     </div>
     <div class="card"><div class="card-title"><span>Inventário de processos</span></div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Processo</th><th>Macroprocesso</th><th>Dono</th><th>Cliente</th><th>Indicador · meta</th><th>Criticidade</th><th>Status</th><th>Maturidade</th><th></th></tr></thead><tbody>
-      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td><td class="mat-cell">${matCell(x)}</td><td><button class="btn-sm" data-proc="${esc(x.id)}" onclick="event.stopPropagation();assessmentDialog(this.dataset.proc)">Avaliar</button></td></tr>`).join('')}
+      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td><td class="mat-cell">${matCell(x)}${sm.frageis.includes(x.id) ? '<div class="flag-fragil" style="color:var(--danger);font-size:.68rem">crítico frágil</div>' : ''}${sm.vencidas.includes(x.id) ? '<div class="flag-vencida" style="color:var(--warn);font-size:.68rem">reavaliar</div>' : ''}</td><td><button class="btn-sm" data-proc="${esc(x.id)}" onclick="event.stopPropagation();assessmentDialog(this.dataset.proc)">Avaliar</button></td></tr>`).join('')}
       </tbody></table></div></div>`;
 }
 
