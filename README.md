@@ -8,7 +8,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 | --- | --- |
 | `index.html` | CEP: I-MR, X̄-S, tendência, dispersão, ANOVA, Box-Cox, capacidade (Cp/Cpk) |
 | `dmaic.html` | Roteiro DMAIC: SIPOC, VOC, Pareto, Ishikawa, 5 porquês, GUT, 5W2H, PDSA, plano de controle |
-| `gestao.html` | **Atlas** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas |
+| `gestao.html` | **Atlas** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos |
 
 ## Atlas — Release 1
 
@@ -19,6 +19,11 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 - **Riscos:** P × I, matriz 5×5, alerta para risco alto sem dono ou sem ação.
 - **Partes interessadas:** matriz poder × interesse com atitude (apoia/neutro/resiste).
 - **Integração LSS:** lê os projetos do `dmaic.html` (mesmo navegador), traz para o portfólio e acompanha as fases D-M-A-I-C.
+
+## Atlas — Seção Processos (R3-A, em construção)
+
+- **Diagnóstico de processos:** inventário dos processos contínuos com macroprocesso, dono, cliente, objetivo, indicador, meta, criticidade e status; alerta de processo sem dono ou sem indicador. A barra superior troca os controles de projeto por "+ Novo processo". Os processos entram no backup JSON.
+- **Próximas fatias:** avaliação de maturidade (5 níveis × 5 dimensões, nível geral = menor dimensão), painel do diagnóstico e ponte com o DMAIC.
 
 ## Dados e backup
 

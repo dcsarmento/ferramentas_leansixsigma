@@ -24,7 +24,7 @@ Arquivo único, dividido em blocos comentados, nesta ordem:
 2. **Utilitários** — `esc` (escape de HTML, obrigatório em toda saída de texto do usuário), datas, formatação.
 3. **Domínio** — listas de valores, `makeProject`, `normalize`, regras puras (`moveItem`, `riskScore`, `riskLevel`, `quadrant`, `flowMetrics`, `progress`).
 4. **Navegação e modal** — `showPage`, `RENDER`, `openModal`.
-5. **Uma seção por tela** — `render<Tela>` + diálogos da tela.
+5. **Uma seção por tela** — `render<Tela>` + diálogos da tela (a seção PROCESSOS tem `renderProcessos` e `processDialog`; `PROCESS_PAGES` lista as telas em que a barra superior mostra os controles de processo).
 6. **Backup** — exportar, restaurar, aviso.
 
 Regra: lógica de negócio fica em funções puras do bloco Domínio, para ser testável sem clicar na tela.
@@ -65,7 +65,7 @@ Regra: lógica de negócio fica em funções puras do bloco Domínio, para ser t
 ```
 Campo novo exige: valor padrão em `makeProject`, tratamento em `normalize` (backups antigos) e teste DAD-03 continuando verde.
 
-Processos seguem a mesma regra com `makeProcess` e `normalizeProcess`; `db.processes` ausente vira `{}` (DAD-04). O nível de maturidade **nunca é gravado**: a função pura `maturity(proc)` calcula da avaliação mais recente, para não haver duas verdades.
+Processos seguem a mesma regra com `makeProcess` e `normalizeProcess`; `normalizeProcesses(db)` roda na abertura e na restauração de backup e transforma `db.processes` ausente ou inválido em `{}` (DAD-04). O backup não muda de formato: `processes` vai dentro de `atlas`. O nível de maturidade **nunca é gravado**: a função pura `maturity(proc)` calcula da avaliação mais recente, para não haver duas verdades.
 
 ## Menu (a partir da R3-A)
 Portfólio · Projetos (TAP, Kanban, Scrum, Riscos, Partes interessadas, Lições) · **Processos** (Diagnóstico) · Melhoria contínua (DMAIC e CEP, links externos).
