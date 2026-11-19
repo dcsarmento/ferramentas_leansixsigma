@@ -1,4 +1,4 @@
-// Visual de software de gestão moderno (ADR 13). Critérios LAY-01 a LAY-04 de docs/ESPECIFICACAO.md.
+// Visual de software de gestão moderno (ADR 13). Critérios LAY-01 a LAY-06 de docs/ESPECIFICACAO.md.
 const { test, before, after, describe } = require('node:test');
 const assert = require('node:assert/strict');
 const { startServer, launch, openPage } = require('./helpers');
@@ -81,5 +81,52 @@ describe('Layout', () => {
     }
     assert.deepEqual(errors, []);
     await context.close();
+  });
+
+  test('[LAY-05] modo escuro opcional: alterna auto → claro → escuro, grava pelo Store e mantém contraste AA', async () => {
+    const { page, context, errors } = await openPage(browser, URL);
+    const fundo = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor.match(/\d+/g).map(Number));
+    const claro = c => c.every(v => v > 230), escuro = c => c.every(v => v < 40);
+    assert.equal(await page.evaluate(() => db.meta.tema), 'auto');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    assert.ok(escuro(await fundo()), 'auto segue o sistema escuro');
+    await page.emulateMedia({ colorScheme: 'light' });
+    assert.ok(claro(await fundo()), 'auto segue o sistema claro');
+
+    await page.click('#theme-btn');
+    assert.equal(await page.evaluate(() => db.meta.tema), 'claro');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    assert.ok(claro(await fundo()), 'claro fixo ignora o sistema');
+    await page.click('#theme-btn');
+    assert.equal(await page.evaluate(() => db.meta.tema), 'escuro');
+    await page.emulateMedia({ colorScheme: 'light' });
+    assert.ok(escuro(await fundo()), 'escuro fixo ignora o sistema');
+    assert.match(await page.textContent('#theme-btn'), /escuro/);
+
+    for (const fg of ['--text', '--muted2', '--muted', '--accent', '--danger', '--success', '--warn'])
+      for (const bg of ['--surface', '--bg']) {
+        const c = await contraste(page, fg, bg);
+        assert.ok(c >= 4.5, `escuro: ${fg} sobre ${bg}: ${c.toFixed(2)} < 4.5`);
+      }
+    assert.ok(await contraste(page, '--accent-ink', '--accent') >= 4.5, 'escuro: texto do botão principal');
+
+    await page.reload();
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('atlas_db_v1')).meta.tema), 'escuro');
+    assert.ok(escuro(await fundo()), 'preferência sobrevive ao recarregar');
+    await page.click('#theme-btn');
+    assert.equal(await page.evaluate(() => db.meta.tema), 'auto', 'volta ao automático');
+    assert.deepEqual(errors, []);
+    await context.close();
+  });
+
+  test('[LAY-06] dados antigos sem tema abrem no automático; tema inválido também', async () => {
+    for (const tema of [undefined, 'neon']) {
+      const meta = { current: null }; if (tema) meta.tema = tema;
+      const { page, context, errors } = await openPage(browser, URL, { seed: { atlas_db_v1: JSON.stringify({ version: 1, projects: {}, meta }) } });
+      assert.equal(await page.evaluate(() => db.meta.tema), 'auto');
+      assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), undefined);
+      assert.deepEqual(errors, []);
+      await context.close();
+    }
   });
 });
