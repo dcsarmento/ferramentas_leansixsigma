@@ -1,0 +1,37 @@
+name: Merge automático
+
+# ADR 11. Quando a suíte "Testes" termina verde num pull request para a main,
+# este workflow faz o merge, redireciona para a main os PRs empilhados sobre ele,
+# reexecuta a suíte desses PRs e apaga a branch mesclada.
+# Não mescla: rascunho, PR com o rótulo "segurar", PR de fork, PR cuja base não é a main
+# ou PR que recebeu commit depois da execução dos testes. Regras em tools/merge-automatico.js.
+on:
+  workflow_run:
+    workflows: [Testes]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: merge-automatico
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Código da main (nunca o do PR): o workflow_run sempre roda a partir da branch padrão.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Mesclar PRs verdes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node tools/merge-automatico.js "$GITHUB_EVENT_PATH"

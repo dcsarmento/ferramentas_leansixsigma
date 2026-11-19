@@ -2,10 +2,13 @@ name: Testes
 
 # Roda a suíte em todo pull request e em todo push na main.
 # PR com teste vermelho não deve receber merge.
+# workflow_dispatch: o merge automático (ADR 11) reexecuta a suíte de um PR
+# empilhado depois de redirecioná-lo para a main.
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   testes:

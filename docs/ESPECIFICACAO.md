@@ -122,5 +122,22 @@ Diferença em relação ao BI Frota: lá o Vercel roda `npm test && npm run buil
 | PUB-02 | `vercel.json` publica `dist/` via `npm run build`; nenhuma página tem link absoluto para `github.io` |
 | PUB-03 | Faltando uma página, o build sai com erro e não cria `dist/` |
 
-## 9. Referências
+## 9. Merge automático (fatia AUT-01, ADR 11)
+**Problema.** Cada PR verde ainda depende de um merge manual, de apagar a branch e, nos PRs empilhados, de trocar a base e reexecutar os testes. O dono quer isso automático, como no BI Frota.
+**Objetivo.** PR para a `main` com a suíte **Testes** verde no último commit é mesclado sem intervenção. A publicação no Vercel segue sozinha a partir da `main` (ADR 10).
+**Resultado esperado.** O workflow `merge-automatico.yml` mescla (merge commit, que preserva a pilha), redireciona os PRs empilhados para a `main`, reexecuta os testes deles e apaga a branch mesclada. A pilha desce sozinha, um PR por vez, cada um com seus testes.
+
+Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abrir o PR, antes do CI terminar. Aqui o merge só acontece depois do check **Testes** verde, como manda o ADR 6.
+
+**Como segurar um PR.** Abrir como rascunho ou pôr o rótulo `segurar`. Tirando o rótulo, basta reexecutar os testes (aba Actions, "Run workflow" na branch) para o merge acontecer.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| AUT-01 | PR aberto, do próprio repositório, com base `main`, sem conflito e com testes verdes no commit atual é mesclado |
+| AUT-02 | Não mescla rascunho, PR com rótulo `segurar`, PR de fork, PR empilhado (base diferente da `main`), PR com commit posterior aos testes, PR com conflito nem execução com testes vermelhos |
+| AUT-03 | Depois do merge, os PRs empilhados passam a ter base `main` e têm os testes reexecutados antes de a branch ser apagada; execução manual dos testes acha o PR pela branch e pelo commit |
+| AUT-04 | O workflow dispara no fim de **Testes**, só age em sucesso, roda o código da `main` (nunca o do PR) e pede só `contents`, `pull-requests` e `actions` |
+
+## 10. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

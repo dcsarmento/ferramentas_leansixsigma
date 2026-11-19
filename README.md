@@ -28,6 +28,10 @@ O aviso no topo aparece quando o último backup tem mais de 7 dias.
 
 No celular o quadro não aceita arrastar: abra o cartão e troque a coluna no campo **Coluna**.
 
+## Publicação e merge
+- Todo PR para a `main` é mesclado automaticamente quando os testes passam; o Vercel publica a `main` em seguida.
+- Para segurar um PR: rascunho ou rótulo `segurar`.
+
 ## Como o projeto é desenvolvido
 - `CLAUDE.md` — regras de trabalho (três leis e ciclo especificação → arquitetura → tarefa → teste → PR)
 - `docs/ESPECIFICACAO.md` — problema, objetivo, resultado esperado e critérios de aceite com código

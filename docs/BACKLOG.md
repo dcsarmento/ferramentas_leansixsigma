@@ -40,6 +40,11 @@ Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, po
 | --- | --- | --- | --- |
 | PUB-01 | `vercel.json`, script `build` e `tools/build.js`; docs atualizados para o Vercel | Ver PUB-01 a PUB-03 | PUB-01, PUB-02, PUB-03 |
 
+## Merge automático (ADR 11)
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| AUT-01 | `merge-automatico.yml` + `tools/merge-automatico.js`; `workflow_dispatch` em `testes.yml`; docs | Ver AUT-01 a AUT-04 | AUT-01 a AUT-04 |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
