@@ -107,6 +107,81 @@ describe('Processos', () => {
     assert.equal(await page.evaluate(() => window.__xss), undefined);
     assert.equal(await page.locator('#processos-body img, #processos-body b, #processos-body i').count(), 0);
     assert.equal(await page.inputValue('#pr-nome'), '<img src=x onerror="window.__xss=1">');
+    await page.evaluate(() => {
+      const p = Object.values(db.processes)[0];
+      p.avaliacoes.push({ id: "q');window.__xss=3;('", data: '2026-11-19', avaliador: '<u>a</u>', niveis: { desenho: 3, dono: 1, executores: 1, indicadores: 1, controle: 1 }, evidencias: { desenho: '<img src=y onerror="window.__xss=4">' } });
+      persist(); closeModal(); renderProcessos();
+    });
+    await page.click('#processos-body tbody tr');
+    assert.equal(await page.evaluate(() => window.__xss), undefined);
+    assert.equal(await page.locator('#mat-box img, #mat-box u').count(), 0);
+    await context.close();
+  });
+});
+
+describe('Maturidade', () => {
+  // Cria um processo com avaliações [{data, n: [desenho, dono, executores, indicadores, controle]}] e devolve o id.
+  const processoAvaliado = (page, avs) => page.evaluate(avs => {
+    const ks = MAT_DIMS.map(m => m.k);
+    const p = makeProcess({ nome: 'Preparação', avaliacoes: avs.map((a, i) => ({ id: 'a' + i, data: a.data, avaliador: 'Ana',
+      niveis: Object.fromEntries(ks.map((k, j) => [k, a.n[j]])), evidencias: Object.fromEntries(ks.map(k => [k, 'POP-1'])) })) });
+    db.processes[p.id] = p; persist(); showPage('processos'); return p.id;
+  }, avs);
+
+  test('[MAT-01] nível geral = menor nível das 5 dimensões da avaliação mais recente; sem avaliação = não avaliado', async () => {
+    const { page, context, errors } = await openPage(browser, URL);
+    await page.evaluate(() => { const p = makeProcess({ nome: 'Sem avaliação' }); db.processes[p.id] = p; persist(); showPage('processos'); });
+    assert.match(await page.textContent('#processos-body tbody'), /não avaliado/);
+    assert.equal(await page.evaluate(() => maturity(Object.values(db.processes)[0])), null);
+    const id = await processoAvaliado(page, [{ data: '2026-11-10', n: [3, 4, 2, 5, 3] }, { data: '2026-01-01', n: [5, 5, 5, 5, 5] }]);
+    const m = await page.evaluate(id => { const r = maturity(db.processes[id]); return { nivel: r.nivel, nome: r.nome, fracas: r.fracas }; }, id);
+    assert.deepEqual(m, { nivel: 2, nome: 'Repetível', fracas: ['executores'] }, 'usa a data mais recente, não a última cadastrada');
+    assert.match(await page.textContent(`#processos-body tr[data-proc="${id}"]`), /2 · Repetível/);
+    await page.click(`#processos-body tr[data-proc="${id}"]`);
+    assert.match(await page.textContent('#mat-box'), /nível 2 · Repetível/);
+    assert.match(await page.textContent('#mat-box'), /elo fraco/);
+    assert.deepEqual(errors, []);
+    await context.close();
+  });
+
+  test('[MAT-02] dimensão acima de 2 sem evidência é recusada com mensagem', async () => {
+    const { page, context, dialogLog } = await openPage(browser, URL);
+    await page.evaluate(() => { const p = makeProcess({ nome: 'Faturamento' }); db.processes[p.id] = p; persist(); showPage('processos'); });
+    await page.click('#processos-body >> text=Avaliar');
+    await page.selectOption('#av-n-desenho', '3');
+    await page.click('#modal-save');
+    assert.match(dialogLog.at(-1), /Desenho e documentação: nível 3 exige evidência/);
+    assert.equal(await page.evaluate(() => Object.values(db.processes)[0].avaliacoes.length), 0);
+    assert.ok(await page.isVisible('#modal-bg.show'), 'o formulário continua aberto');
+    await page.fill('#av-e-desenho', 'POP-012 rev. 3');
+    await page.click('#modal-save');
+    const r = await page.evaluate(() => { const p = Object.values(db.processes)[0]; return { n: p.avaliacoes.length, nivel: maturity(p).nivel, ev: p.avaliacoes[0].evidencias.desenho }; });
+    assert.deepEqual(r, { n: 1, nivel: 1, ev: 'POP-012 rev. 3' });
+    assert.deepEqual(await page.evaluate(() => validateAssessment({ data: '2026-11-19', niveis: { desenho: 2, dono: 2, executores: 1, indicadores: 1, controle: 1 }, evidencias: {} })), [], 'nível ≤ 2 dispensa evidência');
+    await context.close();
+  });
+
+  test('[MAT-03] nova avaliação entra no histórico sem apagar as anteriores; tendência compara com a penúltima', async () => {
+    const { page, context } = await openPage(browser, URL);
+    const id = await processoAvaliado(page, [{ data: '2026-10-01', n: [2, 2, 2, 2, 2] }]);
+    assert.equal(await page.evaluate(id => maturityTrend(db.processes[id]), id), null, 'com uma avaliação não há tendência');
+    await page.click(`#processos-body tr[data-proc="${id}"] >> text=Avaliar`);
+    assert.equal(await page.inputValue('#av-n-dono'), '2', 'a avaliação anterior vem preenchida');
+    for (const k of ['desenho', 'dono', 'executores', 'indicadores', 'controle']) await page.selectOption('#av-n-' + k, '3');
+    await page.click('#modal-save');
+    assert.equal(await page.evaluate(id => db.processes[id].avaliacoes.length, id), 2);
+    assert.equal(await page.evaluate(id => maturityTrend(db.processes[id]), id), '↑');
+    assert.match(await page.textContent(`#processos-body tr[data-proc="${id}"]`), /3 · Padronizado\s*↑/);
+    await page.evaluate(id => { db.processes[id].avaliacoes.push({ id: 'z', data: '2099-01-01', niveis: { desenho: 1, dono: 3, executores: 3, indicadores: 3, controle: 3 }, evidencias: {} }); }, id);
+    assert.equal(await page.evaluate(id => maturityTrend(db.processes[id]), id), '↓');
+    await page.reload();
+    assert.equal(await page.evaluate(id => db.processes[id].avaliacoes.length, id), 2, 'histórico persiste após recarregar');
+    await page.evaluate(() => showPage('processos'));
+    await page.click(`#processos-body tr[data-proc="${id}"]`);
+    await page.click('#mat-box .mat-hist tbody tr:last-child button.danger');
+    const restam = await page.evaluate(id => db.processes[id].avaliacoes.map(a => a.data), id);
+    assert.equal(restam.length, 1, 'excluir apaga só a avaliação escolhida');
+    assert.equal(await page.locator('#mat-box .mat-hist tbody tr').count(), 1);
     await context.close();
   });
 });

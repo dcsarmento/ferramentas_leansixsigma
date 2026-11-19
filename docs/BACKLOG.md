@@ -24,7 +24,7 @@ Critérios na seção 6 da ESPECIFICACAO.md. Uma fatia por PR, nesta ordem. ✓ 
 | --- | --- | --- | --- |
 | R3-A0 | Documentação: especificação, escala, modelo de dados, ADR 7 e 8, backlog | Docs revisados pelo dono | — |
 | R3-A1 ✓ | Menu reorganizado (Portfólio, Projetos, Processos, Melhoria contínua) + barra por contexto + cadastro de processos + `processes` em `normalize` e no backup | Ver PRC-01, PRC-02, DAD-04 | PRC-01, PRC-02, DAD-04 |
-| R3-A2 | Avaliação de maturidade: formulário com os descritores da escala, `maturity`, regra da evidência, histórico | Ver MAT-01 a MAT-03 | MAT-01, MAT-02, MAT-03, SEG-01 |
+| R3-A2 ✓ | Avaliação de maturidade: formulário com os descritores da escala, `maturity`, regra da evidência, histórico | Ver MAT-01 a MAT-03 | MAT-01, MAT-02, MAT-03, SEG-01 |
 | R3-A3 | Painel do diagnóstico: distribuição por nível, alertas, tendência | Ver MAT-04 | MAT-04 |
 | R3-A4 | Ponte com melhoria: abrir projeto DMAIC a partir do processo (`processoId`) | Ver PRC-03 | PRC-03 |
 
