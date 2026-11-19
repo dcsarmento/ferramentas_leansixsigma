@@ -165,5 +165,15 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 | LAY-03 | Títulos de tela e de cartão, rótulos de indicador e de campo, cabeçalhos de tabela, legendas do menu e botões não usam caixa-alta nem DM Mono (DM Mono só em números e códigos) |
 | LAY-04 | Todas as telas de `RENDER` abrem sem erro de script com o projeto de exemplo, a 1400 px e a 390 px de largura, sem rolagem horizontal da página |
 
+### Modo escuro opcional (fatia LAY-03)
+**Problema.** O tema claro é o padrão, mas pessoas com sensibilidade à luz (fotofobia, enxaqueca) ou que trabalham à noite precisam de uma tela de brilho baixo. Pedido do dono em 19/11/2026.
+**Objetivo.** Um botão na barra superior alterna entre automático (segue o sistema operacional), claro e escuro. A escolha fica em `db.meta.tema`, gravada pelo `Store`, e vai junto no backup.
+**Resultado esperado.** O escuro novo usa os mesmos tokens, com cores dessaturadas (sem o ciano neon nem a fonte de terminal do visual antigo) e o mesmo contraste AA do claro.
+
+| Código | Critério |
+| --- | --- |
+| LAY-05 | Padrão `auto` segue `prefers-color-scheme`; o botão `#theme-btn` alterna auto → claro → escuro → auto; claro e escuro fixos ignoram o sistema; a escolha está em `atlas_db_v1` (`meta.tema`) e sobrevive ao recarregar; no escuro, os mesmos tokens do LAY-01 têm contraste ≥ 4,5:1 |
+| LAY-06 | Dados sem `meta.tema`, ou com valor fora de `auto`/`claro`/`escuro`, abrem no automático |
+
 ## 12. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

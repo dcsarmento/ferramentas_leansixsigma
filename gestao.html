@@ -16,7 +16,32 @@
   --text:#101828;--muted:#5d6676;--muted2:#475467;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
   --shadow-lg:0 12px 24px -6px rgba(16,24,40,.14),0 4px 8px -4px rgba(16,24,40,.06);
-  --radius:10px;--sidebar-w:248px;
+  --bar-bg:rgba(255,255,255,.92);--warn-border:#fedf89;--danger-border:#fda29b;--mcell-ink:#ffffff;--danger-ink:#ffffff;
+  --radius:10px;--sidebar-w:248px;color-scheme:light;
+}
+/* Modo escuro opcional (LAY-03): mesmos nomes de token, outros valores.
+   Segue o sistema quando a preferência é "auto"; data-theme fixa claro ou escuro. */
+:root[data-theme="dark"]{
+  --bg:#0f1115;--surface:#16181d;--surface2:#1e2128;--border:#2a2e36;--border2:#3a3f4a;
+  --accent:#a5b4fc;--accent-soft:#272a45;--accent-ink:#0f1115;--accent2:#fdb022;
+  --danger:#f97066;--success:#47cd89;--purple:#b692f6;--warn:#fdb022;
+  --danger-soft:#2d1a1a;--success-soft:#13261c;--warn-soft:#2a2111;
+  --text:#e6e8ec;--muted:#949cab;--muted2:#b3bac6;
+  --shadow:0 1px 2px rgba(0,0,0,.4);--shadow-lg:0 12px 24px -6px rgba(0,0,0,.6);
+  --bar-bg:rgba(22,24,29,.92);--warn-border:#5c4511;--danger-border:#7a2e2a;--mcell-ink:#0f1115;--danger-ink:#0f1115;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --bg:#0f1115;--surface:#16181d;--surface2:#1e2128;--border:#2a2e36;--border2:#3a3f4a;
+    --accent:#a5b4fc;--accent-soft:#272a45;--accent-ink:#0f1115;--accent2:#fdb022;
+    --danger:#f97066;--success:#47cd89;--purple:#b692f6;--warn:#fdb022;
+    --danger-soft:#2d1a1a;--success-soft:#13261c;--warn-soft:#2a2111;
+    --text:#e6e8ec;--muted:#949cab;--muted2:#b3bac6;
+    --shadow:0 1px 2px rgba(0,0,0,.4);--shadow-lg:0 12px 24px -6px rgba(0,0,0,.6);
+    --bar-bg:rgba(22,24,29,.92);--warn-border:#5c4511;--danger-border:#7a2e2a;--mcell-ink:#0f1115;--danger-ink:#0f1115;
+    color-scheme:dark;
+  }
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;display:flex;min-height:100vh;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;}
@@ -48,7 +73,7 @@ button,input,select,textarea{font-family:inherit;}
 
 /* TOPBAR */
 #main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0;}
-.project-bar{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:.65rem 2rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+.project-bar{background:var(--bar-bg);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:.65rem 2rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
 .bar-ctx{display:flex;align-items:center;gap:.5rem;flex:1 1 auto;min-width:0;}
 .project-bar select{background:var(--surface);border:1px solid var(--border2);color:var(--text);font-size:.88rem;font-weight:600;padding:.42rem .7rem;border-radius:8px;outline:none;flex:0 1 360px;min-width:0;box-shadow:var(--shadow);cursor:pointer;}
 .project-bar select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
@@ -64,7 +89,9 @@ button,input,select,textarea{font-family:inherit;}
 .chip.bad{background:var(--danger-soft);color:var(--danger);}
 .save-indicator{font-size:.75rem;color:var(--success);opacity:0;transition:opacity .3s;}
 .save-indicator.show{opacity:1;}
-.banner{margin:1.2rem 2rem 0;padding:.7rem 1rem;border:1px solid #fedf89;background:var(--warn-soft);color:var(--warn);border-radius:var(--radius);font-size:.84rem;display:none;align-items:center;gap:.8rem;flex-wrap:wrap;}
+.theme-btn{display:inline-flex;align-items:center;gap:.35rem;}
+.theme-btn svg{width:15px;height:15px;}
+.banner{margin:1.2rem 2rem 0;padding:.7rem 1rem;border:1px solid var(--warn-border);background:var(--warn-soft);color:var(--warn);border-radius:var(--radius);font-size:.84rem;display:none;align-items:center;gap:.8rem;flex-wrap:wrap;}
 .banner.show{display:flex;}
 
 /* PAGES */
@@ -94,7 +121,7 @@ button,input,select,textarea{font-family:inherit;}
 .btn:hover{filter:brightness(1.08);}
 .btn.ghost{background:var(--surface);border:1px solid var(--border2);color:var(--muted2);}
 .btn.ghost:hover{background:var(--surface2);color:var(--text);filter:none;}
-.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff;}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:var(--danger-ink);}
 .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem;}
 .btn-rm{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:.9rem;border-radius:6px;}
 .btn-rm:hover{color:var(--danger);background:var(--danger-soft);}
@@ -153,12 +180,12 @@ table.tbl tr.click:hover td{background:var(--accent-soft);}
 
 /* MATRIZES */
 .matrix{display:grid;grid-template-columns:28px repeat(5,1fr);gap:4px;max-width:520px;}
-.mcell{aspect-ratio:1.6;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;font-family:'DM Mono',monospace;font-size:.7rem;padding:2px;color:#fff;font-weight:600;}
+.mcell{aspect-ratio:1.6;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;font-family:'DM Mono',monospace;font-size:.7rem;padding:2px;color:var(--mcell-ink);font-weight:600;}
 .maxis{display:flex;align-items:center;justify-content:center;font-size:.74rem;color:var(--muted);}
 .quad{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:640px;}
 .qcell{border:1px solid var(--border);border-radius:var(--radius);padding:.8rem;min-height:120px;background:var(--surface2);}
 .qcell h4{font-size:.8rem;font-weight:600;color:var(--muted2);margin-bottom:.5rem;}
-.qcell.hot{border-color:#fda29b;background:var(--danger-soft);}
+.qcell.hot{border-color:var(--danger-border);background:var(--danger-soft);}
 .pill{display:inline-block;background:var(--surface);border:1px solid var(--border2);border-radius:999px;padding:.18rem .65rem;font-size:.8rem;margin:0 .25rem .3rem 0;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
@@ -242,6 +269,7 @@ svg text{font-family:'DM Sans',sans-serif;}
     </span>
     <span style="flex:1"></span>
     <span class="save-indicator" id="save-indicator">✓ salvo</span>
+    <button class="btn-sm theme-btn" id="theme-btn" onclick="cycleTheme()" title="Tema: automático segue o sistema; escuro reduz o brilho para quem tem sensibilidade à luz"></button>
     <span class="chip" id="backup-chip">backup: nunca</span>
     <button class="btn-sm" onclick="exportBackup()">⬇ Backup JSON</button>
     <label class="btn-sm" style="cursor:pointer">⬆ Restaurar<input type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"></label>
@@ -539,9 +567,13 @@ const DOMAINS = [
 ];
 const PROJECT_PAGES = ['tap', 'kanban', 'scrum', 'riscos', 'partes', 'licoes'];
 /* Garante db.meta.lastPage (última tela por projeto) em dados de versões anteriores (NAV-04) */
+/* Tema da interface (LAY-03): auto segue o sistema; a ordem é a do botão */
+const TEMAS = ['auto', 'claro', 'escuro'];
+const nextTheme = t => TEMAS[(TEMAS.indexOf(t) + 1) % TEMAS.length];
 function normalizeMeta(d) {
   d.meta = d.meta || {};
   if (!d.meta.lastPage || typeof d.meta.lastPage !== 'object' || Array.isArray(d.meta.lastPage)) d.meta.lastPage = {};
+  if (!TEMAS.includes(d.meta.tema)) d.meta.tema = 'auto';   // LAY-03
   return d;
 }
 
@@ -576,6 +608,21 @@ const nextMilestone = p => p.marcos.filter(m => !m.feito && m.data).sort((a, b) 
 let currentPage = 'painel';
 const RENDER = { painel: renderPainel, tap: renderTap, kanban: renderKanban, scrum: renderScrum, riscos: renderRiscos, partes: renderPartes, licoes: renderLicoes, processos: renderProcessos };
 const PROCESS_PAGES = ['processos'];   // telas da seção Processos: a barra troca os controles de projeto (PRC-02)
+/* Tema (LAY-03): aplica db.meta.tema no <html>; o botão alterna auto → claro → escuro e grava pelo Store */
+const THEME_LABEL = { auto: 'Tema: automático', claro: 'Tema: claro', escuro: 'Tema: escuro' };
+const THEME_ICON = {
+  auto: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>',
+  claro: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  escuro: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
+};
+function applyTheme() {
+  const t = db.meta.tema, el = document.documentElement;
+  if (t === 'auto') delete el.dataset.theme; else el.dataset.theme = t === 'escuro' ? 'dark' : 'light';
+  const b = document.getElementById('theme-btn');
+  if (b) { b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${THEME_ICON[t]}</svg>${THEME_LABEL[t]}`; b.setAttribute('aria-label', THEME_LABEL[t]); }
+}
+function cycleTheme() { db.meta.tema = nextTheme(db.meta.tema); Store.save(db); applyTheme(); }
+
 /* Ícones do menu (LAY-01): o código curto de cada item (it.icon) vira um desenho em traço; código sem desenho continua como texto */
 const NAV_ICONS = {
   PORT: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -1425,6 +1472,7 @@ function importBackup(e) {
     Object.values(db.projects).forEach(normalize);
     normalizeProcesses(db);
     normalizeMeta(db);
+    applyTheme();
     if (!db.projects[db.meta.current]) db.meta.current = Object.keys(db.projects)[0] || null;
     Store.save(db);
     const dn = data.dmaic ? Object.keys(data.dmaic).length : 0;
@@ -1437,6 +1485,7 @@ function importBackup(e) {
 /* ===================== INÍCIO ===================== */
 // Sincroniza se o dmaic.html for alterado em outra aba
 window.addEventListener('storage', e => { if (e.key === DMAIC_KEY && (currentPage === 'painel' || currentPage === 'tap')) RENDER[currentPage](); });
+applyTheme();
 renderProjectNav();
 refreshSelect();
 renderBackupStatus();

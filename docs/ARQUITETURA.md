@@ -35,7 +35,8 @@ Regra: lógica de negócio fica em funções puras do bloco Domínio, para ser t
 ```
 {
   version: 1,
-  meta: { current, lastBackup, updatedAt, lastPage: { <projectId>: <pageId> } },   // lastPage a partir da P-01
+  meta: { current, lastBackup, updatedAt, lastPage: { <projectId>: <pageId> },   // lastPage a partir da P-01
+          tema: auto|claro|escuro },                                             // LAY-03; normalizeMeta põe 'auto'
   projects: {
     <id>: {
       id, nome, abordagem, status, saude, prioridade, gerente, patrocinador,
@@ -70,7 +71,7 @@ Campo novo exige: valor padrão em `makeProject`, tratamento em `normalize` (bac
 Processos seguem a mesma regra com `makeProcess` e `normalizeProcess`; `normalizeProcesses(db)` roda na abertura e na restauração de backup e transforma `db.processes` ausente ou inválido em `{}` (DAD-04). O backup não muda de formato: `processes` vai dentro de `atlas`. O nível de maturidade **nunca é gravado**: a função pura `maturity(proc)` calcula da avaliação mais recente, para não haver duas verdades. Funções puras da maturidade no bloco Domínio: `MAT_NIVEIS`, `MAT_DIMS` (dimensões e descritores da escala), `assessmentsByDate` (mais recente primeiro: data desc, empate pela ordem de registro), `overallLevel` (mínimo das dimensões), `maturity`, `maturityTrend` (última × penúltima), `validateAssessment` (nível > `MAT_SEM_EVIDENCIA` exige evidência) e `diagnosticSummary(procs, hoje)` (MAT-04: distribuição por nível, críticos frágeis e avaliações com mais de `MAT_VALIDADE_DIAS`; processos desativados ficam fora).
 
 ## Visual (ADR 13)
-Cores, sombras e raios ficam em tokens no `:root` do `gestao.html` (`--bg`, `--surface`, `--accent`, `--accent-soft`, `--danger-soft` etc.); nenhum componente usa cor fixa, o que deixa o modo escuro (LAY-03) como uma troca de tokens. Os ícones do menu vêm de `NAV_ICONS` (bloco Navegação): `hydrateNavIcons()` troca o código curto de cada `.nav-icon` (o campo `icon` de `DOMAINS` ou o texto do HTML) pelo SVG e guarda o código em `data-icon`.
+Cores, sombras e raios ficam em tokens no `:root` do `gestao.html` (`--bg`, `--surface`, `--accent`, `--accent-soft`, `--danger-soft` etc.); nenhum componente usa cor fixa, o que faz do modo escuro (LAY-03) só uma troca de tokens: `:root[data-theme="dark"]` e, no automático, `@media (prefers-color-scheme: dark)` sobre `:root:not([data-theme])`. `applyTheme()` traduz `db.meta.tema` para `data-theme` no `<html>` (ausente no automático); `cycleTheme()` usa a função pura `nextTheme` e grava pelo `Store`. Os ícones do menu vêm de `NAV_ICONS` (bloco Navegação): `hydrateNavIcons()` troca o código curto de cada `.nav-icon` (o campo `icon` de `DOMAINS` ou o texto do HTML) pelo SVG e guarda o código em `data-icon`.
 
 ## Menu (a partir da R3-A)
 Portfólio · Projetos (TAP, Kanban, Scrum, Riscos, Partes interessadas, Lições) · **Processos** (Diagnóstico) · Melhoria contínua (DMAIC e CEP, links externos).
