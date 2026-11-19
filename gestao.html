@@ -33,6 +33,7 @@ a{color:var(--accent);}
 /* TOPBAR */
 #main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0;}
 .project-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+.bar-ctx{display:flex;align-items:center;gap:.6rem;flex:1;max-width:520px;flex-wrap:wrap;}
 .project-bar select{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.78rem;padding:.3rem .6rem;border-radius:4px;outline:none;flex:1;max-width:320px;}
 .btn-sm{font-family:'DM Mono',monospace;font-size:.72rem;padding:.3rem .75rem;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted2);transition:all .15s;white-space:nowrap;}
 .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
@@ -185,7 +186,7 @@ svg text{font-family:'DM Mono',monospace;}
     <div class="nav-item active" data-page="painel" onclick="showPage('painel')"><span class="nav-icon">PORT</span>Painel do portfólio</div>
   </div>
   <div class="sidebar-section">
-    <div class="sidebar-section-label">Projeto selecionado</div>
+    <div class="sidebar-section-label">Projetos</div>
     <div class="nav-item" data-page="tap" onclick="showPage('tap')"><span class="nav-icon">TAP</span>Termo de abertura</div>
     <div class="nav-item" data-page="kanban" onclick="showPage('kanban')"><span class="nav-icon">KAN</span>Kanban</div>
     <div class="nav-item" data-page="scrum" onclick="showPage('scrum')"><span class="nav-icon">SCR</span>Scrum</div>
@@ -194,7 +195,11 @@ svg text{font-family:'DM Mono',monospace;}
     <div class="nav-item" data-page="licoes" onclick="showPage('licoes')"><span class="nav-icon">LIÇ</span>Lições aprendidas</div>
   </div>
   <div class="sidebar-section">
-    <div class="sidebar-section-label">Lean Six Sigma</div>
+    <div class="sidebar-section-label">Processos</div>
+    <div class="nav-item" data-page="processos" onclick="showPage('processos')"><span class="nav-icon">PRC</span>Diagnóstico de processos</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Melhoria contínua</div>
     <div class="nav-item nav-ext" onclick="window.open('dmaic.html','_blank')"><span class="nav-icon">DMAIC</span>Projetos de melhoria</div>
     <div class="nav-item nav-ext" onclick="window.open('index.html','_blank')"><span class="nav-icon">CEP</span>Gráficos de controle</div>
   </div>
@@ -207,9 +212,14 @@ svg text{font-family:'DM Mono',monospace;}
 
 <div id="main">
   <div class="project-bar">
-    <select id="project-select" onchange="selectProject(this.value)"></select>
-    <button class="btn-sm primary" onclick="newProjectDialog()">+ Novo projeto</button>
-    <button class="btn-sm danger" onclick="deleteProject()">Excluir</button>
+    <span class="bar-ctx" id="bar-projeto">
+      <select id="project-select" onchange="selectProject(this.value)"></select>
+      <button class="btn-sm primary" onclick="newProjectDialog()">+ Novo projeto</button>
+      <button class="btn-sm danger" onclick="deleteProject()">Excluir</button>
+    </span>
+    <span class="bar-ctx" id="bar-processo" style="display:none">
+      <button class="btn-sm primary" onclick="processDialog()">+ Novo processo</button>
+    </span>
     <span style="flex:1"></span>
     <span class="save-indicator" id="save-indicator">✓ salvo</span>
     <span class="chip" id="backup-chip">backup: nunca</span>
@@ -302,6 +312,18 @@ svg text{font-family:'DM Mono',monospace;}
   </section>
 
   <!-- LIÇÕES -->
+  <section class="page" id="page-processos">
+    <div class="page-header">
+      <div>
+        <div class="ref">BPM · Diagnóstico · Maturidade de processos</div>
+        <h1>Diagnóstico de processos</h1>
+        <p>Inventário dos processos contínuos: quem é o dono, a quem servem e como se mede. A avaliação de maturidade vem na próxima fatia.</p>
+      </div>
+      <button class="btn no-print" onclick="processDialog()">+ Novo processo</button>
+    </div>
+    <div id="processos-body"></div>
+  </section>
+
   <section class="page" id="page-licoes">
     <div class="page-header">
       <div>
@@ -400,6 +422,29 @@ function makeProject(o) {
   }, o || {});
 }
 
+/* Processos (R3-A): trabalho contínuo, fora dos projetos */
+const CRITICIDADE = ['Alta', 'Média', 'Baixa'];
+const STATUS_PROC = ['Ativo', 'Em revisão', 'Desativado'];
+function makeProcess(o) {
+  const t = nowISO();
+  return Object.assign({
+    id: uid('prc'), nome: 'Novo processo', macroprocesso: '', dono: '', cliente: '', objetivo: '', indicador: '', meta: '',
+    criticidade: 'Média', status: 'Ativo', avaliacoes: [], createdAt: t, updatedAt: t
+  }, o || {});
+}
+function normalizeProcess(pr) {
+  const base = makeProcess({ id: pr.id });
+  for (const k in base) if (pr[k] === undefined) pr[k] = base[k];
+  if (!Array.isArray(pr.avaliacoes)) pr.avaliacoes = [];
+  return pr;
+}
+/* Garante db.processes em dados de versões anteriores (DAD-04) */
+function normalizeProcesses(d) {
+  if (!d.processes || typeof d.processes !== 'object' || Array.isArray(d.processes)) d.processes = {};
+  Object.values(d.processes).forEach(normalizeProcess);
+  return d;
+}
+
 /* Normaliza projetos vindos de backups antigos ou incompletos */
 function normalize(p) {
   const base = makeProject({ id: p.id });
@@ -409,6 +454,7 @@ function normalize(p) {
   return p;
 }
 Object.values(db.projects).forEach(normalize);
+normalizeProcesses(db);
 
 const colOf = (p, id) => p.cols.find(c => c.id === id) || p.cols[0];
 const isDone = (p, it) => colOf(p, it.col).tipo === 'done';
@@ -427,11 +473,15 @@ const nextMilestone = p => p.marcos.filter(m => !m.feito && m.data).sort((a, b) 
 
 /* ===================== NAVEGAÇÃO ===================== */
 let currentPage = 'painel';
-const RENDER = { painel: renderPainel, tap: renderTap, kanban: renderKanban, scrum: renderScrum, riscos: renderRiscos, partes: renderPartes, licoes: renderLicoes };
+const RENDER = { painel: renderPainel, tap: renderTap, kanban: renderKanban, scrum: renderScrum, riscos: renderRiscos, partes: renderPartes, licoes: renderLicoes, processos: renderProcessos };
+const PROCESS_PAGES = ['processos'];   // telas da seção Processos: a barra troca os controles de projeto (PRC-02)
 function showPage(id) {
   currentPage = id;
   document.querySelectorAll('.page').forEach(e => e.classList.toggle('active', e.id === 'page-' + id));
   document.querySelectorAll('.nav-item[data-page]').forEach(e => e.classList.toggle('active', e.dataset.page === id));
+  const proc = PROCESS_PAGES.includes(id);
+  document.getElementById('bar-projeto').style.display = proc ? 'none' : '';
+  document.getElementById('bar-processo').style.display = proc ? '' : 'none';
   RENDER[id]();
   window.scrollTo(0, 0);
 }
@@ -1072,10 +1122,58 @@ function renderLicoes() {
       </tbody></table></div></div>`;
 }
 
+/* ===================== PROCESSOS ===================== */
+function processDialog(id) {
+  const pr = id ? db.processes[id] : null;
+  openModal(pr ? 'Editar processo' : 'Novo processo', `
+    <div class="form-grid">
+      <div class="field span2"><label>Nome do processo</label><input id="pr-nome" value="${esc(pr?.nome)}" placeholder="Ex.: Preparação de veículos para locação"></div>
+      <div class="field"><label>Macroprocesso</label><input id="pr-macro" value="${esc(pr?.macroprocesso)}" placeholder="Ex.: Operações"></div>
+      <div class="field"><label>Dono do processo</label><input id="pr-dono" value="${esc(pr?.dono)}"></div>
+      <div class="field span2"><label>Cliente (quem recebe a saída)</label><input id="pr-cliente" value="${esc(pr?.cliente)}"></div>
+      <div class="field span2"><label>Objetivo</label><textarea id="pr-obj" rows="2">${esc(pr?.objetivo)}</textarea></div>
+      <div class="field"><label>Indicador principal</label><input id="pr-ind" value="${esc(pr?.indicador)}" placeholder="Ex.: Lead time de preparação (h)"></div>
+      <div class="field"><label>Meta</label><input id="pr-meta" value="${esc(pr?.meta)}" placeholder="Ex.: ≤ 4 h"></div>
+      <div class="field"><label>Criticidade</label><select id="pr-crit">${opts(CRITICIDADE, pr?.criticidade || 'Média')}</select></div>
+      <div class="field"><label>Status</label><select id="pr-status">${opts(STATUS_PROC, pr?.status || 'Ativo')}</select></div>
+    </div>`,
+    () => {
+      const nome = val('pr-nome');
+      if (!nome) { alert('Informe o nome do processo.'); return false; }
+      const t = pr || makeProcess();
+      Object.assign(t, { nome, macroprocesso: val('pr-macro'), dono: val('pr-dono'), cliente: val('pr-cliente'), objetivo: val('pr-obj'),
+        indicador: val('pr-ind'), meta: val('pr-meta'), criticidade: val('pr-crit'), status: val('pr-status'), updatedAt: nowISO() });
+      db.processes[t.id] = t;
+      persist(); renderProcessos();
+    },
+    pr ? () => { delete db.processes[pr.id]; persist(); renderProcessos(); } : null);
+}
+function renderProcessos() {
+  const list = Object.values(db.processes).sort((a, b) => (a.macroprocesso || '').localeCompare(b.macroprocesso || '', 'pt-BR') || a.nome.localeCompare(b.nome, 'pt-BR'));
+  const body = document.getElementById('processos-body');
+  if (!list.length) {
+    body.innerHTML = `<div class="card empty"><h2>Nenhum processo cadastrado</h2>Comece pelos processos que mais afetam o cliente: um por vez, com dono e indicador.<div class="btn-row" style="justify-content:center"><button class="btn" onclick="processDialog()">+ Novo processo</button></div></div>`;
+    return;
+  }
+  const semDono = list.filter(x => x.status !== 'Desativado' && !x.dono).length;
+  const semInd = list.filter(x => x.status !== 'Desativado' && !x.indicador).length;
+  const critCor = c => c === 'Alta' ? 'var(--danger)' : c === 'Média' ? 'var(--warn)' : 'var(--muted2)';
+  body.innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Processos</div><div class="kpi-val">${list.length}</div><div class="kpi-sub">${list.filter(x => x.status === 'Ativo').length} ativos</div></div>
+      <div class="kpi"><div class="kpi-label">Sem dono</div><div class="kpi-val" style="color:${semDono ? 'var(--danger)' : 'var(--success)'}">${semDono}</div><div class="kpi-sub">processo sem dono não amadurece</div></div>
+      <div class="kpi"><div class="kpi-label">Sem indicador</div><div class="kpi-val" style="color:${semInd ? 'var(--warn)' : 'var(--success)'}">${semInd}</div><div class="kpi-sub">o que não se mede não se gerencia</div></div>
+    </div>
+    <div class="card"><div class="card-title"><span>Inventário de processos</span></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Processo</th><th>Macroprocesso</th><th>Dono</th><th>Cliente</th><th>Indicador · meta</th><th>Criticidade</th><th>Status</th></tr></thead><tbody>
+      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+}
+
 /* ===================== BACKUP ===================== */
 function renderBackupStatus() {
   const lb = db.meta.lastBackup;
-  const has = Object.keys(db.projects).length > 0;
+  const has = Object.keys(db.projects).length + Object.keys(db.processes || {}).length > 0;
   const age = lb ? days(lb, Date.now()) : null;
   const chip = document.getElementById('backup-chip');
   chip.className = 'chip ' + (!has ? '' : age == null || age > 7 ? 'bad' : age > 5 ? 'warn' : 'ok');
@@ -1107,9 +1205,11 @@ function importBackup(e) {
     try { data = JSON.parse(ev.target.result); } catch (err) { alert('Arquivo inválido: não é JSON.'); return; }
     if (!data || data.app !== 'atlas' || !data.atlas || !data.atlas.projects) { alert('Este arquivo não é um backup do Atlas.'); return; }
     const n = Object.keys(data.atlas.projects).length;
-    if (!confirm(`Restaurar backup de ${fmtD(data.exportedAt)} com ${n} projeto(s)?\nOs dados atuais do Atlas neste navegador serão substituídos.`)) return;
+    const np = data.atlas.processes ? Object.keys(data.atlas.processes).length : 0;
+    if (!confirm(`Restaurar backup de ${fmtD(data.exportedAt)} com ${n} projeto(s) e ${np} processo(s)?\nOs dados atuais do Atlas neste navegador serão substituídos.`)) return;
     db = data.atlas; db.meta = db.meta || {};
     Object.values(db.projects).forEach(normalize);
+    normalizeProcesses(db);
     if (!db.projects[db.meta.current]) db.meta.current = Object.keys(db.projects)[0] || null;
     Store.save(db);
     const dn = data.dmaic ? Object.keys(data.dmaic).length : 0;
