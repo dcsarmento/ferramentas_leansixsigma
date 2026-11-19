@@ -28,6 +28,13 @@ Critérios na seção 6 da ESPECIFICACAO.md. Uma fatia por PR, nesta ordem.
 | R3-A3 | Painel do diagnóstico: distribuição por nível, alertas, tendência | Ver MAT-04 | MAT-04 |
 | R3-A4 | Ponte com melhoria: abrir projeto DMAIC a partir do processo (`processoId`) | Ver PRC-03 | PRC-03 |
 
+## Projetos por domínio (aprovada em 18/11/2026, ADR 9)
+Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, porque mexe no mesmo menu.
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| P-00 | Documentação: especificação seção 7, ADR 9, backlog | Docs revisados pelo dono | — |
+| P-01 | Sub-menu de Projetos agrupado pelos 7 domínios do PMBOK 8, lista `DOMAINS` no bloco Domínio, previstos desabilitados, `meta.lastPage` por projeto | Ver NAV-01 a NAV-05 | NAV-01 a NAV-05, DAD-03 |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |

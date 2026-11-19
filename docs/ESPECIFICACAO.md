@@ -79,5 +79,32 @@ Dimensão acima do nível 2 exige evidência escrita.
 | DAD-04 | Backup exporta e restaura `processes`; backup antigo sem `processes` abre com `{}`; DAD-03 segue verde |
 | SEG-01 | Textos de processo e evidência passam por `esc()` (teste de XSS estendido) |
 
-## 7. Referências
-PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
+## 7. Projetos por domínio de desempenho (fatia P-01, ADR 9)
+**Problema.** O menu de Projetos é uma lista plana de 6 telas, sem relação visível com o PMBOK 8. O dono quer cada ferramenta na sua área.
+**Objetivo.** Agrupar as telas de Projetos pelos 7 domínios do PMBOK 8 (Governança, Escopo, Cronograma, Finanças, Partes interessadas, Recursos, Riscos), com a área de conhecimento clássica como legenda.
+**Resultado esperado.** Só navegação: nenhuma tela muda por dentro; ferramentas da R2 e R3-B aparecem como "previsto", desabilitadas. Não antecipa o gate.
+
+| Domínio (legenda clássica) | Telas |
+| --- | --- |
+| Atalhos | Kanban · Scrum |
+| Governança (Integração) | TAP e marcos · Lições aprendidas |
+| Escopo | Backlog (abre o Scrum) · EAP *(R2)* |
+| Cronograma (Tempo) | Kanban · Scrum · Gantt e Timeline *(R2)* · CFD *(R2)* |
+| Finanças (Custos) | Valor agregado *(R2)* |
+| Partes interessadas (Comunicações) | Matriz de partes |
+| Recursos | RACI *(R3-B)* |
+| Riscos | Registro e matriz |
+
+Regras: um só conjunto de dados com várias visões (ADR 4); a Timeline sai do mesmo cronograma do Gantt na R2-05, sem cadastro próprio. Ponto a conferir no texto oficial do PMBOK 8: domínio de Qualidade e Aquisições na legenda.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| NAV-01 | As 6 telas atuais aparecem no seu domínio e abrem a mesma tela de hoje; Kanban e Scrum também como atalho |
+| NAV-02 | Itens previstos mostram o rótulo da release, ficam desabilitados e o clique não muda a tela |
+| NAV-03 | Cada grupo mostra a área de conhecimento clássica como legenda (Governança → Integração) |
+| NAV-04 | A última tela aberta é lembrada por projeto (`meta.lastPage`) e restaurada ao trocar de projeto; backup sem `meta.lastPage` abre normalmente e DAD-03 segue verde |
+| NAV-05 | Os testes da R1 continuam verdes sem alteração |
+
+## 8. Referências
+PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
