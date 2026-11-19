@@ -69,7 +69,7 @@ Processos seguem a mesma regra com `makeProcess` e `normalizeProcess`; `normaliz
 
 ## Menu (a partir da R3-A)
 Portfólio · Projetos (TAP, Kanban, Scrum, Riscos, Partes interessadas, Lições) · **Processos** (Diagnóstico) · Melhoria contínua (DMAIC e CEP, links externos).
-Dentro de Projetos, a partir da P-01, as telas ficam agrupadas pelos 7 domínios do PMBOK 8, com a área clássica como legenda e Kanban/Scrum como atalhos (ESPECIFICACAO seção 7). A lista `DOMAINS` no bloco Domínio é a fonte do menu.
+Dentro de Projetos, a partir da P-01, as telas ficam agrupadas pelos 7 domínios do PMBOK 8, com a área clássica como legenda e Kanban/Scrum como atalhos (ESPECIFICACAO seção 7). A lista `DOMAINS` no bloco Domínio é a fonte do menu: `renderProjectNav()` monta `#nav-projetos`, item sem `page` é previsto (desabilitado) e a segunda aparição de uma tela leva `nav-dup` (some no celular). `PROJECT_PAGES` lista as telas cujo acesso grava `meta.lastPage`; `normalizeMeta` cria `lastPage: {}` em dados antigos. O menu lateral tem altura da janela e rola.
 Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "+ Novo processo"; backup e restauração ficam sempre visíveis.
 
 ## Registro de decisões (ADR)

@@ -8,7 +8,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 | --- | --- |
 | `index.html` | CEP: I-MR, X̄-S, tendência, dispersão, ANOVA, Box-Cox, capacidade (Cp/Cpk) |
 | `dmaic.html` | Roteiro DMAIC: SIPOC, VOC, Pareto, Ishikawa, 5 porquês, GUT, 5W2H, PDSA, plano de controle |
-| `gestao.html` | **Atlas** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos |
+| `gestao.html` | **Atlas** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos. As telas de Projetos ficam agrupadas pelos 7 domínios do PMBOK 8 |
 
 ## Atlas — Release 1
 
