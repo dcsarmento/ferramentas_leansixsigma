@@ -1,7 +1,7 @@
 {
   "name": "ferramentas-leansixsigma",
   "private": true,
-  "description": "CEP, DMAIC e Atlas (gestão de projetos e processos) — páginas estáticas publicadas no Vercel",
+  "description": "CEP, DMAIC e Enki (gestão de projetos e processos) — páginas estáticas publicadas no Vercel",
   "scripts": {
     "build": "node tools/build.js",
     "test": "node --test --test-concurrency=1 tests/*.test.js"

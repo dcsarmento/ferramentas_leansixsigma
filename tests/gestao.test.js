@@ -1,4 +1,4 @@
-// Testes de regressão do Atlas (gestao.html).
+// Testes de regressão do Enki (gestao.html).
 // Cada teste corresponde a um critério de aceite de docs/ESPECIFICACAO.md (código entre colchetes).
 const { test, before, after, describe } = require('node:test');
 const assert = require('node:assert/strict');
@@ -30,7 +30,7 @@ describe('Portfólio', () => {
     const { page, context, errors } = await openPage(browser, URL);
     await page.click('#page-painel >> text=Carregar exemplo');
     const sel = await page.$eval('#project-select', s => s.options[s.selectedIndex].text);
-    assert.match(sel, /Projeto Atlas/);
+    assert.match(sel, /Projeto Enki/);
     assert.equal(await page.locator('#painel-body tbody tr').count(), 1);
     assert.match(await page.textContent('#painel-body .kpis'), /Riscos altos abertos\s*2/);
     assert.deepEqual(errors, []);
@@ -273,14 +273,14 @@ describe('Segurança e dados', () => {
     await context.close();
   });
 
-  test('[DAD-02] arquivo que não é backup do Atlas é recusado sem apagar dados', async () => {
+  test('[DAD-02] arquivo que não é backup do Enki é recusado sem apagar dados', async () => {
     const { page, context, dialogLog } = await openPage(browser, URL);
     await novoProjeto(page);
     const file = path.join(os.tmpdir(), `nao-atlas-${Date.now()}.json`);
     fs.writeFileSync(file, JSON.stringify({ foo: 1 }));
     await page.setInputFiles('input[type=file]', file);
     await page.waitForTimeout(200);
-    assert.match(dialogLog.at(-1), /não é um backup do Atlas/);
+    assert.match(dialogLog.at(-1), /não é um backup do Enki/);
     assert.equal(await page.evaluate(() => Object.keys(db.projects).length), 1);
     fs.unlinkSync(file);
     await context.close();
@@ -317,7 +317,7 @@ describe('Integração Lean Six Sigma', () => {
     await context.close();
   });
 
-  test('[LSS-03] dmaic_projects corrompido não quebra o Atlas', async () => {
+  test('[LSS-03] dmaic_projects corrompido não quebra o Enki', async () => {
     const { page, context, errors } = await openPage(browser, URL, { seed: { dmaic_projects: '{quebrado' } });
     assert.ok(await page.isVisible('text=Portfólio vazio'));
     assert.deepEqual(errors, []);

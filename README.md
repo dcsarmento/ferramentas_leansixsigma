@@ -1,6 +1,8 @@
-# Ferramentas Lean Six Sigma · Atlas
+# Ferramentas Lean Six Sigma · Enki
 
-Ferramentas web estáticas, publicadas no Vercel (produção a partir da `main`, prévia em cada pull request). No Vercel, o projeto se chama **atlas** (o repositório continua `ferramentas_leansixsigma`); o endereço de produção entra aqui depois da primeira publicação.
+O nome Enki, deus sumério da sabedoria e dos ofícios, substituiu o nome provisório Atlas em 19/11/2026.
+
+Ferramentas web estáticas, publicadas no Vercel (produção a partir da `main`, prévia em cada pull request). No Vercel, o projeto se chama **enki** (o repositório continua `ferramentas_leansixsigma`); o endereço de produção entra aqui depois da primeira publicação.
 
 Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcsarmento.github.io` deve exportar os projetos lá e importar no endereço do Vercel.
 
@@ -8,9 +10,9 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 | --- | --- |
 | `index.html` | CEP: I-MR, X̄-S, tendência, dispersão, ANOVA, Box-Cox, capacidade (Cp/Cpk) |
 | `dmaic.html` | Roteiro DMAIC: SIPOC, VOC, Pareto, Ishikawa, 5 porquês, GUT, 5W2H, PDSA, plano de controle |
-| `gestao.html` | **Atlas** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos. As telas de Projetos ficam agrupadas pelos 7 domínios do PMBOK 8 |
+| `gestao.html` | **Enki** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos. As telas de Projetos ficam agrupadas pelos 7 domínios do PMBOK 8 |
 
-## Atlas — Release 1
+## Enki — Release 1
 
 - **Portfólio:** projetos por abordagem (Preditiva, Scrum, Kanban, DMAIC, Híbrida), saúde, prioridade, progresso, riscos altos e próximo marco.
 - **TAP:** justificativa, objetivo SMART, escopo dentro/fora, premissas, restrições, orçamento, critérios de sucesso e marcos. Imprime em PDF.
@@ -20,7 +22,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 - **Partes interessadas:** matriz poder × interesse com atitude (apoia/neutro/resiste).
 - **Integração LSS:** lê os projetos do `dmaic.html` (mesmo navegador), traz para o portfólio e acompanha as fases D-M-A-I-C.
 
-## Atlas — Seção Processos (R3-A, em construção)
+## Enki — Seção Processos (R3-A, em construção)
 
 - **Diagnóstico de processos:** inventário dos processos contínuos com macroprocesso, dono, cliente, objetivo, indicador, meta, criticidade e status; alerta de processo sem dono ou sem indicador. A barra superior troca os controles de projeto por "+ Novo processo". Os processos entram no backup JSON.
 - **Avaliação de maturidade:** botão "Avaliar" em cada processo; 5 dimensões (desenho, dono, executores, indicadores, controle) × 5 níveis (Inicial, Repetível, Padronizado, Medido, Otimizado), cada nível com seu descritor. Nível geral = menor dimensão (elo fraco destacado); acima do nível 2 a dimensão exige evidência. Histórico de avaliações com tendência (↑ ↓ =) em relação à anterior.
@@ -29,7 +31,8 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 
 ## Dados e backup
 
-Tudo fica no `localStorage` do navegador (chave `atlas_db_v1`). Limpar o cache apaga os dados.
+Tudo fica no `localStorage` do navegador (chave `atlas_db_v1`, nome técnico mantido da época do Atlas para não perder dados; ver ADR 12). Limpar o cache apaga os dados.
+O arquivo de backup se chama `enki-backup-AAAA-MM-DD.json`; backups antigos (`atlas-backup-…`) continuam restaurando.
 Use **⬇ Backup JSON** pelo menos uma vez por semana; o arquivo inclui também os projetos DMAIC.
 O aviso no topo aparece quando o último backup tem mais de 7 dias.
 
