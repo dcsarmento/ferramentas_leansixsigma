@@ -101,6 +101,10 @@ table.tbl tr.click:hover td{background:rgba(62,207,207,.04);}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle;}
 .dot.verde{background:var(--success);}.dot.amarelo{background:var(--warn);}.dot.vermelho{background:var(--danger);}
 .tag{display:inline-block;font-family:'DM Mono',monospace;font-size:.6rem;padding:.1rem .45rem;border-radius:3px;border:1px solid var(--border2);color:var(--muted2);margin-right:.25rem;white-space:nowrap;}
+.mat-row{display:grid;grid-template-columns:190px 1fr 110px;gap:.6rem;align-items:center;font-size:.76rem;margin:.35rem 0;}
+.mat-row .ev{font-size:.68rem;color:var(--muted2);grid-column:2 / span 2;margin-top:-.2rem;}
+.mat-lvl{font-family:'DM Mono',monospace;font-size:.72rem;}
+.mat-box{border-top:1px solid var(--border);margin-top:1.1rem;padding-top:1rem;}
 .bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;min-width:70px;}
 .bar > div{height:100%;background:var(--accent);}
 
@@ -317,7 +321,7 @@ svg text{font-family:'DM Mono',monospace;}
       <div>
         <div class="ref">BPM · Diagnóstico · Maturidade de processos</div>
         <h1>Diagnóstico de processos</h1>
-        <p>Inventário dos processos contínuos: quem é o dono, a quem servem e como se mede. A avaliação de maturidade vem na próxima fatia.</p>
+        <p>Inventário dos processos contínuos e a maturidade de cada um, em 5 níveis × 5 dimensões. O nível geral é o da dimensão mais fraca: é ali que o processo trava.</p>
       </div>
       <button class="btn no-print" onclick="processDialog()">+ Novo processo</button>
     </div>
@@ -438,6 +442,48 @@ function normalizeProcess(pr) {
   if (!Array.isArray(pr.avaliacoes)) pr.avaliacoes = [];
   return pr;
 }
+/* Escala de maturidade (ESPECIFICACAO seção 6, ADR 8): 5 níveis × 5 dimensões */
+const MAT_NIVEIS = ['Inicial', 'Repetível', 'Padronizado', 'Medido', 'Otimizado'];
+const MAT_DIMS = [
+  { k: 'desenho', nome: 'Desenho e documentação', d: ['Na cabeça das pessoas', 'Passos principais escritos', 'Fluxo mapeado (BPMN/SIPOC) e procedimento aprovado', 'Documento revisado com base nos dados', 'Revisão periódica com ciclo de melhoria'] },
+  { k: 'dono', nome: 'Dono e governança', d: ['Ninguém responde', 'Alguém cuida informalmente', 'Dono nomeado, com autoridade', 'Dono acompanha indicadores e responde por eles', 'Dono lidera melhoria entre áreas'] },
+  { k: 'executores', nome: 'Executores e capacitação', d: ['Cada um faz do seu jeito', 'Quem faz conhece a rotina', 'Treinamento no padrão', 'Desempenho individual acompanhado', 'Executores propõem melhorias'] },
+  { k: 'indicadores', nome: 'Indicadores e medição', d: ['Nenhum', 'Medido de vez em quando', 'Indicador definido, com meta e frequência', 'Medido com estabilidade conhecida (CEP)', 'Capacidade (Cp/Cpk) no alvo e comparada'] },
+  { k: 'controle', nome: 'Controle e melhoria', d: ['Só corrige quando quebra', 'Correções repetem os mesmos erros', 'Desvios tratados com causa raiz', 'Plano de controle ativo', 'Melhoria contínua (DMAIC/PDSA) rodando'] }
+];
+const MAT_SEM_EVIDENCIA = 2;   // acima deste nível a dimensão exige evidência (MAT-02)
+/* Avaliações da mais recente para a mais antiga: data desc; mesma data → a registrada depois vem antes */
+const assessmentsByDate = pr => pr.avaliacoes.map((a, i) => [a, i]).sort((x, y) => (y[0].data || '').localeCompare(x[0].data || '') || y[1] - x[1]).map(x => x[0]);
+/* Nível geral = menor nível entre as dimensões (elo mais fraco, MAT-01). Nunca gravado. */
+function overallLevel(av) {
+  const ns = MAT_DIMS.map(m => +(av.niveis || {})[m.k] || 0);
+  return ns.some(n => n < 1) ? null : Math.min(...ns);
+}
+function maturity(pr) {
+  const av = assessmentsByDate(pr)[0];
+  if (!av) return null;
+  const nivel = overallLevel(av);
+  return { nivel, nome: nivel ? MAT_NIVEIS[nivel - 1] : '—', fracas: MAT_DIMS.filter(m => +av.niveis[m.k] === nivel).map(m => m.k), avaliacao: av };
+}
+/* Tendência: nível geral da última contra a penúltima avaliação (MAT-03) */
+function maturityTrend(pr) {
+  const [a, b] = assessmentsByDate(pr);
+  if (!a || !b) return null;
+  const x = overallLevel(a), y = overallLevel(b);
+  return x > y ? '↑' : x < y ? '↓' : '=';
+}
+/* Valida uma avaliação; devolve a lista de problemas (vazia = válida) (MAT-02) */
+function validateAssessment(av) {
+  const erros = [];
+  if (!av.data) erros.push('Informe a data da avaliação.');
+  for (const m of MAT_DIMS) {
+    const n = +(av.niveis || {})[m.k];
+    if (!(n >= 1 && n <= 5 && Number.isInteger(n))) erros.push(`${m.nome}: escolha um nível de 1 a 5.`);
+    else if (n > MAT_SEM_EVIDENCIA && !String((av.evidencias || {})[m.k] || '').trim()) erros.push(`${m.nome}: nível ${n} exige evidência (documento, registro, gráfico).`);
+  }
+  return erros;
+}
+
 /* Garante db.processes em dados de versões anteriores (DAD-04) */
 function normalizeProcesses(d) {
   if (!d.processes || typeof d.processes !== 'object' || Array.isArray(d.processes)) d.processes = {};
@@ -1136,7 +1182,7 @@ function processDialog(id) {
       <div class="field"><label>Meta</label><input id="pr-meta" value="${esc(pr?.meta)}" placeholder="Ex.: ≤ 4 h"></div>
       <div class="field"><label>Criticidade</label><select id="pr-crit">${opts(CRITICIDADE, pr?.criticidade || 'Média')}</select></div>
       <div class="field"><label>Status</label><select id="pr-status">${opts(STATUS_PROC, pr?.status || 'Ativo')}</select></div>
-    </div>`,
+    </div>${pr ? maturityBox(pr) : ''}`,
     () => {
       const nome = val('pr-nome');
       if (!nome) { alert('Informe o nome do processo.'); return false; }
@@ -1165,9 +1211,65 @@ function renderProcessos() {
       <div class="kpi"><div class="kpi-label">Sem indicador</div><div class="kpi-val" style="color:${semInd ? 'var(--warn)' : 'var(--success)'}">${semInd}</div><div class="kpi-sub">o que não se mede não se gerencia</div></div>
     </div>
     <div class="card"><div class="card-title"><span>Inventário de processos</span></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Processo</th><th>Macroprocesso</th><th>Dono</th><th>Cliente</th><th>Indicador · meta</th><th>Criticidade</th><th>Status</th></tr></thead><tbody>
-      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td></tr>`).join('')}
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Processo</th><th>Macroprocesso</th><th>Dono</th><th>Cliente</th><th>Indicador · meta</th><th>Criticidade</th><th>Status</th><th>Maturidade</th><th></th></tr></thead><tbody>
+      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td><td class="mat-cell">${matCell(x)}</td><td><button class="btn-sm" data-proc="${esc(x.id)}" onclick="event.stopPropagation();assessmentDialog(this.dataset.proc)">Avaliar</button></td></tr>`).join('')}
       </tbody></table></div></div>`;
+}
+
+const matColor = n => !n ? 'var(--muted2)' : n <= 2 ? 'var(--danger)' : n === 3 ? 'var(--warn)' : 'var(--success)';
+function matCell(pr) {
+  const m = maturity(pr);
+  if (!m) return '<span class="hint">não avaliado</span>';
+  const t = maturityTrend(pr);
+  return `<span class="mat-lvl" style="color:${matColor(m.nivel)}">${m.nivel} · ${esc(m.nome)}</span>${t ? ` <span class="mat-trend" title="comparado à avaliação anterior">${t}</span>` : ''}<div class="hint">${fmtD(m.avaliacao.data)}</div>`;
+}
+function maturityBox(pr) {
+  const m = maturity(pr);
+  const hist = assessmentsByDate(pr);
+  const perfil = m ? MAT_DIMS.map(d => {
+    const n = +m.avaliacao.niveis[d.k], ev = (m.avaliacao.evidencias || {})[d.k];
+    return `<div class="mat-row"><span>${esc(d.nome)}${m.fracas.includes(d.k) ? ' <span style="color:var(--danger)">◂ elo fraco</span>' : ''}</span><div class="bar"><div style="width:${n * 20}%;background:${matColor(n)}"></div></div><span class="mat-lvl" style="color:${matColor(n)}">${n} · ${esc(MAT_NIVEIS[n - 1])}</span>${ev ? `<div class="ev">${esc(ev)}</div>` : ''}</div>`;
+  }).join('') : '<p class="hint">Ainda não avaliado.</p>';
+  return `<div class="mat-box" id="mat-box">
+    <div class="card-title"><span>Maturidade ${m ? `· nível ${m.nivel} · ${esc(m.nome)}` : ''}</span><button class="btn-sm primary" data-proc="${esc(pr.id)}" onclick="assessmentDialog(this.dataset.proc)">+ Nova avaliação</button></div>
+    ${perfil}
+    ${hist.length ? `<div class="tbl-wrap" style="margin-top:.8rem"><table class="tbl mat-hist"><thead><tr><th>Data</th><th>Avaliador</th><th>Geral</th>${MAT_DIMS.map((d, i) => `<th title="${esc(d.nome)}">${['Des', 'Dono', 'Exec', 'Ind', 'Ctrl'][i]}</th>`).join('')}<th></th></tr></thead><tbody>
+      ${hist.map(a => `<tr><td class="num">${fmtD(a.data)}</td><td>${esc(a.avaliador) || '—'}</td><td class="mat-lvl" style="color:${matColor(overallLevel(a))}">${overallLevel(a) ?? '—'}</td>${MAT_DIMS.map(d => `<td class="num">${esc(a.niveis[d.k])}</td>`).join('')}<td><button class="btn-sm danger" title="Excluir avaliação" data-proc="${esc(pr.id)}" data-av="${esc(a.id)}" onclick="deleteAssessment(this.dataset.proc, this.dataset.av)">✕</button></td></tr>`).join('')}
+    </tbody></table></div>` : ''}
+    <p class="hint" style="margin-top:.6rem">Nível geral = menor nível entre as dimensões. Acima do nível ${MAT_SEM_EVIDENCIA}, cada dimensão exige evidência. Salve as alterações do cadastro antes de abrir uma nova avaliação.</p>
+  </div>`;
+}
+function assessmentDialog(procId) {
+  const pr = db.processes[procId]; if (!pr) return;
+  const prev = assessmentsByDate(pr)[0];
+  openModal(`Avaliar maturidade · ${pr.nome}`, `
+    <div class="form-grid">
+      <div class="field"><label>Data</label><input id="av-data" type="date" value="${today()}"></div>
+      <div class="field"><label>Avaliador</label><input id="av-aval" value="${esc(prev?.avaliador || pr.dono)}"></div>
+    </div>
+    ${MAT_DIMS.map(d => `
+    <div class="form-grid" style="margin-top:.9rem">
+      <div class="field span2"><label>${esc(d.nome)}</label><select id="av-n-${d.k}">${opts(d.d.map((t, i) => [i + 1, `${i + 1} · ${MAT_NIVEIS[i]} — ${t}`]), prev?.niveis?.[d.k] || 1)}</select></div>
+      <div class="field span2"><input id="av-e-${d.k}" value="${esc(prev?.evidencias?.[d.k])}" placeholder="Evidência (obrigatória acima do nível ${MAT_SEM_EVIDENCIA}): POP-012 rev. 3, gráfico I-MR de out/2026…"></div>
+    </div>`).join('')}
+    <div class="field" style="margin-top:.9rem"><label>Observação</label><textarea id="av-obs" rows="2" placeholder="O que falta para subir de nível?"></textarea></div>
+    <p class="hint" style="margin-top:.6rem">A avaliação anterior vem preenchida para facilitar a reavaliação; ela continua no histórico.</p>`,
+    () => {
+      const av = { id: uid('av'), data: val('av-data'), avaliador: val('av-aval'), niveis: {}, evidencias: {}, observacao: val('av-obs') };
+      for (const d of MAT_DIMS) { av.niveis[d.k] = +val('av-n-' + d.k); av.evidencias[d.k] = val('av-e-' + d.k); }
+      const erros = validateAssessment(av);
+      if (erros.length) { alert('Avaliação não salva:\n• ' + erros.join('\n• ')); return false; }
+      pr.avaliacoes.push(av); pr.updatedAt = nowISO();
+      persist(); renderProcessos();
+    });
+}
+function deleteAssessment(procId, avId) {
+  const pr = db.processes[procId]; if (!pr) return;
+  if (!confirm('Excluir esta avaliação do histórico?')) return;
+  pr.avaliacoes = pr.avaliacoes.filter(a => a.id !== avId);
+  persist(); renderProcessos();
+  const box = document.getElementById('mat-box');
+  if (box) box.outerHTML = maturityBox(pr);
 }
 
 /* ===================== BACKUP ===================== */

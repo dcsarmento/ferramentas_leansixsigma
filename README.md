@@ -23,7 +23,8 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 ## Atlas — Seção Processos (R3-A, em construção)
 
 - **Diagnóstico de processos:** inventário dos processos contínuos com macroprocesso, dono, cliente, objetivo, indicador, meta, criticidade e status; alerta de processo sem dono ou sem indicador. A barra superior troca os controles de projeto por "+ Novo processo". Os processos entram no backup JSON.
-- **Próximas fatias:** avaliação de maturidade (5 níveis × 5 dimensões, nível geral = menor dimensão), painel do diagnóstico e ponte com o DMAIC.
+- **Avaliação de maturidade:** botão "Avaliar" em cada processo; 5 dimensões (desenho, dono, executores, indicadores, controle) × 5 níveis (Inicial, Repetível, Padronizado, Medido, Otimizado), cada nível com seu descritor. Nível geral = menor dimensão (elo fraco destacado); acima do nível 2 a dimensão exige evidência. Histórico de avaliações com tendência (↑ ↓ =) em relação à anterior.
+- **Próximas fatias:** painel do diagnóstico (distribuição por nível e alertas) e ponte com o DMAIC.
 
 ## Dados e backup
 
