@@ -42,10 +42,27 @@ Regra: lógica de negócio fica em funções puras do bloco Domínio, para ser t
       partes: [ { id, nome, papel, poder, interesse, atitude, obs } ],
       licoes: [ { id, data, tipo, categoria, oque, rec } ]
     }
+  },
+  processes: {                       // R3-A · fora dos projetos: processo é trabalho contínuo
+    <id>: {
+      id, nome, macroprocesso, dono, cliente, objetivo, indicador, meta,
+      criticidade: Alta|Média|Baixa, status: Ativo|Em revisão|Desativado,
+      avaliacoes: [ { id, data, avaliador,
+                      niveis:     { desenho, dono, executores, indicadores, controle },  // 1..5
+                      evidencias: { desenho, dono, executores, indicadores, controle },
+                      observacao } ],
+      createdAt, updatedAt
+    }
   }
 }
 ```
 Campo novo exige: valor padrão em `makeProject`, tratamento em `normalize` (backups antigos) e teste DAD-03 continuando verde.
+
+Processos seguem a mesma regra com `makeProcess` e `normalizeProcess`; `db.processes` ausente vira `{}` (DAD-04). O nível de maturidade **nunca é gravado**: a função pura `maturity(proc)` calcula da avaliação mais recente, para não haver duas verdades.
+
+## Menu (a partir da R3-A)
+Portfólio · Projetos (TAP, Kanban, Scrum, Riscos, Partes interessadas, Lições) · **Processos** (Diagnóstico) · Melhoria contínua (DMAIC e CEP, links externos).
+Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "+ Novo processo"; backup e restauração ficam sempre visíveis.
 
 ## Registro de decisões (ADR)
 | # | Data | Decisão | Motivo | Alternativa rejeitada |
@@ -56,3 +73,5 @@ Campo novo exige: valor padrão em `makeProject`, tratamento em `normalize` (bac
 | 4 | 18/11/2026 | Kanban e Scrum compartilham os mesmos itens | Uma fonte de verdade; sprint é um filtro do quadro | Backlogs separados |
 | 5 | 18/11/2026 | Testes com `node:test` + Playwright, rodando no GitHub Actions | Sem framework extra; testa a página real no navegador | Extrair a lógica para JS separado só para teste unitário (mudança de estrutura sem ganho agora) |
 | 6 | 18/11/2026 | Entrega por branch + pull request, merge só com testes verdes | O Pages publica a `main`; o PR é o portão de qualidade | Commit direto na `main` |
+| 7 | 18/11/2026 | Exceção ao gate: Diagnóstico de Processos (R3-A) entra antes dos 30 dias de uso da R1, dentro do `gestao.html` | Cadastro de processos reais é uso real; menor corte da R3. Decidido pelo dono | Manter o gate; página `processos.html` separada (duplicaria `Store` e backup). SIPOC, VSM e RACI (R3-B) continuam atrás do gate |
+| 8 | 18/11/2026 | Maturidade de processo em 5 níveis × 5 dimensões, nível geral = mínimo; OPM3 sai da R3 | Elo mais fraco (PEMM) não esconde lacunas; OPM3 mede gestão de projetos, não processos | Média das dimensões; nível único por processo; OPM3 como módulo de maturidade |

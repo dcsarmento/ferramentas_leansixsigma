@@ -18,14 +18,24 @@ Critérios POR, KAN, SCR, RSK, STK, SEG, DAD, LSS e SMK — todos com teste.
 | R2-07 | Curva S (VP, VA, CR) e farol de IDC/IDP no portfólio | IDC < 0,9 ou IDP < 0,9 deixa a saúde sugerida em vermelho | EVM-02 |
 | R2-08 | Diagrama de fluxo cumulativo (CFD) no Kanban a partir de `hist` | Faixas somam o total de itens em cada dia | KAN-07 |
 
-## Release 3 — Processos e maturidade (aguardando gate da R2)
+## Release 3-A — Diagnóstico de Processos (exceção ao gate, ADR 7)
+Critérios na seção 6 da ESPECIFICACAO.md. Uma fatia por PR, nesta ordem.
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
-| R3-01 | Cadastro de processos (dono, cliente, indicador, meta) | Processo listado e editável | PRC-01 |
-| R3-02 | SIPOC por processo, reaproveitando o padrão do `dmaic.html` | Cinco colunas salvas e restauradas | PRC-02 |
-| R3-03 | VSM simplificado: etapas com tempo de ciclo e espera; eficiência do fluxo | Eficiência = Σ tempo de valor ÷ lead time total | PRC-03 |
-| R3-04 | Matriz RACI por projeto | Alerta quando uma atividade tem 0 ou mais de 1 "A" | RAC-01 |
-| R3-05 | Autoavaliação de maturidade (padronizar, medir, controlar, melhorar × projeto/programa/portfólio) | Nota por dimensão e histórico de avaliações | MAT-01 |
+| R3-A0 | Documentação: especificação, escala, modelo de dados, ADR 7 e 8, backlog | Docs revisados pelo dono | — |
+| R3-A1 | Menu reorganizado (Portfólio, Projetos, Processos, Melhoria contínua) + barra por contexto + cadastro de processos + `processes` em `normalize` e no backup | Ver PRC-01, PRC-02, DAD-04 | PRC-01, PRC-02, DAD-04 |
+| R3-A2 | Avaliação de maturidade: formulário com os descritores da escala, `maturity`, regra da evidência, histórico | Ver MAT-01 a MAT-03 | MAT-01, MAT-02, MAT-03, SEG-01 |
+| R3-A3 | Painel do diagnóstico: distribuição por nível, alertas, tendência | Ver MAT-04 | MAT-04 |
+| R3-A4 | Ponte com melhoria: abrir projeto DMAIC a partir do processo (`processoId`) | Ver PRC-03 | PRC-03 |
+
+## Release 3-B — Ferramentas de processo (aguardando gate)
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| R3-B1 | SIPOC por processo, reaproveitando o padrão do `dmaic.html` | Cinco colunas salvas e restauradas | PRC-04 |
+| R3-B2 | VSM simplificado: etapas com tempo de ciclo e espera; eficiência do fluxo | Eficiência = Σ tempo de valor ÷ lead time total | PRC-05 |
+| R3-B3 | Matriz RACI por projeto | Alerta quando uma atividade tem 0 ou mais de 1 "A" | RAC-01 |
+
+A autoavaliação OPM3 (antiga R3-05) saiu do roadmap (ADR 8); volta só se houver uso organizacional.
 
 ## Dívida técnica monitorada
 - `gestao.html` passa de ~150 KB → separar CSS e JS em arquivos próprios (tarefa dedicada, sem mudar comportamento, suíte inteira verde).
