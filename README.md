@@ -1,6 +1,6 @@
 # Ferramentas Lean Six Sigma · Atlas
 
-Ferramentas web estáticas, publicadas no Vercel (produção a partir da `main`, prévia em cada pull request). O endereço de produção entra aqui depois da primeira publicação.
+Ferramentas web estáticas, publicadas no Vercel (produção a partir da `main`, prévia em cada pull request). No Vercel, o projeto se chama **atlas** (o repositório continua `ferramentas_leansixsigma`); o endereço de produção entra aqui depois da primeira publicação.
 
 Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcsarmento.github.io` deve exportar os projetos lá e importar no endereço do Vercel.
 

@@ -12,7 +12,7 @@ Três páginas estáticas publicadas no Vercel (ADR 10), mesma origem (o domíni
 O Atlas **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um backup e confirma.
 
 ## Publicação (ADR 10)
-- O Vercel, ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
+- O projeto no Vercel se chama **atlas** (nome definido na importação; o repositório continua `ferramentas_leansixsigma`). Ligado ao repositório, gera uma prévia por pull request e publica a `main` em produção.
 - `vercel.json` roda `npm run build` (`tools/build.js`), que copia só as três páginas para `dist/` e falha se faltar alguma.
 - Os testes rodam no GitHub Actions; a regra de proteção da `main` exige o check **Testes** verde antes do merge.
 - Cada domínio tem seu próprio `localStorage`: prévia, produção e o antigo `github.io` não compartilham dados.
