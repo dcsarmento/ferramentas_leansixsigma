@@ -151,6 +151,8 @@ table.tbl tr.click:hover td{background:var(--accent-soft);}
 .mat-row .ev{font-size:.76rem;color:var(--muted2);grid-column:2 / span 2;margin-top:-.2rem;}
 .mat-lvl{font-size:.8rem;font-weight:600;}
 .mat-box{border-top:1px solid var(--border);margin-top:1.1rem;padding-top:1rem;}
+.diag-etapa{border-top:1px solid var(--border);margin-top:1.1rem;padding-top:1rem;}
+.diag-eyebrow{font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:.2rem;}
 .bar{height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;min-width:70px;}
 .bar > div{height:100%;background:var(--accent);border-radius:999px;}
 
@@ -490,6 +492,7 @@ function makeProcess(o) {
   const t = nowISO();
   return Object.assign({
     id: uid('prc'), nome: 'Novo processo', macroprocesso: '', dono: '', cliente: '', objetivo: '', indicador: '', meta: '',
+    proposito: '', regras: [],   // diagnóstico de negócio (R3-A5, ADR 16)
     criticidade: 'Média', status: 'Ativo', avaliacoes: [], createdAt: t, updatedAt: t
   }, o || {});
 }
@@ -497,8 +500,16 @@ function normalizeProcess(pr) {
   const base = makeProcess({ id: pr.id });
   for (const k in base) if (pr[k] === undefined) pr[k] = base[k];
   if (!Array.isArray(pr.avaliacoes)) pr.avaliacoes = [];
+  if (typeof pr.proposito !== 'string') pr.proposito = '';
+  pr.regras = parseRules(pr.regras);
   return pr;
 }
+/* Regras de negócio: texto (uma por linha) ou lista → lista de textos sem linhas vazias (NEG-01, NEG-02) */
+function parseRules(v) {
+  const linhas = typeof v === 'string' ? v.split(/\r?\n/) : Array.isArray(v) ? v.filter(x => typeof x === 'string') : [];
+  return linhas.map(x => x.trim()).filter(Boolean);
+}
+const hasPurpose = pr => !!String(pr.proposito || '').trim();
 /* Escala de maturidade (ESPECIFICACAO seção 6, ADR 8): 5 níveis × 5 dimensões */
 const MAT_NIVEIS = ['Inicial', 'Repetível', 'Padronizado', 'Medido', 'Otimizado'];
 const MAT_DIMS = [
@@ -548,14 +559,15 @@ function diagnosticSummary(procs, hoje) {
   const ref = hoje || today();
   const vivos = procs.filter(x => x.status !== 'Desativado');
   const porNivel = [0, 0, 0, 0, 0, 0];
-  const frageis = [], vencidas = [];
+  const frageis = [], vencidas = [], semProposito = [];
   for (const x of vivos) {
+    if (!hasPurpose(x)) semProposito.push(x.id);   // NEG-03: diagnóstico de negócio pendente
     const m = maturity(x);
     porNivel[m && m.nivel ? m.nivel : 0]++;
     if (m && m.nivel && m.nivel <= 2 && x.criticidade === 'Alta') frageis.push(x.id);
     if (m && m.avaliacao.data && days(m.avaliacao.data, ref) > MAT_VALIDADE_DIAS) vencidas.push(x.id);
   }
-  return { total: vivos.length, porNivel, frageis, vencidas };
+  return { total: vivos.length, porNivel, frageis, vencidas, semProposito };
 }
 
 /* Garante db.processes em dados de versões anteriores (DAD-04) */
@@ -1435,18 +1447,28 @@ function processDialog(id) {
       <div class="field"><label>Macroprocesso</label><input id="pr-macro" value="${esc(pr?.macroprocesso)}" placeholder="Ex.: Operações"></div>
       <div class="field"><label>Dono do processo</label><input id="pr-dono" value="${esc(pr?.dono)}"></div>
       <div class="field span2"><label>Cliente (quem recebe a saída)</label><input id="pr-cliente" value="${esc(pr?.cliente)}"></div>
-      <div class="field span2"><label>Objetivo</label><textarea id="pr-obj" rows="2">${esc(pr?.objetivo)}</textarea></div>
+      <div class="field span2"><label>Objetivo</label><textarea id="pr-obj" rows="2" placeholder="Resultado mensurável que o processo persegue">${esc(pr?.objetivo)}</textarea></div>
       <div class="field"><label>Indicador principal</label><input id="pr-ind" value="${esc(pr?.indicador)}" placeholder="Ex.: Lead time de preparação (h)"></div>
       <div class="field"><label>Meta</label><input id="pr-meta" value="${esc(pr?.meta)}" placeholder="Ex.: ≤ 4 h"></div>
       <div class="field"><label>Criticidade</label><select id="pr-crit">${opts(CRITICIDADE, pr?.criticidade || 'Média')}</select></div>
       <div class="field"><label>Status</label><select id="pr-status">${opts(STATUS_PROC, pr?.status || 'Ativo')}</select></div>
+    </div>
+    <div class="diag-etapa" id="diag-negocio">
+      <div class="diag-eyebrow">Diagnóstico · etapa 1</div>
+      <div class="card-title"><span>Diagnóstico de negócio</span></div>
+      <p class="hint">Por que o processo existe e quais regras o governam. Vem antes da maturidade: sem propósito claro, não há como julgar se o processo funciona.</p>
+      <div class="form-grid" style="margin-top:.6rem">
+        <div class="field span2"><label>Propósito</label><textarea id="pr-proposito" rows="3" placeholder="2 a 3 linhas: o que o processo entrega, para quem e por que isso importa">${esc(pr?.proposito)}</textarea></div>
+        <div class="field span2"><label>Regras de negócio principais (uma por linha)</label><textarea id="pr-regras" rows="4" placeholder="Ex.: Veículo só é liberado com vistoria assinada&#10;Ex.: Avaria acima de R$ 500 exige aprovação do gestor">${esc((pr?.regras || []).join('\n'))}</textarea></div>
+      </div>
     </div>${pr ? maturityBox(pr) : ''}`,
     () => {
       const nome = val('pr-nome');
       if (!nome) { alert('Informe o nome do processo.'); return false; }
       const t = pr || makeProcess();
       Object.assign(t, { nome, macroprocesso: val('pr-macro'), dono: val('pr-dono'), cliente: val('pr-cliente'), objetivo: val('pr-obj'),
-        indicador: val('pr-ind'), meta: val('pr-meta'), criticidade: val('pr-crit'), status: val('pr-status'), updatedAt: nowISO() });
+        indicador: val('pr-ind'), meta: val('pr-meta'), criticidade: val('pr-crit'), status: val('pr-status'),
+        proposito: val('pr-proposito'), regras: parseRules(document.getElementById('pr-regras').value), updatedAt: nowISO() });
       db.processes[t.id] = t;
       persist(); renderProcessos();
     },
@@ -1471,6 +1493,7 @@ function renderProcessos() {
       <div class="kpi"><div class="kpi-label">Processos</div><div class="kpi-val">${list.length}</div><div class="kpi-sub">${list.filter(x => x.status === 'Ativo').length} ativos</div></div>
       <div class="kpi"><div class="kpi-label">Sem dono</div><div class="kpi-val" style="color:${semDono ? 'var(--danger)' : 'var(--success)'}">${semDono}</div><div class="kpi-sub">processo sem dono não amadurece</div></div>
       <div class="kpi"><div class="kpi-label">Sem indicador</div><div class="kpi-val" style="color:${semInd ? 'var(--warn)' : 'var(--success)'}">${semInd}</div><div class="kpi-sub">o que não se mede não se gerencia</div></div>
+      <div class="kpi" id="kpi-sem-proposito"><div class="kpi-label">Sem propósito</div><div class="kpi-val" style="color:${sm.semProposito.length ? 'var(--warn)' : 'var(--success)'}">${sm.semProposito.length}</div><div class="kpi-sub">diagnóstico de negócio pendente</div></div>
       <div class="kpi" id="kpi-frageis"><div class="kpi-label">Críticos frágeis</div><div class="kpi-val" style="color:${sm.frageis.length ? 'var(--danger)' : 'var(--success)'}">${sm.frageis.length}</div><div class="kpi-sub">criticidade Alta em nível ≤ 2</div></div>
       <div class="kpi" id="kpi-vencidas"><div class="kpi-label">Reavaliar</div><div class="kpi-val" style="color:${sm.vencidas.length ? 'var(--warn)' : 'var(--success)'}">${sm.vencidas.length}</div><div class="kpi-sub">última avaliação há mais de ${MAT_VALIDADE_DIAS} dias</div></div>
     </div>
@@ -1481,7 +1504,7 @@ function renderProcessos() {
     </div>
     <div class="card"><div class="card-title"><span>Inventário de processos</span></div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Processo</th><th>Macroprocesso</th><th>Dono</th><th>Cliente</th><th>Indicador · meta</th><th>Criticidade</th><th>Status</th><th>Maturidade</th><th></th></tr></thead><tbody>
-      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td><td class="mat-cell">${matCell(x)}${sm.frageis.includes(x.id) ? '<div class="flag-fragil" style="color:var(--danger);font-size:.68rem">crítico frágil</div>' : ''}${sm.vencidas.includes(x.id) ? '<div class="flag-vencida" style="color:var(--warn);font-size:.68rem">reavaliar</div>' : ''}</td><td><button class="btn-sm" data-proc="${esc(x.id)}" onclick="event.stopPropagation();assessmentDialog(this.dataset.proc)">Avaliar</button></td></tr>`).join('')}
+      ${list.map(x => `<tr class="click" data-proc="${esc(x.id)}" onclick="processDialog(this.dataset.proc)"><td>${esc(x.nome)}${sm.semProposito.includes(x.id) ? '<div class="flag-sem-proposito" style="color:var(--warn);font-size:.68rem">sem propósito</div>' : ''}</td><td>${esc(x.macroprocesso) || '—'}</td><td>${x.dono ? esc(x.dono) : '<span style="color:var(--danger)">sem dono</span>'}</td><td>${esc(x.cliente) || '—'}</td><td>${x.indicador ? esc(x.indicador) + (x.meta ? ' · ' + esc(x.meta) : '') : '—'}</td><td style="color:${critCor(x.criticidade)}">${esc(x.criticidade)}</td><td>${esc(x.status)}</td><td class="mat-cell">${matCell(x)}${sm.frageis.includes(x.id) ? '<div class="flag-fragil" style="color:var(--danger);font-size:.68rem">crítico frágil</div>' : ''}${sm.vencidas.includes(x.id) ? '<div class="flag-vencida" style="color:var(--warn);font-size:.68rem">reavaliar</div>' : ''}</td><td><button class="btn-sm" data-proc="${esc(x.id)}" onclick="event.stopPropagation();assessmentDialog(this.dataset.proc)">Avaliar</button></td></tr>`).join('')}
       </tbody></table></div></div>`;
 }
 
@@ -1500,6 +1523,7 @@ function maturityBox(pr) {
     return `<div class="mat-row"><span>${esc(d.nome)}${m.fracas.includes(d.k) ? ' <span style="color:var(--danger)">◂ elo fraco</span>' : ''}</span><div class="bar"><div style="width:${n * 20}%;background:${matColor(n)}"></div></div><span class="mat-lvl" style="color:${matColor(n)}">${n} · ${esc(MAT_NIVEIS[n - 1])}</span>${ev ? `<div class="ev">${esc(ev)}</div>` : ''}</div>`;
   }).join('') : '<p class="hint">Ainda não avaliado.</p>';
   return `<div class="mat-box" id="mat-box">
+    <div class="diag-eyebrow">Diagnóstico · etapa 2</div>
     <div class="card-title"><span>Maturidade ${m ? `· nível ${m.nivel} · ${esc(m.nome)}` : ''}</span><button class="btn-sm primary" data-proc="${esc(pr.id)}" onclick="assessmentDialog(this.dataset.proc)">+ Nova avaliação</button></div>
     ${perfil}
     ${hist.length ? `<div class="tbl-wrap" style="margin-top:.8rem"><table class="tbl mat-hist"><thead><tr><th>Data</th><th>Avaliador</th><th>Geral</th>${MAT_DIMS.map((d, i) => `<th title="${esc(d.nome)}">${['Des', 'Dono', 'Exec', 'Ind', 'Ctrl'][i]}</th>`).join('')}<th></th></tr></thead><tbody>
