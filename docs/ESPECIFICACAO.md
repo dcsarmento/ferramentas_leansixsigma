@@ -209,6 +209,7 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 | --- | --- |
 | CHK-01 | No diálogo do item é possível adicionar, renomear, marcar/desmarcar e remover subitens; tudo persiste após recarregar |
 | CHK-02 | Cartão com lista de verificação mostra "feitos/total"; sem lista, não mostra nada; `checklistProgress(it)` é função pura no bloco Domínio |
+| CHK-04 | No cartão, o contador abre e recolhe a lista; o círculo marca ou desmarca o subitem ali mesmo, sem abrir o diálogo, e grava na hora (a "marcação" do Planner) |
 | CHK-03 | Item de backup antigo, sem `checklist`, `rotulos`, `bucket` ou `origem`, abre normalizado; DAD-03 verde; textos dos subitens passam por `esc()` (SEG-01 estendido) |
 | PLN-01 | `readXlsx(arrayBuffer)` lê a primeira planilha de um .xlsx (strings compartilhadas e inline, células vazias no meio) e devolve linhas; arquivo que não é .xlsx é recusado com mensagem, sem alterar dados |
 | PLN-02 | `plannerRows(linhas)` acha o cabeçalho (pt ou en) e converte cada tarefa conforme o mapeamento; testado com um arquivo de exemplo no formato real |

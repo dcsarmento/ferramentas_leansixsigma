@@ -64,7 +64,7 @@ Especificação na seção 12 da ESPECIFICACAO.md. Exceção aprovada em 23/11/2
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
 | PLN-00 ✓ | Documentação: especificação seção 12, backlog, arquitetura | Docs revisados pelo dono | — |
-| CHK-01 | Lista de verificação no item: campo `checklist`, `rotulos`, `bucket`, `origem` em `normalize`; diálogo; contador no cartão (`checklistProgress`) | Ver CHK-01 a CHK-03 | CHK-01 a CHK-03 (`tests/planner.test.js`), DAD-03, SEG-01 |
+| CHK-01 ✓ | Lista de verificação no item: campo `checklist`, `rotulos`, `bucket`, `origem` em `normalizeItem`; diálogo; contador no cartão (`checklistProgress`); marcar pelo cartão | Ver CHK-01 a CHK-04 | CHK-01 a CHK-04 (`tests/planner.test.js`), DAD-03, SEG-01 |
 | PLN-01 | Leitor de .xlsx sem biblioteca (`readXlsx`) | Ver PLN-01 | PLN-01 |
 | PLN-02 | Conversão do Planner (`plannerRows`) com arquivo real do dono como molde (dados sensíveis trocados) | Ver PLN-02 | PLN-02 |
 | PLN-03 | Botão "Importar do Planner" no Kanban, prévia, gravação e reimportação sem duplicar | Ver PLN-03 a PLN-05 | PLN-03 a PLN-05 |
