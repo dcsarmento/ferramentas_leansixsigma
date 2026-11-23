@@ -79,6 +79,28 @@ Dimensão acima do nível 2 exige evidência escrita.
 | DAD-04 | Backup exporta e restaura `processes`; backup antigo sem `processes` abre com `{}`; DAD-03 segue verde |
 | SEG-01 | Textos de processo e evidência passam por `esc()` (teste de XSS estendido) |
 
+### Diagnóstico de negócio (fatia R3-A5, extensão do ADR 7, ADR 16)
+**Situação.** Pedido do dono em 23/11/2026, dentro da exceção do Diagnóstico de Processos (ADR 7).
+**Problema.** A ficha do processo diz quem é o dono e o que se mede, mas não diz por que o processo existe nem que regras o governam. Sem isso, a avaliação de maturidade julga um processo sem saber o que ele deveria entregar.
+**Objetivo.** Cada processo ganha **Propósito** (2 a 3 linhas: o que entrega, para quem, por que importa) e **Regras de negócio** principais, agrupados na ficha sob "Diagnóstico de negócio", identificado como **etapa 1** do diagnóstico; a maturidade passa a aparecer como **etapa 2**.
+**Resultado esperado.** Abrir um processo mostra primeiro o diagnóstico de negócio e depois a maturidade; o painel aponta quantos processos ainda não têm propósito, como já aponta os sem dono e sem indicador.
+
+**Regras.**
+- `proposito` é texto livre; o limite de 2 a 3 linhas é orientação na tela, não bloqueio (texto já digitado nunca é recusado).
+- `regras` é uma lista de textos: a tela edita uma regra por linha; linhas vazias e espaços nas pontas saem ao salvar (`parseRules`).
+- Propósito e regras não entram no nível de maturidade (ADR 8 não muda); "sem propósito" é alerta, não bloqueio, e não impede avaliar.
+- Processo desativado fica fora do alerta, como nos demais alertas do painel.
+- Dados existentes não mudam: processo antigo abre com `proposito: ''` e `regras: []`, todos os outros campos e avaliações intactos; `regras` gravada como texto vira lista; valor inválido vira `[]`. Chave `atlas_db_v1` e formato do backup mantidos.
+
+| Código | Critério |
+| --- | --- |
+| NEG-01 | A ficha do processo tem a etapa "Diagnóstico · etapa 1 · Diagnóstico de negócio" com Propósito e Regras de negócio (uma por linha), antes da maturidade ("etapa 2"); salvar persiste após recarregar e as regras são gravadas como lista sem linhas vazias |
+| NEG-02 | Processo e backup antigos abrem com `proposito: ''` e `regras: []`, sem alterar nenhum outro campo nem as avaliações; `regras` em texto vira lista; `parseRules` ignora o que não é texto; DAD-03 verde |
+| NEG-03 | `diagnosticSummary` devolve `semProposito` (não desativados com propósito vazio ou só espaços); o painel mostra o indicador "Sem propósito" e o inventário marca "sem propósito" no processo |
+| NEG-04 | Propósito e regras passam por `esc()` (teste de XSS estendido) |
+
+Fora desta fatia: SIPOC, entradas e saídas, fornecedores (R3-B, atrás do gate); regras com código, tipo ou fonte; vínculo de regra com etapa do fluxo.
+
 ## 7. Projetos por domínio de desempenho (fatia P-01, ADR 9)
 **Problema.** O menu de Projetos é uma lista plana de 6 telas, sem relação visível com o PMBOK 8. O dono quer cada ferramenta na sua área.
 **Objetivo.** Agrupar as telas de Projetos pelos 7 domínios do PMBOK 8 (Governança, Escopo, Cronograma, Finanças, Partes interessadas, Recursos, Riscos), com a área de conhecimento clássica como legenda.

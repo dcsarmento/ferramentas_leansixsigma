@@ -27,6 +27,7 @@ Critérios na seção 6 da ESPECIFICACAO.md. Uma fatia por PR, nesta ordem. ✓ 
 | R3-A2 ✓ | Avaliação de maturidade: formulário com os descritores da escala, `maturity`, regra da evidência, histórico | Ver MAT-01 a MAT-03 | MAT-01, MAT-02, MAT-03, SEG-01 |
 | R3-A3 ✓ | Painel do diagnóstico: distribuição por nível, alertas, tendência | Ver MAT-04 | MAT-04 |
 | R3-A4 | Ponte com melhoria: abrir projeto DMAIC a partir do processo (`processoId`) | Ver PRC-03 | PRC-03 |
+| R3-A5 ✓ | Diagnóstico de negócio (ADR 16): `proposito` e `regras` no processo (`parseRules`, `hasPurpose`), etapa 1 na ficha antes da maturidade, alerta "Sem propósito" | Ver NEG-01 a NEG-04 | NEG-01 a NEG-04 (`tests/processos.test.js`), DAD-03, DAD-04 |
 
 ## Projetos por domínio (aprovada em 18/11/2026, ADR 9)
 Só navegação, com as telas da R1; vem depois do merge do PR #1 e da R3-A1, porque mexe no mesmo menu.
