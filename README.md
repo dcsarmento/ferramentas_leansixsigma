@@ -18,7 +18,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 
 - **Portfólio:** projetos por abordagem (Preditiva, Scrum, Kanban, DMAIC, Híbrida), saúde, prioridade, progresso, riscos altos e próximo marco.
 - **TAP:** justificativa, objetivo SMART, escopo dentro/fora, premissas, restrições, orçamento, critérios de sucesso e marcos. Imprime em PDF.
-- **Kanban:** colunas configuráveis com limite de WIP, classes de serviço, lead time, cycle time, vazão semanal, itens envelhecendo e estimativa pela Lei de Little.
+- **Kanban:** colunas configuráveis com limite de WIP, classes de serviço, lead time, cycle time, vazão semanal, itens envelhecendo e estimativa pela Lei de Little. Cada item pode ter lista de verificação e repetir (diária, semanal, mensal ou anual): ao concluir, nasce a próxima ocorrência com a lista desmarcada.
 - **Scrum:** backlog ordenado, sprints com meta, burndown, velocidade e retrospectiva. Os itens são os mesmos do Kanban.
 - **Riscos:** P × I, matriz 5×5, alerta para risco alto sem dono ou sem ação.
 - **Partes interessadas:** matriz poder × interesse com atitude (apoia/neutro/resiste).
