@@ -172,6 +172,18 @@ table.tbl tr.click:hover td{background:var(--accent-soft);}
 .kcard.cls-intangivel{border-left-color:var(--purple);}
 .kcard-title{line-height:1.4;margin-bottom:.45rem;font-weight:500;}
 .kcard-meta{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;font-size:.72rem;color:var(--muted2);}
+/* Lista de verificação (CHK, ADR 14) */
+.ck-dot{flex:0 0 auto;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);background:transparent;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:.62rem;line-height:1;color:transparent;}
+.ck-dot:hover{border-color:var(--success);color:var(--success);}
+.ck-dot.on{background:var(--success);border-color:var(--success);color:var(--surface);}
+.ck-row{display:flex;align-items:center;gap:.5rem;margin:.3rem 0;}
+.ck-row .ck-txt{flex:1;line-height:1.35;}
+.ck-row.done .ck-txt{color:var(--muted);text-decoration:line-through;}
+.ck-row input{flex:1;}
+.kcheck{background:transparent;border:none;cursor:pointer;color:var(--muted2);font-size:.72rem;padding:1px 4px;border-radius:6px;display:inline-flex;align-items:center;gap:.25rem;font-family:'DM Mono',monospace;}
+.kcheck:hover{background:var(--surface2);color:var(--text);}
+.kcheck.full{color:var(--success);}
+.kcard-checks{margin:.1rem 0 .45rem;font-size:.8rem;}
 .aging{color:var(--warn);font-weight:600;}
 .add-card{background:transparent;border:none;color:var(--muted2);font-size:.82rem;font-weight:500;padding:.45rem;border-radius:8px;cursor:pointer;width:100%;text-align:left;}
 .add-card:hover{background:var(--surface);color:var(--accent);}
@@ -577,12 +589,30 @@ function normalizeMeta(d) {
   return d;
 }
 
+/* Item do Kanban: lista de verificação e campos de origem (CHK-03, ADR 14) */
+function normalizeItem(it) {
+  it.checklist = (Array.isArray(it.checklist) ? it.checklist : [])
+    .filter(c => c && typeof c === 'object')
+    .map(c => ({ id: c.id || uid('ck'), texto: String(c.texto ?? ''), feito: !!c.feito }));
+  if (!Array.isArray(it.rotulos)) it.rotulos = [];
+  if (typeof it.bucket !== 'string') it.bucket = '';
+  if (it.origem === undefined) it.origem = null;
+  return it;
+}
+/* Progresso da lista de verificação (CHK-02): null quando não há subitens */
+const checklistProgress = it => {
+  const l = it && Array.isArray(it.checklist) ? it.checklist : [];
+  return l.length ? { feitos: l.filter(c => c.feito).length, total: l.length } : null;
+};
+
 /* Normaliza projetos vindos de backups antigos ou incompletos */
 function normalize(p) {
   const base = makeProject({ id: p.id });
   for (const k in base) if (p[k] === undefined) p[k] = base[k];
   p.tap = Object.assign(base.tap, p.tap || {});
   if (!Array.isArray(p.cols) || !p.cols.length) p.cols = defaultCols();
+  if (!Array.isArray(p.items)) p.items = [];
+  p.items.forEach(normalizeItem);   // CHK-03
   return p;
 }
 Object.values(db.projects).forEach(normalize);
@@ -923,6 +953,8 @@ function itemDialog(id, presetCol) {
       <div class="field"><label>Pontos / esforço</label><input id="it-pontos" type="number" min="0" step="1" value="${esc(it?.pontos ?? 1)}"></div>
       <div class="field"><label>Responsável</label><input id="it-resp" value="${esc(it?.resp)}"></div>
       <div class="field"><label>Data limite (opcional)</label><input id="it-prazo" type="date" value="${esc(it?.prazo)}"></div>
+      <div class="field span2"><label>Lista de verificação <span id="ck-count" class="hint"></span></label><div id="ck-list"></div>
+        <div class="ck-row"><input id="ck-new" placeholder="Adicionar um item" onkeydown="if(event.key==='Enter'){event.preventDefault();window._ckAdd()}"><button class="btn-ic" type="button" onclick="window._ckAdd()">+ subitem</button></div></div>
     </div>
     ${it ? `<p class="hint" style="margin-top:.8rem">Criado ${fmtD(it.criado)} · compromisso ${fmtD(it.commit)} · início ${fmtD(it.inicio)} · entrega ${fmtD(it.fim)}${it.fim && it.commit ? ` · lead time ${f1(days(it.commit, it.fim))} d` : ''}</p>` : ''}`,
     () => {
@@ -932,15 +964,40 @@ function itemDialog(id, presetCol) {
       const target = it || { id: uid('it'), criado: nowISO(), commit: null, inicio: null, fim: null, hist: [], col: null, ordem: p.items.length };
       if (target.col !== colId && !wipOk(p, colId, target.id)) return false;
       Object.assign(target, { titulo, desc: val('it-desc'), tipo: val('it-tipo'), classe: val('it-classe'), sprint: val('it-sprint') || null, pontos: Math.max(0, +val('it-pontos') || 0), resp: val('it-resp'), prazo: val('it-prazo') });
+      target.checklist = ck.filter(c => c.texto.trim()).map(c => ({ id: c.id, texto: c.texto.trim(), feito: c.feito }));
+      normalizeItem(target);
       if (!it) { target.col = null; p.items.push(target); }
       moveItem(p, target, colId);
       persist(); RENDER[currentPage]();
     },
     it ? () => { p.items = p.items.filter(x => x.id !== it.id); persist(); RENDER[currentPage](); } : null);
+  // Lista de verificação (CHK-01): cópia de trabalho, gravada só ao salvar o item
+  const ck = (it && Array.isArray(it.checklist) ? it.checklist : []).map(c => ({ ...c }));
+  const drawCk = () => {
+    const pr = checklistProgress({ checklist: ck });
+    document.getElementById('ck-count').textContent = pr ? `· ${pr.feitos}/${pr.total}` : '';
+    document.getElementById('ck-list').innerHTML = ck.map((c, i) => `<div class="ck-row${c.feito ? ' done' : ''}">
+      <button type="button" class="ck-dot${c.feito ? ' on' : ''}" role="checkbox" aria-checked="${c.feito}" title="${c.feito ? 'Desmarcar' : 'Marcar como concluído'}" onclick="window._ckToggle(${i})">✓</button>
+      <input value="${esc(c.texto)}" oninput="window._ck[${i}].texto=this.value" aria-label="Subitem ${i + 1}">
+      <button type="button" class="btn-rm" title="Remover subitem" onclick="window._ckDel(${i})">✕</button></div>`).join('');
+  };
+  window._ck = ck;
+  window._ckToggle = i => { ck[i].feito = !ck[i].feito; drawCk(); };
+  window._ckDel = i => { ck.splice(i, 1); drawCk(); };
+  window._ckAdd = () => { const el = document.getElementById('ck-new'); const t = el.value.trim(); if (!t) return; ck.push({ id: uid('ck'), texto: t, feito: false }); el.value = ''; drawCk(); el.focus(); };
+  drawCk();
 }
 
 /* ===================== KANBAN ===================== */
 let dragId = null;
+const openChecks = new Set();   // cartões com a lista de verificação aberta (CHK-04), só nesta sessão
+function toggleCheckList(itId) { openChecks.has(itId) ? openChecks.delete(itId) : openChecks.add(itId); renderKanban(); }
+function toggleCheckItem(itId, ckId) {
+  const p = cur(); const it = p && p.items.find(x => x.id === itId);
+  const c = it && (it.checklist || []).find(x => x.id === ckId);
+  if (!c) return;
+  c.feito = !c.feito; persist(); renderKanban();
+}
 function flowMetrics(p, items) {
   const done = items.filter(it => it.fim);
   const now = Date.now();
@@ -980,9 +1037,11 @@ function renderKanban() {
       const age = c.tipo === 'doing' && it.inicio ? days(it.inicio, Date.now()) : null;
       const sprint = it.sprint ? p.sprints.find(s => s.id === it.sprint) : null;
       const late = it.prazo && !it.fim && it.prazo < today();
+      const ckp = checklistProgress(it);
       return `<div class="kcard cls-${esc(it.classe)}" draggable="true" ondragstart="dragId='${it.id}'" onclick="itemDialog('${it.id}')">
         <div class="kcard-title">${esc(it.titulo)}</div>
-        <div class="kcard-meta"><span class="tag">${esc(it.tipo)}</span>${it.pontos ? `<span class="tag">${esc(it.pontos)} pt</span>` : ''}${sprint ? `<span class="tag">${esc(sprint.nome)}</span>` : ''}
+        ${ckp && openChecks.has(it.id) ? `<div class="kcard-checks">${it.checklist.map(c => `<div class="ck-row${c.feito ? ' done' : ''}"><button type="button" class="ck-dot${c.feito ? ' on' : ''}" role="checkbox" aria-checked="${c.feito}" title="${c.feito ? 'Desmarcar' : 'Marcar como concluído'}" onclick="event.stopPropagation();toggleCheckItem('${it.id}','${esc(c.id)}')">✓</button><span class="ck-txt">${esc(c.texto)}</span></div>`).join('')}</div>` : ''}
+        <div class="kcard-meta">${ckp ? `<button type="button" class="kcheck${ckp.feitos === ckp.total ? ' full' : ''}" title="${openChecks.has(it.id) ? 'Recolher' : 'Mostrar'} a lista de verificação" onclick="event.stopPropagation();toggleCheckList('${it.id}')">☑ ${ckp.feitos}/${ckp.total}</button>` : ''}<span class="tag">${esc(it.tipo)}</span>${it.pontos ? `<span class="tag">${esc(it.pontos)} pt</span>` : ''}${sprint ? `<span class="tag">${esc(sprint.nome)}</span>` : ''}
         ${it.resp ? `<span>${esc(it.resp)}</span>` : ''}${age != null ? `<span class="${age > m.agingLimit ? 'aging' : ''}">· ${f1(age)} d</span>` : ''}${late ? `<span style="color:var(--danger)">· venceu ${fmtD(it.prazo)}</span>` : ''}</div></div>`;
     }).join('');
     return `<div class="col${over ? ' over-wip' : ''}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="this.classList.remove('drag-over');dropOn('${c.id}')">
