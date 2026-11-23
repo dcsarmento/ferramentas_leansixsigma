@@ -45,7 +45,8 @@ Regra: lógica de negócio fica em funções puras do bloco Domínio, para ser t
       marcos: [ { id, nome, data, feito } ],
       cols:   [ { id, nome, tipo: backlog|todo|doing|done, wip } ],
       items:  [ { id, titulo, desc, tipo, classe, pontos, resp, prazo, col, sprint, ordem,
-                  criado, commit, inicio, fim, hist: [ { col, ts } ] } ],
+                  criado, commit, inicio, fim, hist: [ { col, ts } ],
+                  checklist: [ { id, texto, feito } ], rotulos, bucket, origem } ],   // CHK/PLN, ADR 14
       sprints:[ { id, nome, meta, status: planejada|ativa|concluída, inicio, fim,
                   compromisso, velocidade, retro: { bom, melhorar, acoes } } ],
       riscos: [ { id, desc, categoria, prob, imp, resposta, acao, dono, status } ],
@@ -94,3 +95,4 @@ Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "
 | 11 | 19/11/2026 | Merge automático por GitHub Actions quando **Testes** fica verde no último commit de um PR para a `main`; merge commit; empilhados redirecionados e retestados; branch apagada | Pedido do dono (mesmo fluxo do BI Frota, sem merge manual); o workflow não depende de configurar o repositório e só mescla depois do CI, ao contrário do BI | Auto-merge nativo do GitHub (exige ligar a opção e a proteção da `main` nas configurações); merge logo ao abrir o PR, como no BI (pula o CI); squash (quebra PRs empilhados) |
 | 12 | 19/11/2026 | Nome da ferramenta passa de Atlas para Enki (deus sumério da sabedoria e dos ofícios) em tudo que aparece na tela e na documentação; chave `atlas_db_v1` e formato do backup (`app: 'atlas'`) mantidos | Pedido do dono; manter os identificadores preserva os dados salvos e os backups existentes sem código de migração | Renomear a chave para `enki_db_v1` com migração (risco de perder dados se falhar, sem ganho para o usuário); aceitar dois formatos de backup |
 | 13 | 19/11/2026 | Enki em tema claro, com DM Sans no texto, DM Mono só em números e ícones SVG no menu; cores só em tokens do `:root`. DMAIC e CEP seguem escuros até a LAY-04 | Pedido do dono ("cara de DOS"); padrão das ferramentas de gestão de mercado; contraste AA testado (LAY-01) | Biblioteca de componentes ou framework CSS (quebra a página autocontida); trocar as três páginas de uma vez (PR grande demais para revisar); manter escuro e só trocar fontes |
+| 14 | 23/11/2026 | Exceção ao gate: lista de verificação no item do Kanban e importação do arquivo Excel exportado pelo Microsoft Planner, lido no navegador sem biblioteca | Os projetos reais do dono estão no Planner; importar é o que traz uso real ao Enki e faz o gate andar. Decidido pelo dono | Manter o gate e recadastrar à mão; Microsoft Graph com login (fora do escopo, exige servidor e registro no Entra ID); SheetJS (npm parado; CDN seria dependência externa em tempo de execução) |
