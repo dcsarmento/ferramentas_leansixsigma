@@ -45,7 +45,8 @@ Regra: lógica de negócio fica em funções puras do bloco Domínio, para ser t
       marcos: [ { id, nome, data, feito } ],
       cols:   [ { id, nome, tipo: backlog|todo|doing|done, wip } ],
       items:  [ { id, titulo, desc, tipo, classe, pontos, resp, prazo, col, sprint, ordem,
-                  criado, commit, inicio, fim, hist: [ { col, ts } ] } ],
+                  criado, commit, inicio, fim, hist: [ { col, ts } ],
+                  checklist: [ { id, texto, feito } ], rotulos, bucket, origem } ],   // PLN, proposta (seção 12 da ESPECIFICACAO)
       sprints:[ { id, nome, meta, status: planejada|ativa|concluída, inicio, fim,
                   compromisso, velocidade, retro: { bom, melhorar, acoes } } ],
       riscos: [ { id, desc, categoria, prob, imp, resposta, acao, dono, status } ],

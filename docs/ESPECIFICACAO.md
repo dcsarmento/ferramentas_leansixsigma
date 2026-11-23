@@ -175,5 +175,49 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 | LAY-05 | Padrão `auto` segue `prefers-color-scheme`; o botão `#theme-btn` alterna auto → claro → escuro → auto; claro e escuro fixos ignoram o sistema; a escolha está em `atlas_db_v1` (`meta.tema`) e sobrevive ao recarregar; no escuro, os mesmos tokens do LAY-01 têm contraste ≥ 4,5:1 |
 | LAY-06 | Dados sem `meta.tema`, ou com valor fora de `auto`/`claro`/`escuro`, abrem no automático |
 
-## 12. Referências
-PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
+## 12. Importação do Microsoft Planner e lista de verificação (proposta PLN, aguardando decisão do gate)
+**Situação.** Proposta. Nenhum código antes da decisão do dono sobre o gate (seção 3 e CLAUDE.md). Se aprovada, vira exceção registrada no ADR 14, no molde do ADR 7.
+
+**Problema.** Os projetos reais do dono (o BI Frota, por exemplo) estão no Microsoft Planner. Recadastrar tarefa por tarefa no Enki é trabalho repetido, e o cartão do Enki não tem a lista de verificação que o Planner tem (subitens com círculo de marcar e contador "0/13" no cartão). Sem os projetos reais, o gate da R1 (30 dias, 3 projetos) não anda.
+**Objetivo.** (1) Cada item do Kanban ganha uma lista de verificação. (2) O Kanban importa o arquivo que o Planner gera em "Exportar plano para Excel" (.xlsx), criando os itens no projeto aberto.
+**Resultado esperado.** Um plano real do Planner vira um quadro do Enki em menos de um minuto, com título, descrição, responsável, prazo, coluna pelo progresso, rótulos e lista de verificação; o cartão mostra "feitos/total".
+
+**Por que arquivo, e não integração.** O Planner só se lê por API (Microsoft Graph) com login Microsoft e registro de aplicativo no Entra ID, o que a seção 4 deixa fora do escopo e o ADR 1 (página estática, sem servidor) não comporta. A exportação para Excel não precisa de nada disso: é um retrato do plano no momento da exportação, feito pelo Planner na web. É importação de mão única: o que mudar depois no Planner não volta sozinho.
+
+**Formato do arquivo (a confirmar com um arquivo real do dono antes da PLN-02).** Pela documentação da Microsoft e por relatos de usuários: uma planilha com o cabeçalho do plano (nome, ID, data de exportação) acima da tabela de tarefas, uma linha por tarefa, com ID, nome, bucket, progresso, prioridade, atribuído a, datas de criação, início, conclusão e término, recorrência, atraso, rótulos, descrição e duas colunas da lista de verificação: os itens numa célula só, separados por ";", e a contagem de concluídos. **Limitação conhecida:** a exportação não diz *qual* subitem está marcado, só quantos. Na importação os subitens entram desmarcados, exceto quando a tarefa está concluída (todos marcados) ou quando a contagem é igual ao total. Item com ";" no texto se parte em dois. O leitor aceita cabeçalhos em português e em inglês e acha a linha do cabeçalho em vez de supor a posição.
+
+**Leitura do .xlsx sem biblioteca.** O .xlsx é um ZIP de XML. O navegador já descompacta (`DecompressionStream('deflate-raw')`) e lê XML (`DOMParser`); um leitor mínimo da primeira planilha e das strings compartilhadas cabe em poucas dezenas de linhas. Evita carregar a SheetJS (a versão do npm está parada e a da CDN própria seria dependência externa em tempo de execução, contra a página autocontida). Plano B, se o leitor falhar com algum arquivo real: aceitar o mesmo plano salvo como CSV pelo Excel.
+
+**Mapeamento.**
+| Planner | Enki |
+| --- | --- |
+| Nome da tarefa | `titulo` |
+| Descrição | `desc` |
+| Progresso: Não iniciado / Em andamento / Concluída | primeira coluna do tipo `todo` (ou `backlog`) / primeira `doing` / primeira `done`, com `moveItem` (datas de fluxo coerentes) |
+| Bucket | rótulo `bucket` guardado no item e mostrado como etiqueta (bucket no Planner é agrupamento livre, não estado) |
+| Prioridade: Urgente / Importante / Média / Baixa | classe de serviço: `expedite` / `padrao` / `padrao` / `intangivel` |
+| Atribuído a | `resp` (nomes separados por ";" viram texto com vírgula) |
+| Data de conclusão (término) | `prazo` |
+| Rótulos | `rotulos` (lista), mostrados como etiquetas |
+| Itens da lista de verificação | `checklist` |
+| ID da tarefa | `origem: { sistema: 'planner', id }`, para reimportar sem duplicar |
+
+**Modelo de dados.** Item ganha `checklist: [ { id, texto, feito } ]`, `rotulos: []`, `bucket: ''` e `origem: null`, com padrão em `normalize` dos itens (backups antigos abrem com lista vazia; DAD-03 verde). O backup não muda de formato.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| CHK-01 | No diálogo do item é possível adicionar, renomear, marcar/desmarcar e remover subitens; tudo persiste após recarregar |
+| CHK-02 | Cartão com lista de verificação mostra "feitos/total"; sem lista, não mostra nada; `checklistProgress(it)` é função pura no bloco Domínio |
+| CHK-03 | Item de backup antigo, sem `checklist`, `rotulos`, `bucket` ou `origem`, abre normalizado; DAD-03 verde; textos dos subitens passam por `esc()` (SEG-01 estendido) |
+| PLN-01 | `readXlsx(arrayBuffer)` lê a primeira planilha de um .xlsx (strings compartilhadas e inline, células vazias no meio) e devolve linhas; arquivo que não é .xlsx é recusado com mensagem, sem alterar dados |
+| PLN-02 | `plannerRows(linhas)` acha o cabeçalho (pt ou en) e converte cada tarefa conforme o mapeamento; testado com um arquivo de exemplo no formato real |
+| PLN-03 | Importar mostra a prévia (quantas tarefas, buckets e subitens) e só grava após confirmar; cancelar não muda nada |
+| PLN-04 | Reimportar o mesmo arquivo atualiza os itens já importados (mesma `origem.id`) em vez de duplicar; subitens marcados no Enki não são desmarcados |
+| PLN-05 | Tarefa concluída no Planner entra em Concluído com todos os subitens marcados e datas de fluxo preenchidas; coluna no limite de WIP não bloqueia a importação, mas o destaque KAN-04 aparece |
+
+### Fora desta proposta
+Sincronização contínua com o Planner, exportar de volta para o Planner, comentários e anexos das tarefas, tarefas recorrentes (entram como item único).
+
+## 13. Referências
+PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

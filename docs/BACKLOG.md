@@ -59,6 +59,16 @@ Fora do gate: muda só a aparência, sem função nova. Uma fatia por PR, cada u
 | LAY-03 | Modo escuro opcional: botão na barra (auto → claro → escuro), `db.meta.tema` gravado pelo `Store`, padrão segue o sistema (`TEMAS`, `nextTheme`, `applyTheme`, `cycleTheme`) | Ver LAY-05 e LAY-06 | LAY-05, LAY-06 (`tests/layout.test.js`) |
 | LAY-04 | Mesmo visual no `dmaic.html` e no `index.html` (CEP), para a regra "mesmo visual nas três páginas" voltar a valer | A definir | — |
 
+## Planner e lista de verificação (proposta, aguardando decisão do gate)
+Especificação na seção 12 da ESPECIFICACAO.md. Só começa se o dono aprovar a exceção (ADR 14). Uma fatia por PR, nesta ordem.
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| PLN-00 | Documentação: especificação seção 12, backlog, arquitetura | Docs revisados pelo dono | — |
+| CHK-01 | Lista de verificação no item: campo `checklist`, `rotulos`, `bucket`, `origem` em `normalize`; diálogo; contador no cartão (`checklistProgress`) | Ver CHK-01 a CHK-03 | CHK-01 a CHK-03 (`tests/planner.test.js`), DAD-03, SEG-01 |
+| PLN-01 | Leitor de .xlsx sem biblioteca (`readXlsx`) | Ver PLN-01 | PLN-01 |
+| PLN-02 | Conversão do Planner (`plannerRows`) com arquivo real do dono como molde (dados sensíveis trocados) | Ver PLN-02 | PLN-02 |
+| PLN-03 | Botão "Importar do Planner" no Kanban, prévia, gravação e reimportação sem duplicar | Ver PLN-03 a PLN-05 | PLN-03 a PLN-05 |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
