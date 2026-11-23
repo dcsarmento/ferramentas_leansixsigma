@@ -69,6 +69,12 @@ Especificação na seção 12 da ESPECIFICACAO.md. Exceção aprovada em 23/11/2
 | PLN-02 | Conversão do Planner (`plannerRows`) com arquivo real do dono como molde (dados sensíveis trocados) | Ver PLN-02 | PLN-02 |
 | PLN-03 | Botão "Importar do Planner" no Kanban, prévia, gravação e reimportação sem duplicar | Ver PLN-03 a PLN-05 | PLN-03 a PLN-05 |
 
+## Cartões recorrentes (extensão da exceção do ADR 14, ADR 15)
+Especificação na seção 13 da ESPECIFICACAO.md. Pedido do dono em 23/11/2026.
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| REC-01 ✓ | Campo `recorrencia` no item (`normalizeRecurrence`), "Repetir" no diálogo, etiqueta no cartão, próxima ocorrência ao concluir (`nextDue`, `nextOccurrence`, `spawnRecurrence`, chamada em `moveItem`) | Ver REC-01 a REC-04 | REC-01 a REC-04 (`tests/recorrencia.test.js`), DAD-03, CHK-03 |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |

@@ -220,5 +220,31 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 ### Fora desta proposta
 Sincronização contínua com o Planner, exportar de volta para o Planner, comentários e anexos das tarefas, tarefas recorrentes (entram como item único).
 
-## 13. Referências
+## 13. Cartões recorrentes no Kanban (fatia REC-01, extensão da exceção do ADR 14, ADR 15)
+**Situação.** Pedido explícito do dono em 23/11/2026, ciente do gate; registrado como extensão da exceção do ADR 14 (ADR 15).
+
+**Problema.** Parte do trabalho real se repete: no projeto BI, o cartão "Importação" volta todo mês com a mesma lista de verificação de ~13 relatórios. Hoje é preciso recriar o cartão e a lista à mão a cada ciclo, como no Planner sem a opção "Repetir".
+**Objetivo.** O item do Kanban ganha a opção "Repetir" (diária, semanal, mensal, anual). Ao concluir o item, o Enki cria a próxima ocorrência, como o Planner faz.
+**Resultado esperado.** Concluir "Importação" de novembro faz surgir "Importação" com prazo em dezembro, na primeira coluna de compromisso ("A fazer"), com a mesma lista desmarcada; o cartão de novembro fica em Concluído, intacto, e entra nas métricas de fluxo como qualquer entrega.
+
+**Regras.**
+- Gatilho: entrada do item numa coluna do tipo `done` (arrastar ou trocar a coluna no diálogo). Não há gerador por calendário: sem conclusão, não nasce ocorrência nova, o que mantém o WIP honesto (a ocorrência atrasada aparece como atrasada, em vez de empilhar cópias).
+- Uma ocorrência por item: o item concluído guarda `recorrencia.proxima` (id do item criado). Reabrir e concluir de novo não duplica. Reabrir não apaga a ocorrência criada (nenhum dado é apagado sozinho).
+- Data: a próxima data limite parte da data limite do item; sem data limite, parte de hoje. Mensal e anual mantêm o dia de referência (`recorrencia.dia`): 31/01 → 28/02 → 31/03.
+- Copia: título, descrição, tipo, classe de serviço, pontos, responsável, rótulos, bucket e lista de verificação (desmarcada, ids novos). Não copia: sprint (a sprint é um timebox, a ocorrência nova entra no backlog do quadro), datas de fluxo, histórico e `origem`.
+- O limite de WIP da coluna de destino não bloqueia a criação; a coluna estourada fica destacada (KAN-04), como na importação.
+- Item sem recorrência e dados antigos não mudam: `recorrencia` ausente ou inválida vira `null`; o backup não muda de formato.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| REC-01 | `nextDue(data, freq, dia)` é função pura: diária +1 dia, semanal +7, mensal e anual preservam o dia de referência e param no último dia do mês quando ele não existe; data vazia ou frequência desconhecida devolvem `null` |
+| REC-02 | O diálogo do item tem "Repetir" (não se repete, diária, semanal, mensal, anual); a escolha persiste após recarregar e o cartão mostra a etiqueta "↻ Mensal" etc.; "Não se repete" remove a recorrência |
+| REC-03 | Concluir um item recorrente (arrastando ou pelo diálogo) cria uma única próxima ocorrência na primeira coluna `todo`, com a próxima data, a lista desmarcada, os mesmos campos e sem sprint; o item concluído não muda; reabrir e concluir de novo não duplica |
+| REC-04 | Item de dados antigos ou com `recorrencia` inválida abre com `recorrencia: null`, sem etiqueta, e concluir não cria nada; DAD-03 e CHK-03 verdes |
+
+### Fora desta fatia
+Intervalo personalizado ("a cada 2 semanas"), dias da semana específicos, "último dia útil do mês", data de término da série, geração por calendário sem concluir, editar a série inteira de uma vez e importar a recorrência do Planner (a PLN segue trazendo a tarefa recorrente como item único).
+
+## 14. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

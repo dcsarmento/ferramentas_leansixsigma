@@ -597,6 +597,7 @@ function normalizeItem(it) {
   if (!Array.isArray(it.rotulos)) it.rotulos = [];
   if (typeof it.bucket !== 'string') it.bucket = '';
   if (it.origem === undefined) it.origem = null;
+  it.recorrencia = normalizeRecurrence(it.recorrencia);   // REC-04
   return it;
 }
 /* Progresso da lista de verificação (CHK-02): null quando não há subitens */
@@ -604,6 +605,53 @@ const checklistProgress = it => {
   const l = it && Array.isArray(it.checklist) ? it.checklist : [];
   return l.length ? { feitos: l.filter(c => c.feito).length, total: l.length } : null;
 };
+
+/* Recorrência de itens (REC, ADR 15): ao concluir, nasce a próxima ocorrência */
+const RECORRENCIAS = [['', 'Não se repete'], ['diaria', 'Diária'], ['semanal', 'Semanal'], ['mensal', 'Mensal'], ['anual', 'Anual']];
+function normalizeRecurrence(r) {
+  if (!r || typeof r !== 'object' || !RECORRENCIAS.some(([v]) => v && v === r.freq)) return null;
+  const dia = Number.isInteger(r.dia) && r.dia >= 1 && r.dia <= 31 ? r.dia : null;
+  return { freq: r.freq, dia, proxima: typeof r.proxima === 'string' && r.proxima ? r.proxima : null };
+}
+/* Próxima data (REC-01): mensal e anual mantêm o dia de referência e param no fim do mês quando ele não existe */
+function nextDue(iso, freq, dia) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
+  if (!m) return null;
+  let y = +m[1], mo = +m[2] - 1, d = +m[3];
+  const ymd = dt => dt.toISOString().slice(0, 10);
+  if (freq === 'diaria' || freq === 'semanal') return ymd(new Date(Date.UTC(y, mo, d + (freq === 'diaria' ? 1 : 7))));
+  if (freq !== 'mensal' && freq !== 'anual') return null;
+  if (freq === 'mensal') { mo += 1; if (mo > 11) { mo = 0; y += 1; } } else y += 1;
+  const fimMes = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  return ymd(new Date(Date.UTC(y, mo, Math.min(dia || d, fimMes))));
+}
+/* Próxima ocorrência (REC-03): mesmos campos, lista desmarcada, sem sprint, fluxo zerado */
+function nextOccurrence(it, hoje) {
+  const r = normalizeRecurrence(it.recorrencia);
+  if (!r) return null;
+  const base = it.prazo || hoje;
+  const dia = r.dia || +String(base).slice(8, 10) || null;
+  return normalizeItem({
+    id: uid('it'), titulo: it.titulo, desc: it.desc, tipo: it.tipo, classe: it.classe, pontos: it.pontos, resp: it.resp,
+    prazo: nextDue(base, r.freq, dia) || '', sprint: null, criado: nowISO(), commit: null, inicio: null, fim: null, hist: [], col: null,
+    checklist: (it.checklist || []).map(c => ({ texto: c.texto, feito: false })),
+    rotulos: [...(it.rotulos || [])], bucket: it.bucket || '', origem: null,
+    recorrencia: { freq: r.freq, dia, proxima: null }
+  });
+}
+/* Cria a próxima ocorrência uma única vez por item concluído; devolve o item novo ou null */
+function spawnRecurrence(p, it) {
+  it.recorrencia = normalizeRecurrence(it.recorrencia);
+  if (!it.recorrencia || it.recorrencia.proxima) return null;
+  const novo = nextOccurrence(it, today());
+  const destino = p.cols.find(c => c.tipo === 'todo') || p.cols.find(c => c.tipo !== 'done') || p.cols[0];
+  novo.ordem = p.items.length;
+  p.items.push(novo);
+  moveItem(p, novo, destino.id);
+  it.recorrencia.proxima = novo.id;
+  if (!it.recorrencia.dia) it.recorrencia.dia = novo.recorrencia.dia;
+  return novo;
+}
 
 /* Normaliza projetos vindos de backups antigos ou incompletos */
 function normalize(p) {
@@ -928,7 +976,7 @@ function moveItem(p, it, colId) {
   it.col = colId; it.hist = it.hist || []; it.hist.push({ col: colId, ts: t });
   if (c.tipo !== 'backlog' && !it.commit) it.commit = t;
   if (c.tipo === 'doing' && !it.inicio) it.inicio = t;
-  if (c.tipo === 'done') { it.fim = t; if (!it.inicio) it.inicio = t; if (!it.commit) it.commit = t; }
+  if (c.tipo === 'done') { it.fim = t; if (!it.inicio) it.inicio = t; if (!it.commit) it.commit = t; if (it.recorrencia) spawnRecurrence(p, it); }
   else it.fim = null;
 }
 function wipOk(p, colId, excludeId) {
@@ -953,6 +1001,7 @@ function itemDialog(id, presetCol) {
       <div class="field"><label>Pontos / esforço</label><input id="it-pontos" type="number" min="0" step="1" value="${esc(it?.pontos ?? 1)}"></div>
       <div class="field"><label>Responsável</label><input id="it-resp" value="${esc(it?.resp)}"></div>
       <div class="field"><label>Data limite (opcional)</label><input id="it-prazo" type="date" value="${esc(it?.prazo)}"></div>
+      <div class="field"><label>Repetir</label><select id="it-rec">${opts(RECORRENCIAS, it?.recorrencia?.freq || '')}</select><span class="hint">Ao concluir, nasce a próxima ocorrência</span></div>
       <div class="field span2"><label>Lista de verificação <span id="ck-count" class="hint"></span></label><div id="ck-list"></div>
         <div class="ck-row"><input id="ck-new" placeholder="Adicionar um item" onkeydown="if(event.key==='Enter'){event.preventDefault();window._ckAdd()}"><button class="btn-ic" type="button" onclick="window._ckAdd()">+ subitem</button></div></div>
     </div>
@@ -965,6 +1014,8 @@ function itemDialog(id, presetCol) {
       if (target.col !== colId && !wipOk(p, colId, target.id)) return false;
       Object.assign(target, { titulo, desc: val('it-desc'), tipo: val('it-tipo'), classe: val('it-classe'), sprint: val('it-sprint') || null, pontos: Math.max(0, +val('it-pontos') || 0), resp: val('it-resp'), prazo: val('it-prazo') });
       target.checklist = ck.filter(c => c.texto.trim()).map(c => ({ id: c.id, texto: c.texto.trim(), feito: c.feito }));
+      const freq = val('it-rec'), r0 = target.recorrencia;   // REC-02: trocar a frequência recomeça o dia de referência
+      target.recorrencia = freq ? { freq, dia: r0 && r0.freq === freq ? r0.dia : null, proxima: r0 ? r0.proxima : null } : null;
       normalizeItem(target);
       if (!it) { target.col = null; p.items.push(target); }
       moveItem(p, target, colId);
@@ -1041,7 +1092,7 @@ function renderKanban() {
       return `<div class="kcard cls-${esc(it.classe)}" draggable="true" ondragstart="dragId='${it.id}'" onclick="itemDialog('${it.id}')">
         <div class="kcard-title">${esc(it.titulo)}</div>
         ${ckp && openChecks.has(it.id) ? `<div class="kcard-checks">${it.checklist.map(c => `<div class="ck-row${c.feito ? ' done' : ''}"><button type="button" class="ck-dot${c.feito ? ' on' : ''}" role="checkbox" aria-checked="${c.feito}" title="${c.feito ? 'Desmarcar' : 'Marcar como concluído'}" onclick="event.stopPropagation();toggleCheckItem('${it.id}','${esc(c.id)}')">✓</button><span class="ck-txt">${esc(c.texto)}</span></div>`).join('')}</div>` : ''}
-        <div class="kcard-meta">${ckp ? `<button type="button" class="kcheck${ckp.feitos === ckp.total ? ' full' : ''}" title="${openChecks.has(it.id) ? 'Recolher' : 'Mostrar'} a lista de verificação" onclick="event.stopPropagation();toggleCheckList('${it.id}')">☑ ${ckp.feitos}/${ckp.total}</button>` : ''}<span class="tag">${esc(it.tipo)}</span>${it.pontos ? `<span class="tag">${esc(it.pontos)} pt</span>` : ''}${sprint ? `<span class="tag">${esc(sprint.nome)}</span>` : ''}
+        <div class="kcard-meta">${ckp ? `<button type="button" class="kcheck${ckp.feitos === ckp.total ? ' full' : ''}" title="${openChecks.has(it.id) ? 'Recolher' : 'Mostrar'} a lista de verificação" onclick="event.stopPropagation();toggleCheckList('${it.id}')">☑ ${ckp.feitos}/${ckp.total}</button>` : ''}<span class="tag">${esc(it.tipo)}</span>${it.recorrencia ? `<span class="tag krec" title="Repete: ${esc(RECORRENCIAS.find(([v]) => v === it.recorrencia.freq)[1])}">↻ ${esc(RECORRENCIAS.find(([v]) => v === it.recorrencia.freq)[1])}</span>` : ''}${it.pontos ? `<span class="tag">${esc(it.pontos)} pt</span>` : ''}${sprint ? `<span class="tag">${esc(sprint.nome)}</span>` : ''}
         ${it.resp ? `<span>${esc(it.resp)}</span>` : ''}${age != null ? `<span class="${age > m.agingLimit ? 'aging' : ''}">· ${f1(age)} d</span>` : ''}${late ? `<span style="color:var(--danger)">· venceu ${fmtD(it.prazo)}</span>` : ''}</div></div>`;
     }).join('');
     return `<div class="col${over ? ' over-wip' : ''}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="this.classList.remove('drag-over');dropOn('${c.id}')">
