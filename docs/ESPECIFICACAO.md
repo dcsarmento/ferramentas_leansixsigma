@@ -175,8 +175,8 @@ Diferença em relação ao BI Frota: lá o merge acontece segundos depois de abr
 | LAY-05 | Padrão `auto` segue `prefers-color-scheme`; o botão `#theme-btn` alterna auto → claro → escuro → auto; claro e escuro fixos ignoram o sistema; a escolha está em `atlas_db_v1` (`meta.tema`) e sobrevive ao recarregar; no escuro, os mesmos tokens do LAY-01 têm contraste ≥ 4,5:1 |
 | LAY-06 | Dados sem `meta.tema`, ou com valor fora de `auto`/`claro`/`escuro`, abrem no automático |
 
-## 12. Importação do Microsoft Planner e lista de verificação (proposta PLN, aguardando decisão do gate)
-**Situação.** Proposta. Nenhum código antes da decisão do dono sobre o gate (seção 3 e CLAUDE.md). Se aprovada, vira exceção registrada no ADR 14, no molde do ADR 7.
+## 12. Importação do Microsoft Planner e lista de verificação (fatias CHK e PLN, exceção ao gate, ADR 14)
+**Situação.** Exceção ao gate aprovada pelo dono em 23/11/2026 (ADR 14), no molde do ADR 7.
 
 **Problema.** Os projetos reais do dono (o BI Frota, por exemplo) estão no Microsoft Planner. Recadastrar tarefa por tarefa no Enki é trabalho repetido, e o cartão do Enki não tem a lista de verificação que o Planner tem (subitens com círculo de marcar e contador "0/13" no cartão). Sem os projetos reais, o gate da R1 (30 dias, 3 projetos) não anda.
 **Objetivo.** (1) Cada item do Kanban ganha uma lista de verificação. (2) O Kanban importa o arquivo que o Planner gera em "Exportar plano para Excel" (.xlsx), criando os itens no projeto aberto.
