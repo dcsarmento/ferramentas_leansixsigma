@@ -335,5 +335,20 @@ Pedido do dono em 24/11/2026: o Enki deve indicar como preencher cada projeto na
 ### Fora desta fatia
 Bloquear o avanço de fase ou marcar atraso automaticamente; roteiro editável pelo usuário; roteiro da R2 (EAP, Gantt, EVM).
 
-## 18. Referências
-PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
+## 18. Programa (fatia PRG-01, exceção ao gate, ADR 22)
+Pedido do dono em 24/11/2026: "Governança corporativa" é um programa (não o portfólio); o BI Corporativo é um projeto dentro dele; as melhorias de processo são projetos DMAIC dentro do programa. No PMBOK 8 e no Standard for Program Management, programa = projetos relacionados geridos juntos para obter benefícios que não viriam separados; o portfólio é o conjunto de tudo que a empresa executa.
+
+**Resultado esperado.** Nova abordagem "Programa". Na TAP de qualquer outro projeto, o campo "Programa" liga o projeto a um programa. A TAP do programa mostra o bloco "Projetos do programa": quantidade, progresso médio, riscos altos (programa + projetos), projetos com saúde vermelha, a lista com o próximo passo de cada um e "+ Projeto no programa" (cria já ligado, com patrocinador e alinhamento do programa). No painel, o projeto mostra "programa: X".
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| PRG-01 | `programaId` no modelo (padrão ''); `programComponents(d, id)` lista os projetos ligados, sem programa dentro de programa; progresso do programa = média dos projetos que têm progresso (null se nenhum) |
+| PRG-02 | TAP liga o projeto ao programa (só programas no seletor; a TAP do programa não tem Programa, Processo melhorado nem DMAIC); a TAP do programa lista os projetos e "+ Projeto no programa" cria o projeto já ligado; o painel mostra "programa: X" |
+| PRG-03 | Excluir o programa solta os projetos (`programaId` = ''); o roteiro do programa pede "Projetos do programa" no lugar de entregas no Kanban |
+
+### Fora desta fatia
+Registro e acompanhamento de benefícios do programa; programa dentro de programa; filtro do portfólio por programa; cronograma integrado (R2).
+
+## 19. Referências
+PMBOK Guide 8ª ed. (PMI, 2025) · The Standard for Program Management, 5ª ed. (PMI) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

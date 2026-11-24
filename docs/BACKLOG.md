@@ -79,6 +79,7 @@ Especificação na seção 13 da ESPECIFICACAO.md. Pedido do dono em 23/11/2026.
 ## DMAIC: correções e integração com o Enki
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
+| PRG-01 ✓ | Programa: abordagem nova, campo "Programa" na TAP (`programaId`), bloco "Projetos do programa" na TAP do programa (`programComponents`, `programBox`, `newComponentProject`), progresso médio, roteiro com etapa "componentes"; ADR 22 | Ver PRG-01 a PRG-03 | PRG-01 a PRG-03 (`tests/programa.test.js`) |
 | GUI-01 ✓ | Roteiro do projeto: barra "Próximo passo" e "Ver roteiro" nas telas de projeto (`projectRoadmap`, `renderGuide`, `DMAIC_FASES`); "Como começar esta fase" no DMAIC (`FASE_GUIA`, `renderFaseGuia`); ADR 21 | Ver GUI-01 a GUI-03 | GUI-01 a GUI-03 (`tests/roteiro.test.js`) |
 | INT-06 ✓ | Frente DMAIC em qualquer abordagem: vínculo e "Criar no DMAIC" na TAP sem exigir abordagem DMAIC (`renderTap`); progresso só segue as fases quando a abordagem é DMAIC; ADR 19 | Ver INT-06 | INT-06 (`tests/integracao-dmaic.test.js`) |
 | INT-01 ✓ | Botão "⇣ Puxar do Enki" na fase Define: lê `atlas_db_v1` (só leitura, `enkiData`), preenche vazios (`mergeFromEnki`, `ENKI_MAP`, `puxarDoEnki`); ADR 17 | Ver INT-01 a INT-03 | INT-01 a INT-03 (`tests/integracao-dmaic.test.js`) |

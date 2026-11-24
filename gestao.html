@@ -469,7 +469,7 @@ function persist() {
 }
 
 /* ===================== DOMÍNIO ===================== */
-const ABORDAGENS = ['Preditiva', 'Scrum', 'Kanban', 'DMAIC', 'Híbrida'];
+const ABORDAGENS = ['Preditiva', 'Scrum', 'Kanban', 'DMAIC', 'Híbrida', 'Programa'];   // Programa: PRG-01, ADR 22
 const STATUS = ['Ideia', 'Planejamento', 'Em execução', 'Pausado', 'Concluído', 'Cancelado'];
 const ATIVOS = ['Planejamento', 'Em execução'];
 const SAUDE = [['verde', 'Verde — no plano'], ['amarelo', 'Amarelo — atenção'], ['vermelho', 'Vermelho — fora do plano']];
@@ -495,7 +495,7 @@ function makeProject(o) {
   const t = nowISO();
   return Object.assign({
     id: uid('prj'), nome: 'Novo projeto', abordagem: 'Híbrida', status: 'Planejamento', saude: 'verde', prioridade: 'Média',
-    gerente: '', patrocinador: '', inicio: today(), fim: '', alinhamento: '', dmaicId: '', processoId: '',   // processoId: R3-A4
+    gerente: '', patrocinador: '', inicio: today(), fim: '', alinhamento: '', dmaicId: '', processoId: '', programaId: '',   // processoId: R3-A4 · programaId: PRG-01
     tap: { justificativa: '', objetivo: '', dentro: '', fora: '', premissas: '', restricoes: '', orcamento: '', criterios: '' },
     marcos: [], cols: defaultCols(), items: [], sprints: [], riscos: [], partes: [], licoes: [],
     createdAt: t, updatedAt: t
@@ -652,6 +652,8 @@ function projectRoadmap(p, procs, dm) {
   } else if (ab === 'Kanban') {
     add('quadro', 'Execução', 'Itens no quadro', 'kanban', 'No Kanban, cadastre as demandas como cartões no Backlog.', (p.items || []).length > 0);
     add('wip', 'Execução', 'Limites de WIP', 'kanban', 'Defina o limite de WIP das colunas de trabalho: é o que torna o fluxo puxado.', (p.cols || []).some(c => c.tipo === 'doing' && +c.wip > 0));
+  } else if (ab === 'Programa') {
+    add('componentes', 'Execução', 'Projetos do programa', 'tap', 'Na TAP do programa, use "+ Projeto no programa" ou ligue projetos existentes pelo campo "Programa" na TAP deles.', programComponents(db, p.id).length > 0);
   } else if (ab !== 'DMAIC') {
     add('entregas', 'Execução', 'Entregas no Kanban', 'kanban', 'No Kanban, quebre o escopo em entregas e mova conforme o trabalho anda.', (p.items || []).length > 0);
   }
@@ -776,7 +778,13 @@ const isDone = (p, it) => colOf(p, it.col).tipo === 'done';
 const activeSprint = p => p.sprints.find(s => s.status === 'ativa') || null;
 const riskScore = r => (+r.prob || 0) * (+r.imp || 0);
 const riskLevel = s => s >= 15 ? ['Alto', 'var(--danger)'] : s >= 6 ? ['Médio', 'var(--warn)'] : ['Baixo', 'var(--success)'];
+/* PRG-01: componentes de um programa e progresso = média dos componentes que têm progresso */
+const programComponents = (d, progId) => Object.values(d.projects).filter(x => x.programaId === progId && x.id !== progId && x.abordagem !== 'Programa');   // sem programa dentro de programa (evita ciclo)
 const progress = p => {
+  if (p.abordagem === 'Programa') {
+    const vals = programComponents(db, p.id).map(progress).filter(v => v != null);
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  }
   if (p.abordagem === 'DMAIC' && p.dmaicId) {
     const d = Store.dmaic()[p.dmaicId];
     if (d) return PH.filter(([k]) => d[k] && d[k].status === 'done').length / 5;
@@ -916,7 +924,7 @@ function newProjectDialog() {
       <div class="field"><label>Abordagem</label><select id="np-abord">${opts(ABORDAGENS, 'Híbrida')}</select></div>
       <div class="field"><label>Prioridade</label><select id="np-prio">${opts(PRIORIDADE, 'Média')}</select></div>
     </div>
-    <p class="hint" style="margin-top:.8rem">Preditiva: escopo estável, entregas por marcos. Scrum: escopo emergente em sprints. Kanban: fluxo contínuo de demandas. DMAIC: problema de processo com causa desconhecida e dados disponíveis. Híbrida: combina marcos com quadro ágil.</p>`,
+    <p class="hint" style="margin-top:.8rem">Preditiva: escopo estável, entregas por marcos. Scrum: escopo emergente em sprints. Kanban: fluxo contínuo de demandas. DMAIC: problema de processo com causa desconhecida e dados disponíveis. Híbrida: combina marcos com quadro ágil. Programa: agrupa projetos relacionados que juntos entregam um benefício (ex.: governança corporativa).</p>`,
     () => {
       const nome = val('np-nome');
       if (!nome) { alert('Informe o nome do projeto.'); return false; }
@@ -928,6 +936,7 @@ function newProjectDialog() {
 function deleteProject() {
   const p = cur(); if (!p) return;
   if (!confirm(`Excluir o projeto "${p.nome}" e todos os seus dados? Faça um backup antes, se tiver dúvida.`)) return;
+  programComponents(db, p.id).forEach(x => { x.programaId = ''; });   // PRG-01: componentes ficam soltos no portfólio
   delete db.projects[p.id]; db.meta.current = null; persist(); rerender();
 }
 
@@ -993,7 +1002,7 @@ function renderPainel() {
       const ra = p.riscos.filter(r => r.status !== 'Encerrado' && riskScore(r) >= 15).length;
       const late = p.fim && p.fim < today() && ATIVOS.includes(p.status);
       return `<tr class="click" onclick="selectProject('${p.id}');showPage('tap')">
-        <td><span class="dot ${esc(p.saude)}"></span>${esc(p.nome)}${p.id === db.meta.current ? ' <span class="tag">atual</span>' : ''}</td>
+        <td><span class="dot ${esc(p.saude)}"></span>${esc(p.nome)}${p.id === db.meta.current ? ' <span class="tag">atual</span>' : ''}${p.programaId && db.projects[p.programaId] ? `<div class="hint prg-de">programa: ${esc(db.projects[p.programaId].nome)}</div>` : ''}</td>
         <td><span class="tag">${esc(p.abordagem)}</span></td><td>${esc(p.status)}</td><td>${esc(p.prioridade)}</td>
         <td>${pr == null ? '—' : `<div style="display:flex;align-items:center;gap:.4rem"><div class="bar" style="flex:1"><div style="width:${Math.round(pr * 100)}%"></div></div><span class="num">${Math.round(pr * 100)}%</span></div>`}</td>
         <td class="num">${ra ? `<span style="color:var(--danger)">${ra}</span>` : '0'}</td>
@@ -1034,6 +1043,32 @@ function importDmaic(id) {
   db.projects[p.id] = p; db.meta.current = p.id; persist(); rerender();
 }
 
+/* ===================== PROGRAMA (PRG-01, ADR 22) ===================== */
+function programBox(p) {
+  const comps = programComponents(db, p.id).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  const pr = progress(p);
+  const riscosAltos = comps.concat([p]).reduce((s, x) => s + x.riscos.filter(r => r.status !== 'Encerrado' && riskScore(r) >= 15).length, 0);
+  const vermelhos = comps.filter(x => x.saude === 'vermelho').length;
+  return `<div class="card" id="programa-box"><div class="card-title">Projetos do programa<span><button class="btn-ic no-print" id="btn-novo-componente" onclick="newComponentProject('${esc(p.id)}')">+ Projeto no programa</button></span></div>
+    <div class="kpis" style="margin-bottom:.8rem">
+      <div class="kpi"><div class="kpi-label">Projetos</div><div class="kpi-val" id="prg-qtd">${comps.length}</div><div class="kpi-sub">${comps.filter(x => ATIVOS.includes(x.status)).length} ativos</div></div>
+      <div class="kpi"><div class="kpi-label">Progresso</div><div class="kpi-val" id="prg-prog">${pr == null ? '—' : Math.round(pr * 100) + '%'}</div><div class="kpi-sub">média dos projetos</div></div>
+      <div class="kpi"><div class="kpi-label">Riscos altos</div><div class="kpi-val" style="color:${riscosAltos ? 'var(--danger)' : 'var(--success)'}">${riscosAltos}</div><div class="kpi-sub">programa + projetos</div></div>
+      <div class="kpi"><div class="kpi-label">Saúde vermelha</div><div class="kpi-val" style="color:${vermelhos ? 'var(--danger)' : 'var(--success)'}">${vermelhos}</div><div class="kpi-sub">projetos</div></div>
+    </div>
+    ${comps.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Projeto</th><th>Abordagem</th><th>Status</th><th>Progresso</th><th>Próximo passo</th></tr></thead><tbody>
+      ${comps.map(x => { const px = progress(x), nx = projectRoadmap(x, db.processes, Store.dmaic()).atual; return `<tr class="click" data-prj="${esc(x.id)}" onclick="selectProject(this.dataset.prj);showPage('tap')"><td><span class="dot ${esc(x.saude)}"></span>${esc(x.nome)}</td><td><span class="tag">${esc(x.abordagem)}</span></td><td>${esc(x.status)}</td><td class="num">${px == null ? '—' : Math.round(px * 100) + '%'}</td><td class="hint">${nx ? esc(nx.label) : 'roteiro completo'}</td></tr>`; }).join('')}
+      </tbody></table></div>` : '<p class="hint">Nenhum projeto ligado a este programa. Use "+ Projeto no programa" ou escolha o programa na TAP de um projeto que já existe.</p>'}
+  </div>`;
+}
+function newComponentProject(progId) {
+  const prog = db.projects[progId]; if (!prog) return;
+  const nome = prompt('Nome do projeto dentro do programa "' + prog.nome + '":');
+  if (!nome || !nome.trim()) return;
+  const p = makeProject({ nome: nome.trim(), programaId: progId, patrocinador: prog.patrocinador, alinhamento: prog.alinhamento });
+  db.projects[p.id] = p; db.meta.current = p.id; persist(); refreshSelect(); showPage('tap');
+}
+
 /* ===================== TAP ===================== */
 function setP(field, v) { const p = cur(); if (!p) return; p[field] = v; persist(); if (field === 'nome' || field === 'abordagem') refreshSelect(); }
 function setTap(field, v) { const p = cur(); if (!p) return; p.tap[field] = v; persist(); }
@@ -1057,11 +1092,13 @@ function renderTap() {
         <div class="field"><label>Patrocinador</label><input value="${esc(p.patrocinador)}" oninput="setP('patrocinador',this.value)"></div>
         <div class="field"><label>Gerente do projeto</label><input value="${esc(p.gerente)}" oninput="setP('gerente',this.value)"></div>
         <div class="field span2"><label>Alinhamento estratégico</label><input value="${esc(p.alinhamento)}" placeholder="Qual objetivo estratégico este projeto move?" oninput="setP('alinhamento',this.value)"></div>
-        <div class="field span2"><label>Processo melhorado</label><select id="tap-processo" onchange="setP('processoId',this.value)">${opts([['', '— nenhum —']].concat(Object.values(db.processes).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(x => [x.id, x.nome])), p.processoId)}</select></div>
+        ${p.abordagem === 'Programa' ? '' : `<div class="field span2"><label>Programa</label><select id="tap-programa" onchange="setP('programaId',this.value);renderTap()">${opts([['', '— nenhum —']].concat(Object.values(db.projects).filter(x => x.abordagem === 'Programa' && x.id !== p.id).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(x => [x.id, x.nome])), p.programaId)}</select></div>`}
+        ${p.abordagem === 'Programa' ? '' : `<div class="field span2"><label>Processo melhorado</label><select id="tap-processo" onchange="setP('processoId',this.value)">${opts([['', '— nenhum —']].concat(Object.values(db.processes).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(x => [x.id, x.nome])), p.processoId)}</select></div>
         <div class="field span2"><label>Projeto no DMAIC${p.abordagem === 'DMAIC' ? '' : ' (frente de melhoria, opcional)'}</label><select id="tap-dmaic" onchange="setP('dmaicId',this.value);renderTap()">${opts(dmOpts, p.dmaicId)}</select></div>
-        <div class="field span2" style="justify-content:flex-end">${p.dmaicId ? `<button class="btn ghost" onclick="openDmaic('${esc(p.dmaicId)}')">Abrir fases D-M-A-I-C ↗</button>` : `<button class="btn" id="btn-criar-dmaic" onclick="createInDmaic('${esc(p.id)}')">Criar no DMAIC ↗</button>`}<span class="hint" id="tap-dmaic-hint" style="margin-left:.6rem">${p.abordagem === 'DMAIC' ? 'o progresso do portfólio segue as fases D-M-A-I-C' : 'o progresso continua seguindo os itens do Kanban; o DMAIC só recebe os dados da TAP'}</span></div>
+        <div class="field span2" style="justify-content:flex-end">${p.dmaicId ? `<button class="btn ghost" onclick="openDmaic('${esc(p.dmaicId)}')">Abrir fases D-M-A-I-C ↗</button>` : `<button class="btn" id="btn-criar-dmaic" onclick="createInDmaic('${esc(p.id)}')">Criar no DMAIC ↗</button>`}<span class="hint" id="tap-dmaic-hint" style="margin-left:.6rem">${p.abordagem === 'DMAIC' ? 'o progresso do portfólio segue as fases D-M-A-I-C' : 'o progresso continua seguindo os itens do Kanban; o DMAIC só recebe os dados da TAP'}</span></div>`}   <!-- PRG-02: programa não melhora processo nem abre DMAIC; os projetos dele é que fazem -->
       </div>
     </div>
+    ${p.abordagem === 'Programa' ? programBox(p) : ''}
     <div class="card"><div class="card-title">Por que e para quê</div>
       <div class="form-grid">
         ${tf('justificativa', 'Justificativa / problema de negócio', 'Qual dor ou oportunidade justifica o investimento?')}

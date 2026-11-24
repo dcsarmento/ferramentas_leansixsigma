@@ -12,7 +12,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 | --- | --- |
 | `index.html` | CEP: I-MR, X̄-S, tendência, dispersão, ANOVA, Box-Cox, capacidade (Cp/Cpk) |
 | `dmaic.html` | Roteiro DMAIC: SIPOC, VOC, Pareto, Ishikawa, 5 porquês, GUT, 5W2H, PDSA, plano de controle |
-| `gestao.html` | **Enki** — portfólio, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos. As telas de Projetos ficam agrupadas pelos 7 domínios do PMBOK 8 |
+| `gestao.html` | **Enki** — portfólio, programas, TAP (PMBOK 8), Kanban com WIP e métricas de fluxo, Scrum, riscos, partes interessadas, lições aprendidas; seção Processos com o diagnóstico de processos. As telas de Projetos ficam agrupadas pelos 7 domínios do PMBOK 8 |
 
 ## Enki — Release 1
 
@@ -32,6 +32,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 - **Painel do diagnóstico:** distribuição dos processos por nível (1 a 5 e não avaliado), alerta de "crítico frágil" (criticidade Alta em nível ≤ 2) e de "reavaliar" (última avaliação há mais de 180 dias). Processos desativados ficam fora da conta.
 - **Roteiro do projeto:** nas telas de projeto, "Próximo passo" diz qual etapa preencher na ordem da metodologia da abordagem (TAP → escopo → partes → riscos → marcos → execução → DMAIC → lições), com dica e botão "Ir"; "Ver roteiro" mostra tudo e avisa etapa pulada. No DMAIC, cada fase abre com "Como começar esta fase".
 - **SIPOC do processo:** cinco colunas na ficha do processo (uma linha por item). O DMAIC puxa daqui; "⇣ Trazer do DMAIC" traz de volta o que foi descoberto no projeto. Sempre só colunas vazias.
+- **Programa:** abordagem "Programa" agrupa projetos (ex.: Governança corporativa com BI Corporativo e as melhorias DMAIC). Na TAP de cada projeto, o campo "Programa" faz o vínculo; a TAP do programa mostra os projetos, progresso médio, riscos altos, saúde e "+ Projeto no programa".
 - **Ponte com o DMAIC:** na ficha do processo, "+ Projeto DMAIC" cria o projeto de melhoria já vinculado (`processoId`); na TAP, "Criar no DMAIC ↗" abre o dmaic.html com o projeto criado, preenchido com a TAP e o processo, e o vínculo se fecha sozinho.
 
 ## Dados e backup
