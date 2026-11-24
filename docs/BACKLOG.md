@@ -76,6 +76,11 @@ Especificação na seção 13 da ESPECIFICACAO.md. Pedido do dono em 23/11/2026.
 | --- | --- | --- | --- |
 | REC-01 ✓ | Campo `recorrencia` no item (`normalizeRecurrence`), "Repetir" no diálogo, etiqueta no cartão, próxima ocorrência ao concluir (`nextDue`, `nextOccurrence`, `spawnRecurrence`, chamada em `moveItem`) | Ver REC-01 a REC-04 | REC-01 a REC-04 (`tests/recorrencia.test.js`), DAD-03, CHK-03 |
 
+## Correções do DMAIC
+| # | Tarefa | Critério de aceite | Teste |
+| --- | --- | --- | --- |
+| DMA-01 ✓ | `dmaic.html` sem projeto selecionado: aviso nas fases e campos bloqueados (`syncNoProject`, chamada em `loadProjects`, `loadProject` e `deleteProject`); dica na coluna vazia do SIPOC | Ver DMA-01 a DMA-03 | DMA-01 a DMA-03 (`tests/dmaic.test.js`) |
+
 ## Release 3-B — Ferramentas de processo (aguardando gate)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
