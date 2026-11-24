@@ -103,6 +103,12 @@ table.dmaic-tbl td input:focus,table.dmaic-tbl td textarea:focus,table.dmaic-tbl
 .sipoc-body{padding:.5rem;}
 .sipoc-item{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.4rem .6rem;margin-bottom:.4rem;font-size:.76rem;display:flex;align-items:center;gap:.4rem;}
 .sipoc-item input{background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.76rem;outline:none;flex:1;min-width:0;}
+.sipoc-body:empty::before{content:'Nenhum item. Use "+ Adicionar".';display:block;font-size:.72rem;color:var(--muted2);text-align:center;padding:.3rem 0;}
+
+/* SEM PROJETO (DMA-01): fases bloqueadas até criar ou selecionar um projeto */
+.no-project-banner{display:none;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem;padding:.7rem 1rem;border:1px solid var(--accent2);border-radius:6px;background:rgba(240,165,0,.08);color:var(--text);font-size:.8rem;}
+body.no-project .no-project-banner{display:flex;}
+body.no-project .page:not(#page-home) .card{opacity:.55;}
 
 /* PARETO CHART */
 canvas.chart{display:block;width:100%;}
@@ -425,7 +431,7 @@ canvas.chart{display:block;width:100%;}
         <strong>Ferramentas CEP — Gráficos de Controle e Capacidade</strong>
         <p>Use o sistema CEP para: I-MR, X̄-S, Tendência, Box-Cox, Cp/Cpk, ANOVA, Dispersão</p>
       </div>
-      <button class="btn" onclick="window.open('index.html','_blank')">Abrir CEP →</button>
+      <button class="btn" data-livre onclick="window.open('index.html','_blank')">Abrir CEP →</button>
     </div>
 
     <!-- TEMPOS E MÉTODOS -->
@@ -678,6 +684,7 @@ function loadProjects() {
   refreshProjectSelect();
   const last = localStorage.getItem('dmaic_last');
   if (last && projects[last]) loadProject(last);
+  syncNoProject();
 }
 
 function refreshProjectSelect() {
@@ -772,6 +779,7 @@ function loadProject(id) {
   updateStatus();
   updateHomeInfo();
   document.getElementById('footer-project').textContent = d.nome || id;
+  syncNoProject();
 }
 
 function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
@@ -813,6 +821,23 @@ function deleteProject() {
   refreshProjectSelect();
   document.getElementById('project-select').value = '';
   document.getElementById('home-project-name').textContent = 'Nenhum projeto selecionado';
+  syncNoProject();
+}
+
+// DMA-01: sem projeto selecionado, as fases avisam e bloqueiam os campos,
+// em vez de aceitar digitação que não é gravada em lugar nenhum.
+function syncNoProject() {
+  const none = !currentProject || !projects[currentProject];
+  document.body.classList.toggle('no-project', none);
+  document.querySelectorAll('.page:not(#page-home)').forEach(pg => {
+    if (!pg.querySelector('.no-project-banner')) {
+      const b = document.createElement('div');
+      b.className = 'no-project-banner';
+      b.innerHTML = '<span><strong>Nenhum projeto selecionado.</strong> Crie ou selecione um projeto na barra acima para preencher esta fase.</span><button class="btn-sm primary" onclick="newProject()">+ Novo projeto</button>';
+      pg.prepend(b);
+    }
+    pg.querySelectorAll('.card input, .card textarea, .card select, .card button:not([data-livre]), .page-header select').forEach(el => { el.disabled = none; });
+  });
 }
 
 function exportProject() {

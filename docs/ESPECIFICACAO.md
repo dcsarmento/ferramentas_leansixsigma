@@ -268,5 +268,19 @@ Sincronização contínua com o Planner, exportar de volta para o Planner, comen
 ### Fora desta fatia
 Intervalo personalizado ("a cada 2 semanas"), dias da semana específicos, "último dia útil do mês", data de término da série, geração por calendário sem concluir, editar a série inteira de uma vez e importar a recorrência do Planner (a PLN segue trazendo a tarefa recorrente como item único).
 
-## 14. Referências
+## 14. DMAIC sem projeto selecionado (fatia DMA-01, correção)
+Correção pedida pelo dono em 24/11/2026, fora do gate (conserta comportamento existente do `dmaic.html`, sem função nova).
+
+**Problema.** Sem projeto selecionado, as fases do `dmaic.html` abriam normalmente: o "+ Adicionar" do SIPOC não fazia nada e os campos do contrato aceitavam digitação que não era gravada, sem aviso. Parecia que o SIPOC não aceitava registro.
+**Objetivo.** Deixar claro que é preciso criar ou selecionar um projeto e impedir digitação que se perde.
+**Resultado esperado.** Sem projeto, cada fase mostra um aviso com "+ Novo projeto" e os campos ficam bloqueados; com projeto, tudo funciona como antes. Coluna vazia do SIPOC indica o "+ Adicionar".
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| DMA-01 | Sem projeto, a fase Define mostra "Nenhum projeto selecionado" e os campos, botões do SIPOC e status ficam desabilitados; o botão "Abrir CEP" segue livre |
+| DMA-02 | Com projeto, o aviso some, a coluna vazia do SIPOC mostra a dica do "+ Adicionar" e as cinco colunas aceitam itens que persistem após recarregar |
+| DMA-03 | Excluir o projeto aberto volta a bloquear as fases |
+
+## 15. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
