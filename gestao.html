@@ -116,6 +116,19 @@ button,input,select,textarea{font-family:inherit;}
 .field textarea{resize:vertical;line-height:1.55;}
 .field select option{background:var(--surface);}
 .hint{font-size:.78rem;color:var(--muted);line-height:1.5;}
+/* Roteiro do projeto (GUI-01) */
+#guia-bar:empty{display:none;}
+#guia-bar{margin:0 0 1rem;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--surface);padding:.7rem 1rem;box-shadow:var(--shadow);}
+.guia-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.84rem;color:var(--text);}
+.guia-head .guia-eyebrow{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);}
+.guia-how{font-size:.78rem;color:var(--muted2);margin-top:.25rem;}
+.guia-pulo{color:var(--warn);font-size:.78rem;font-weight:500;}
+.guia-list{list-style:none;margin:.7rem 0 0;padding:0;display:grid;gap:.15rem;}
+.guia-list li{display:flex;gap:.5rem;align-items:baseline;font-size:.8rem;color:var(--muted2);padding:.15rem 0;cursor:pointer;}
+.guia-list li.done{color:var(--success);}
+.guia-list li.atual{color:var(--text);font-weight:600;}
+.guia-list li.pulada{color:var(--warn);}
+.guia-list .guia-fase{min-width:7.5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;}
 
 .btn{background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);padding:.5rem 1rem;font-size:.86rem;font-weight:600;border-radius:8px;cursor:pointer;transition:filter .12s,background .12s;box-shadow:var(--shadow);}
 .btn:hover{filter:brightness(1.08);}
@@ -290,6 +303,7 @@ svg text{font-family:'DM Sans',sans-serif;}
     <button class="btn-sm" onclick="exportBackup()">⬇ Backup JSON</button>
     <label class="btn-sm" style="cursor:pointer">⬆ Restaurar<input type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"></label>
   </div>
+  <div id="guia-bar" class="no-print"></div>
   <div class="banner" id="backup-banner">
     <span id="backup-banner-text"></span>
     <button class="btn-sm" onclick="exportBackup()">Fazer backup agora</button>
@@ -451,6 +465,7 @@ function persist() {
   const el = document.getElementById('save-indicator');
   el.classList.add('show'); clearTimeout(saveTimer); saveTimer = setTimeout(() => el.classList.remove('show'), 1200);
   renderBackupStatus();
+  renderGuide();
 }
 
 /* ===================== DOMÍNIO ===================== */
@@ -608,6 +623,50 @@ const DOMAINS = [
   { id: 'riscos', nome: 'Riscos', itens: [{ page: 'riscos', nome: 'Registro e matriz', icon: 'RSK' }] }
 ];
 const PROJECT_PAGES = ['tap', 'kanban', 'scrum', 'riscos', 'partes', 'licoes'];
+
+/* Roteiro do projeto (GUI-01, ADR 21): etapas na ordem da metodologia de cada abordagem.
+   Função pura: só orienta, não bloqueia. done = o dado da etapa existe. */
+const DMAIC_FASES = [
+  ['define', 'Define', 'Revise o Contrato puxado do Enki e escreva o incômodo com número. Ferramentas: Contrato de Melhoria, SIPOC, VOC, árvore CTC, variáveis e checklist. Passa quando o checklist estiver respondido e o patrocinador de acordo.'],
+  ['measure', 'Measure', 'Monte o plano de coleta (o quê, onde, quem, quantos) e meça a linha de base. Ferramentas: tempos, Pareto e CEP. Passa quando houver linha de base confiável e estabilidade vista no CEP.'],
+  ['analyse', 'Analyse', 'Escolha o efeito (maior barra do Pareto) e monte o Ishikawa com a equipe. Ferramentas: Ishikawa, 5 porquês e GUT. Passa quando cada causa raiz tiver evidência nos dados.'],
+  ['improve', 'Improve', 'Gere soluções por causa raiz e priorize. Ferramentas: ECRS, 5W2H e PDSA. Passa quando o piloto melhorar o indicador contra a linha de base.'],
+  ['control', 'Control', 'Monte o plano de controle (indicador, frequência, responsável, reação). Ferramentas: plano de controle, treinamento e encerramento. Passa com o checklist de encerramento feito e o SIPOC do processo atualizado.']
+];
+function projectRoadmap(p, procs, dm) {
+  const t = p.tap || {}, has = v => !!String(v || '').trim();
+  const proc = p.processoId && procs ? procs[p.processoId] : null;
+  const dp = p.dmaicId && dm ? dm[p.dmaicId] : null;
+  const ab = p.abordagem;
+  const melhoria = ab === 'DMAIC' || !!p.dmaicId || !!p.processoId;
+  const st = [];
+  const add = (k, fase, label, page, how, done) => st.push({ k, fase, label, page, how, done: !!done });
+  add('tap', 'Iniciação', 'TAP: justificativa, objetivo e patrocinador', 'tap', 'Na TAP, escreva o problema de negócio com número, um objetivo SMART (número e prazo) e o patrocinador que autoriza o projeto.', has(t.justificativa) && has(t.objetivo) && has(p.patrocinador));
+  add('escopo', 'Planejamento', 'Escopo: dentro e fora', 'tap', 'Na TAP, liste o que está dentro e o que está fora do escopo. O "fora" evita o aumento silencioso de escopo.', has(t.dentro) && has(t.fora));
+  add('partes', 'Planejamento', 'Partes interessadas', 'partes', 'Em Partes interessadas, registre quem é afetado ou decide, com poder e interesse (matriz de Mendelow).', (p.partes || []).length > 0);
+  add('riscos', 'Planejamento', 'Riscos', 'riscos', 'Em Riscos, registre ao menos um risco com probabilidade, impacto, resposta e dono.', (p.riscos || []).length > 0);
+  if (ab !== 'Scrum' && ab !== 'Kanban') add('marcos', 'Planejamento', 'Marcos com data', 'tap', 'Na TAP, cadastre os marcos com data: são eles que mostram atraso no portfólio.', (p.marcos || []).some(m => m.data));
+  if (ab === 'Scrum') {
+    add('backlog', 'Execução', 'Backlog do produto', 'scrum', 'Em Scrum, escreva os itens do backlog e estime em pontos.', (p.items || []).length > 0);
+    add('sprint', 'Execução', 'Primeira sprint', 'scrum', 'Crie a sprint com meta, puxe itens do backlog e marque como ativa.', (p.sprints || []).some(s => s.status === 'ativa' || s.status === 'concluída'));
+  } else if (ab === 'Kanban') {
+    add('quadro', 'Execução', 'Itens no quadro', 'kanban', 'No Kanban, cadastre as demandas como cartões no Backlog.', (p.items || []).length > 0);
+    add('wip', 'Execução', 'Limites de WIP', 'kanban', 'Defina o limite de WIP das colunas de trabalho: é o que torna o fluxo puxado.', (p.cols || []).some(c => c.tipo === 'doing' && +c.wip > 0));
+  } else if (ab !== 'DMAIC') {
+    add('entregas', 'Execução', 'Entregas no Kanban', 'kanban', 'No Kanban, quebre o escopo em entregas e mova conforme o trabalho anda.', (p.items || []).length > 0);
+  }
+  if (melhoria) {
+    const sip = proc && proc.sipoc ? ['s', 'i', 'p', 'o', 'c'].some(k => (proc.sipoc[k] || []).length) : false;
+    add('processo', 'Melhoria', 'Processo vinculado com SIPOC', 'tap', 'Na TAP, escolha o "Processo melhorado". Em Processos, preencha propósito, regras e o SIPOC do processo antes de abrir o DMAIC.', !!proc && sip);
+    add('dmaic', 'Melhoria', 'Projeto criado no DMAIC', 'tap', 'Na TAP, clique em "Criar no DMAIC ↗": o Contrato e o SIPOC vão preenchidos.', !!dp);
+    DMAIC_FASES.forEach(([k, nome, how]) => add('dmaic-' + k, 'DMAIC', nome, 'dmaic', how, dp && dp[k] && dp[k].status === 'done'));
+  }
+  add('licoes', 'Encerramento', 'Lições aprendidas', 'licoes', 'Em Lições, registre o que funcionou e o que mudar, com recomendação. Faça ao longo do projeto, não só no fim.', (p.licoes || []).length > 0);
+  const atual = st.findIndex(x => !x.done);
+  const ultimoFeito = st.map(x => x.done).lastIndexOf(true);
+  st.forEach((x, i) => { x.atual = i === atual; x.pulada = !x.done && i < ultimoFeito; });
+  return { etapas: st, atual: atual < 0 ? null : st.at(atual), puladas: st.filter(x => x.pulada) };
+}
 /* Garante db.meta.lastPage (última tela por projeto) em dados de versões anteriores (NAV-04) */
 /* Tema da interface (LAY-03): auto segue o sistema; a ordem é a do botão */
 const TEMAS = ['auto', 'claro', 'escuro'];
@@ -794,9 +853,25 @@ function showPage(id) {
   document.getElementById('bar-projeto').style.display = proc ? 'none' : '';
   document.getElementById('bar-processo').style.display = proc ? '' : 'none';
   RENDER[id]();
+  renderGuide();
   window.scrollTo(0, 0);
 }
-function rerender() { refreshSelect(); RENDER[currentPage](); }
+function rerender() { refreshSelect(); RENDER[currentPage](); renderGuide(); }
+let guideOpen = false;
+function renderGuide() {
+  const el = document.getElementById('guia-bar'); if (!el) return;
+  const p = cur();
+  if (!p || !PROJECT_PAGES.includes(currentPage)) { el.innerHTML = ''; return; }
+  const r = projectRoadmap(p, db.processes, Store.dmaic());
+  const feitas = r.etapas.filter(x => x.done).length;
+  const go = x => x.page === 'dmaic' ? (p.dmaicId ? `openDmaic('${esc(p.dmaicId)}')` : `showPage('tap')`) : `showPage('${x.page}')`;
+  const head = r.atual
+    ? `<span class="guia-eyebrow">Próximo passo · ${esc(r.atual.fase)}</span><strong id="guia-atual">${esc(r.atual.label)}</strong><button class="btn-sm primary" id="guia-ir" onclick="${go(r.atual)}">Ir</button>`
+    : `<span class="guia-eyebrow">Roteiro completo</span><strong id="guia-atual">Todas as etapas têm registro</strong>`;
+  el.innerHTML = `<div class="guia-head">${head}${r.puladas.length ? `<span class="guia-pulo" id="guia-pulo" title="${esc(r.puladas.map(x => x.fase + ' · ' + x.label).join('\n'))}">⚠ ${r.puladas.length} etapa${r.puladas.length > 1 ? 's' : ''} pulada${r.puladas.length > 1 ? 's' : ''}</span>` : ''}<span style="flex:1"></span><span class="hint">${feitas} de ${r.etapas.length} · ${esc(p.abordagem)}</span><button class="btn-sm" id="guia-toggle" onclick="guideOpen=!guideOpen;renderGuide()">${guideOpen ? 'Fechar roteiro' : 'Ver roteiro'}</button></div>
+    ${r.atual ? `<div class="guia-how">${esc(r.atual.how)}</div>` : ''}
+    ${guideOpen ? `<ol class="guia-list" id="guia-list">${r.etapas.map(x => `<li class="${x.done ? 'done' : x.atual ? 'atual' : x.pulada ? 'pulada' : ''}" data-etapa="${esc(x.k)}" title="${esc(x.how)}" onclick="${go(x)}"><span class="guia-fase">${esc(x.fase)}</span><span>${x.done ? '✓' : x.atual ? '▸' : x.pulada ? '⚠' : '○'} ${esc(x.label)}</span></li>`).join('')}</ol>` : ''}`;
+}
 
 function needProject(el) {
   if (cur()) return false;
