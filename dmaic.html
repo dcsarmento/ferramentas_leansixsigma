@@ -904,12 +904,19 @@ function mergeFromEnki(define, enkiProj, processes) {
   if (proc && vazio(d.processo) && !vazio(proc.nome)) { d.processo = String(proc.nome); filled.push('processo'); }
   if (proc) {
     d.sipoc = d.sipoc || { s: [], i: [], p: [], o: [], c: [] };
+    // R3-B1: colunas vazias recebem o SIPOC do processo; Clientes cai no campo Cliente se o processo não tiver SIPOC
+    const ps = proc.sipoc || {};
+    ['s', 'i', 'p', 'o', 'c'].forEach(k => {
+      const atual = (d.sipoc[k] || []).filter(x => !vazio(x));
+      const fonte = (Array.isArray(ps[k]) ? ps[k] : []).filter(x => !vazio(x)).map(String);
+      if (!atual.length && fonte.length) { d.sipoc[k] = fonte; filled.push('sipoc.' + k); }
+    });
     const c = (d.sipoc.c || []).filter(x => !vazio(x));
     if (!c.length && !vazio(proc.cliente)) { d.sipoc.c = [String(proc.cliente)]; filled.push('sipoc.c'); }
   }
   return { define: d, filled, processo: proc ? proc.nome : null };
 }
-const ENKI_LABELS = { processo: 'Processo', nome: 'Nome', patrocinador: 'Patrocinador', lider: 'Líder', inicio: 'Início', fim: 'Conclusão', contexto: 'Contexto', objetivos: 'Objetivos', escopoIn: 'Dentro do escopo', escopoOut: 'Fora do escopo', restricoes: 'Restrições', pressupostos: 'Pressupostos', riscos: 'Riscos', 'sipoc.c': 'SIPOC · Clientes' };
+const ENKI_LABELS = { processo: 'Processo', nome: 'Nome', patrocinador: 'Patrocinador', lider: 'Líder', inicio: 'Início', fim: 'Conclusão', contexto: 'Contexto', objetivos: 'Objetivos', escopoIn: 'Dentro do escopo', escopoOut: 'Fora do escopo', restricoes: 'Restrições', pressupostos: 'Pressupostos', riscos: 'Riscos', 'sipoc.s': 'SIPOC · Fornecedores', 'sipoc.i': 'SIPOC · Entradas', 'sipoc.p': 'SIPOC · Processo', 'sipoc.o': 'SIPOC · Saídas', 'sipoc.c': 'SIPOC · Clientes' };
 // Projeto do Enki ligado a este DMAIC: pelo dmaicId do Enki ou pelo enkiId gravado aqui (R3-A4).
 function enkiProjectFor(db, dp) {
   const list = Object.values(db.projects || {});

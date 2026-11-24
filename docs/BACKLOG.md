@@ -83,10 +83,10 @@ Especificação na seção 13 da ESPECIFICACAO.md. Pedido do dono em 23/11/2026.
 | INT-01 ✓ | Botão "⇣ Puxar do Enki" na fase Define: lê `atlas_db_v1` (só leitura, `enkiData`), preenche vazios (`mergeFromEnki`, `ENKI_MAP`, `puxarDoEnki`); ADR 17 | Ver INT-01 a INT-03 | INT-01 a INT-03 (`tests/integracao-dmaic.test.js`) |
 | DMA-01 ✓ | `dmaic.html` sem projeto selecionado: aviso nas fases e campos bloqueados (`syncNoProject`, chamada em `loadProjects`, `loadProject` e `deleteProject`); dica na coluna vazia do SIPOC | Ver DMA-01 a DMA-03 | DMA-01 a DMA-03 (`tests/dmaic.test.js`) |
 
-## Release 3-B — Ferramentas de processo (aguardando gate)
+## Release 3-B — Ferramentas de processo (aguardando gate; R3-B1 por exceção, ADR 20)
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
-| R3-B1 | SIPOC por processo, reaproveitando o padrão do `dmaic.html` | Cinco colunas salvas e restauradas | PRC-04 |
+| R3-B1 ✓ | SIPOC por processo (`sipoc` em `makeProcess`/`normalizeSipoc`, bloco `#sipoc-proc` na ficha, `sipocFromDmaic`, `mergeSipoc`); DMAIC puxa as colunas vazias (`mergeFromEnki`). Exceção ao gate, ADR 20 | Ver PRC-04, SIP-01, SIP-02 | PRC-04, SIP-01, SIP-02 (`tests/sipoc-processo.test.js`) |
 | R3-B2 | VSM simplificado: etapas com tempo de ciclo e espera; eficiência do fluxo | Eficiência = Σ tempo de valor ÷ lead time total | PRC-05 |
 | R3-B3 | Matriz RACI por projeto | Alerta quando uma atividade tem 0 ou mais de 1 "A" | RAC-01 |
 

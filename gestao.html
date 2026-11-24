@@ -152,6 +152,8 @@ table.tbl tr.click:hover td{background:var(--accent-soft);}
 .mat-lvl{font-size:.8rem;font-weight:600;}
 .mat-box{border-top:1px solid var(--border);margin-top:1.1rem;padding-top:1rem;}
 .diag-etapa{border-top:1px solid var(--border);margin-top:1.1rem;padding-top:1rem;}
+#sipoc-proc .sipoc-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem;margin-top:.6rem;}
+@media (max-width:760px){#sipoc-proc .sipoc-grid{grid-template-columns:1fr;}}
 .diag-eyebrow{font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:.2rem;}
 .bar{height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;min-width:70px;}
 .bar > div{height:100%;background:var(--accent);border-radius:999px;}
@@ -493,6 +495,7 @@ function makeProcess(o) {
   return Object.assign({
     id: uid('prc'), nome: 'Novo processo', macroprocesso: '', dono: '', cliente: '', objetivo: '', indicador: '', meta: '',
     proposito: '', regras: [],   // diagnóstico de negócio (R3-A5, ADR 16)
+    sipoc: emptySipoc(),         // SIPOC do processo (R3-B1, ADR 20)
     criticidade: 'Média', status: 'Ativo', avaliacoes: [], createdAt: t, updatedAt: t
   }, o || {});
 }
@@ -502,7 +505,22 @@ function normalizeProcess(pr) {
   if (!Array.isArray(pr.avaliacoes)) pr.avaliacoes = [];
   if (typeof pr.proposito !== 'string') pr.proposito = '';
   pr.regras = parseRules(pr.regras);
+  pr.sipoc = normalizeSipoc(pr.sipoc);
   return pr;
+}
+/* SIPOC do processo (R3-B1, ADR 20): cinco listas de textos */
+const SIPOC_COLS = [['s', 'Fornecedores'], ['i', 'Entradas'], ['p', 'Etapas'], ['o', 'Saídas'], ['c', 'Clientes']];
+function emptySipoc() { return { s: [], i: [], p: [], o: [], c: [] }; }
+function normalizeSipoc(v) {
+  const o = emptySipoc();
+  if (v && typeof v === 'object') SIPOC_COLS.forEach(([k]) => { o[k] = parseRules(v[k]); });
+  return o;
+}
+/* Preenche só as colunas vazias de base com as de fonte; devolve { sipoc, cols } (SIP-02) */
+function mergeSipoc(base, fonte) {
+  const b = normalizeSipoc(base), f = normalizeSipoc(fonte), cols = [];
+  SIPOC_COLS.forEach(([k]) => { if (!b[k].length && f[k].length) { b[k] = f[k]; cols.push(k); } });
+  return { sipoc: b, cols };
 }
 /* Regras de negócio: texto (uma por linha) ou lista → lista de textos sem linhas vazias (NEG-01, NEG-02) */
 function parseRules(v) {
@@ -1478,6 +1496,11 @@ function processDialog(id) {
         <div class="field span2"><label>Propósito</label><textarea id="pr-proposito" rows="3" placeholder="2 a 3 linhas: o que o processo entrega, para quem e por que isso importa">${esc(pr?.proposito)}</textarea></div>
         <div class="field span2"><label>Regras de negócio principais (uma por linha)</label><textarea id="pr-regras" rows="4" placeholder="Ex.: Veículo só é liberado com vistoria assinada&#10;Ex.: Avaria acima de R$ 500 exige aprovação do gestor">${esc((pr?.regras || []).join('\n'))}</textarea></div>
       </div>
+    </div>
+    <div class="diag-etapa" id="sipoc-proc">
+      <div class="card-title"><span>SIPOC do processo</span>${pr ? `<button class="btn-sm" id="btn-sipoc-dmaic" data-proc="${esc(pr.id)}" onclick="sipocFromDmaic(this.dataset.proc)">⇣ Trazer do DMAIC</button>` : ''}</div>
+      <p class="hint">Um item por linha. Vale para todos os projetos de melhoria deste processo: o DMAIC puxa daqui, e o que for descoberto no DMAIC pode voltar para cá (só colunas vazias).</p>
+      <div class="sipoc-grid">${SIPOC_COLS.map(([k, nome]) => `<div class="field"><label>${k.toUpperCase()} · ${nome}</label><textarea id="pr-sipoc-${k}" rows="6" style="font-size:.8rem">${esc((pr?.sipoc?.[k] || []).join('\n'))}</textarea></div>`).join('')}</div>
     </div>${pr ? maturityBox(pr) + improvementBox(pr) : ''}`,
     () => {
       const nome = val('pr-nome');
@@ -1485,7 +1508,8 @@ function processDialog(id) {
       const t = pr || makeProcess();
       Object.assign(t, { nome, macroprocesso: val('pr-macro'), dono: val('pr-dono'), cliente: val('pr-cliente'), objetivo: val('pr-obj'),
         indicador: val('pr-ind'), meta: val('pr-meta'), criticidade: val('pr-crit'), status: val('pr-status'),
-        proposito: val('pr-proposito'), regras: parseRules(document.getElementById('pr-regras').value), updatedAt: nowISO() });
+        proposito: val('pr-proposito'), regras: parseRules(document.getElementById('pr-regras').value),
+        sipoc: normalizeSipoc(Object.fromEntries(SIPOC_COLS.map(([k]) => [k, document.getElementById('pr-sipoc-' + k).value]))), updatedAt: nowISO() });
       db.processes[t.id] = t;
       persist(); renderProcessos();
     },
@@ -1499,6 +1523,18 @@ function improvementBox(pr) {
     ${list.length ? list.map(p => `<div class="hint" style="margin:.2rem 0"><a href="#" data-prj="${esc(p.id)}" onclick="event.preventDefault();closeModal();selectProject(this.dataset.prj);showPage('tap')">${esc(p.nome)}</a> · ${esc(p.abordagem)} · ${esc(p.status)}</div>`).join('')
       : '<p class="hint">Nenhum projeto de melhoria ligado a este processo. "+ Projeto DMAIC" cria o projeto no portfólio, já vinculado, e abre a TAP.</p>'}
   </div>`;
+}
+/* R3-B1: traz para a ficha (sem gravar) as colunas do SIPOC dos projetos DMAIC ligados ao processo */
+function sipocFromDmaic(procId) {
+  const dm = Store.dmaic();
+  const fontes = improvementProjects(db, procId).map(p => dm[p.dmaicId]).filter(d => d && d.define && d.define.sipoc);
+  if (!fontes.length) { alert('Nenhum projeto DMAIC ligado a este processo tem SIPOC. Crie um em "+ Projeto DMAIC" e vincule no DMAIC.'); return; }
+  const atual = Object.fromEntries(SIPOC_COLS.map(([k]) => [k, document.getElementById('pr-sipoc-' + k).value]));
+  let r = { sipoc: normalizeSipoc(atual), cols: [] };
+  fontes.forEach(d => { const m = mergeSipoc(r.sipoc, d.define.sipoc); r = { sipoc: m.sipoc, cols: r.cols.concat(m.cols) }; });
+  if (!r.cols.length) { alert('Nada a trazer: as colunas com dados no DMAIC já estão preenchidas aqui.'); return; }
+  r.cols.forEach(k => { document.getElementById('pr-sipoc-' + k).value = r.sipoc[k].join('\n'); });
+  alert(`Trazido do DMAIC: ${r.cols.map(k => SIPOC_COLS.find(c => c[0] === k)[1]).join(', ')}. Confira e clique em Salvar.`);
 }
 function newImprovementProject(procId) {
   const pr = db.processes[procId]; if (!pr) return;
