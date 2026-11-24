@@ -302,5 +302,21 @@ Pedido do dono em 24/11/2026 ("a ideia é que tudo esteja integrado e que eles p
 ### Fora desta fatia
 Sincronização automática ou campos espelhados; levar dados do DMAIC de volta ao Enki; SIPOC completo do processo (R3-B, atrás do gate).
 
-## 16. Referências
+## 16. SIPOC do processo (fatia R3-B1, exceção ao gate, ADR 20)
+Pedido do dono em 24/11/2026: "o SIPOC precisa ser o SIPOC do processo", puxando dos processos e vice-versa. Exceção ao gate aprovada só para a R3-B1; VSM (R3-B2) e RACI (R3-B3) seguem atrás do gate.
+
+**Problema.** O SIPOC ficava gravado em cada projeto DMAIC; dois projetos do mesmo processo geravam dois SIPOCs e o processo não guardava nenhum.
+**Objetivo.** O SIPOC mora na ficha do processo (`sipoc: { s, i, p, o, c }`, listas de textos). O DMAIC puxa dele e a ficha traz do DMAIC o que foi descoberto no projeto, sempre só para colunas vazias e cada página gravando só os próprios dados.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| PRC-04 | A ficha do processo tem as cinco colunas (uma linha por item); salvar grava listas sem linhas vazias e restaura após recarregar; processo de dados antigos abre com o SIPOC vazio |
+| SIP-01 | "Criar no DMAIC" e "Puxar do Enki" levam o SIPOC do processo vinculado para as colunas vazias do DMAIC; coluna já preenchida no DMAIC é mantida; sem SIPOC no processo, Clientes segue vindo do campo Cliente |
+| SIP-02 | "⇣ Trazer do DMAIC" na ficha preenche as colunas vazias do processo com o SIPOC dos projetos DMAIC ligados a ele (`mergeSipoc`, função pura) e só grava ao salvar; o Enki não grava em `dmaic_projects` |
+
+### Fora desta fatia
+Mapa do processo (BPMN), VSM e RACI; SIPOC com quantidades ou requisitos por saída; mesclar itens dentro de uma coluna já preenchida.
+
+## 17. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

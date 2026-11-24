@@ -30,6 +30,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 - **Diagnóstico de negócio (etapa 1):** na ficha de cada processo, propósito (o que entrega, para quem, por que importa) e regras de negócio principais, uma por linha. O painel alerta processo sem propósito. A maturidade aparece em seguida, como etapa 2.
 - **Avaliação de maturidade:** botão "Avaliar" em cada processo; 5 dimensões (desenho, dono, executores, indicadores, controle) × 5 níveis (Inicial, Repetível, Padronizado, Medido, Otimizado), cada nível com seu descritor. Nível geral = menor dimensão (elo fraco destacado); acima do nível 2 a dimensão exige evidência. Histórico de avaliações com tendência (↑ ↓ =) em relação à anterior.
 - **Painel do diagnóstico:** distribuição dos processos por nível (1 a 5 e não avaliado), alerta de "crítico frágil" (criticidade Alta em nível ≤ 2) e de "reavaliar" (última avaliação há mais de 180 dias). Processos desativados ficam fora da conta.
+- **SIPOC do processo:** cinco colunas na ficha do processo (uma linha por item). O DMAIC puxa daqui; "⇣ Trazer do DMAIC" traz de volta o que foi descoberto no projeto. Sempre só colunas vazias.
 - **Ponte com o DMAIC:** na ficha do processo, "+ Projeto DMAIC" cria o projeto de melhoria já vinculado (`processoId`); na TAP, "Criar no DMAIC ↗" abre o dmaic.html com o projeto criado, preenchido com a TAP e o processo, e o vínculo se fecha sozinho.
 
 ## Dados e backup
