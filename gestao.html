@@ -478,7 +478,7 @@ function makeProject(o) {
   const t = nowISO();
   return Object.assign({
     id: uid('prj'), nome: 'Novo projeto', abordagem: 'Híbrida', status: 'Planejamento', saude: 'verde', prioridade: 'Média',
-    gerente: '', patrocinador: '', inicio: today(), fim: '', alinhamento: '', dmaicId: '',
+    gerente: '', patrocinador: '', inicio: today(), fim: '', alinhamento: '', dmaicId: '', processoId: '',   // processoId: R3-A4
     tap: { justificativa: '', objetivo: '', dentro: '', fora: '', premissas: '', restricoes: '', orcamento: '', criterios: '' },
     marcos: [], cols: defaultCols(), items: [], sprints: [], riscos: [], partes: [], licoes: [],
     createdAt: t, updatedAt: t
@@ -665,6 +665,20 @@ function spawnRecurrence(p, it) {
   return novo;
 }
 
+/* R3-A4: projeto DMAIC criado a partir do Enki (dmaic.html?enki=<id>) guarda define.enkiId;
+   o Enki completa o próprio dmaicId. Função pura sobre os dados: o Enki só grava no atlas_db_v1. */
+function autoLinkDmaic(d, dm) {
+  const usados = new Set(Object.values(d.projects).map(p => p.dmaicId).filter(Boolean));
+  let n = 0;
+  Object.values(d.projects).forEach(p => {
+    if (p.dmaicId) return;
+    const alvo = Object.values(dm || {}).find(x => x && x.id && x.define && x.define.enkiId === p.id && !usados.has(x.id));
+    if (alvo) { p.dmaicId = alvo.id; usados.add(alvo.id); n++; }
+  });
+  return n;
+}
+const improvementProjects = (d, procId) => Object.values(d.projects).filter(p => p.processoId === procId);
+
 /* Normaliza projetos vindos de backups antigos ou incompletos */
 function normalize(p) {
   const base = makeProject({ id: p.id });
@@ -677,6 +691,7 @@ function normalize(p) {
 }
 Object.values(db.projects).forEach(normalize);
 normalizeProcesses(db);
+if (autoLinkDmaic(db, Store.dmaic())) Store.save(db);
 normalizeMeta(db);
 
 const colOf = (p, id) => p.cols.find(c => c.id === id) || p.cols[0];
@@ -916,6 +931,7 @@ function renderPainel() {
         : '<p class="hint">Nenhum projeto DMAIC neste navegador. Os projetos criados em <a href="dmaic.html" target="_blank">dmaic.html</a> aparecem aqui automaticamente.</p>'}
     </div>`;
 }
+function createInDmaic(id) { window.open('dmaic.html?enki=' + encodeURIComponent(id), '_blank'); }   // R3-A4
 function openDmaic(id) { localStorage.setItem('dmaic_last', id); window.open('dmaic.html', '_blank'); }
 function importDmaic(id) {
   const d = Store.dmaic()[id]; if (!d) return;
@@ -948,8 +964,9 @@ function renderTap() {
         <div class="field"><label>Patrocinador</label><input value="${esc(p.patrocinador)}" oninput="setP('patrocinador',this.value)"></div>
         <div class="field"><label>Gerente do projeto</label><input value="${esc(p.gerente)}" oninput="setP('gerente',this.value)"></div>
         <div class="field span2"><label>Alinhamento estratégico</label><input value="${esc(p.alinhamento)}" placeholder="Qual objetivo estratégico este projeto move?" oninput="setP('alinhamento',this.value)"></div>
+        <div class="field span2"><label>Processo melhorado</label><select id="tap-processo" onchange="setP('processoId',this.value)">${opts([['', '— nenhum —']].concat(Object.values(db.processes).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(x => [x.id, x.nome])), p.processoId)}</select></div>
         ${p.abordagem === 'DMAIC' ? `<div class="field span2"><label>Projeto no DMAIC</label><select onchange="setP('dmaicId',this.value);renderTap()">${opts(dmOpts, p.dmaicId)}</select></div>
-        <div class="field span2" style="justify-content:flex-end">${p.dmaicId ? `<button class="btn ghost" onclick="openDmaic('${esc(p.dmaicId)}')">Abrir fases D-M-A-I-C ↗</button>` : '<span class="hint">Crie o projeto em dmaic.html e vincule aqui; o progresso do portfólio passa a seguir as fases.</span>'}</div>` : ''}
+        <div class="field span2" style="justify-content:flex-end">${p.dmaicId ? `<button class="btn ghost" onclick="openDmaic('${esc(p.dmaicId)}')">Abrir fases D-M-A-I-C ↗</button>` : `<button class="btn" id="btn-criar-dmaic" onclick="createInDmaic('${esc(p.id)}')">Criar no DMAIC ↗</button><span class="hint" style="margin-left:.6rem">abre o dmaic.html já com a TAP e o processo; o vínculo é feito sozinho</span>`}</div>` : ''}
       </div>
     </div>
     <div class="card"><div class="card-title">Por que e para quê</div>
@@ -1461,7 +1478,7 @@ function processDialog(id) {
         <div class="field span2"><label>Propósito</label><textarea id="pr-proposito" rows="3" placeholder="2 a 3 linhas: o que o processo entrega, para quem e por que isso importa">${esc(pr?.proposito)}</textarea></div>
         <div class="field span2"><label>Regras de negócio principais (uma por linha)</label><textarea id="pr-regras" rows="4" placeholder="Ex.: Veículo só é liberado com vistoria assinada&#10;Ex.: Avaria acima de R$ 500 exige aprovação do gestor">${esc((pr?.regras || []).join('\n'))}</textarea></div>
       </div>
-    </div>${pr ? maturityBox(pr) : ''}`,
+    </div>${pr ? maturityBox(pr) + improvementBox(pr) : ''}`,
     () => {
       const nome = val('pr-nome');
       if (!nome) { alert('Informe o nome do processo.'); return false; }
@@ -1473,6 +1490,24 @@ function processDialog(id) {
       persist(); renderProcessos();
     },
     pr ? () => { delete db.processes[pr.id]; persist(); renderProcessos(); } : null);
+}
+/* R3-A4 · ponte com melhoria: projetos do portfólio vinculados ao processo */
+function improvementBox(pr) {
+  const list = improvementProjects(db, pr.id);
+  return `<div class="diag-etapa" id="melhoria-box">
+    <div class="card-title"><span>Projetos de melhoria</span><button class="btn-sm primary" id="btn-nova-melhoria" data-proc="${esc(pr.id)}" onclick="newImprovementProject(this.dataset.proc)">+ Projeto DMAIC</button></div>
+    ${list.length ? list.map(p => `<div class="hint" style="margin:.2rem 0"><a href="#" data-prj="${esc(p.id)}" onclick="event.preventDefault();closeModal();selectProject(this.dataset.prj);showPage('tap')">${esc(p.nome)}</a> · ${esc(p.abordagem)} · ${esc(p.status)}</div>`).join('')
+      : '<p class="hint">Nenhum projeto de melhoria ligado a este processo. "+ Projeto DMAIC" cria o projeto no portfólio, já vinculado, e abre a TAP.</p>'}
+  </div>`;
+}
+function newImprovementProject(procId) {
+  const pr = db.processes[procId]; if (!pr) return;
+  document.getElementById('modal-save').click();   // grava o que foi editado na ficha antes de sair
+  if (document.getElementById('modal-bg').classList.contains('show')) return;   // validação da ficha barrou
+  const p = makeProject({ nome: 'Melhoria · ' + pr.nome, abordagem: 'DMAIC', processoId: pr.id });
+  if (pr.objetivo) p.tap.justificativa = 'Processo: ' + pr.nome + (pr.indicador ? ` · indicador ${pr.indicador}${pr.meta ? ' (meta ' + pr.meta + ')' : ''}` : '') + '\nObjetivo do processo: ' + pr.objetivo;
+  db.projects[p.id] = p; db.meta.current = p.id; persist();
+  refreshSelect(); showPage('tap');
 }
 function renderProcessos() {
   const list = Object.values(db.processes).sort((a, b) => (a.macroprocesso || '').localeCompare(b.macroprocesso || '', 'pt-BR') || a.nome.localeCompare(b.nome, 'pt-BR'));
@@ -1618,7 +1653,11 @@ function importBackup(e) {
 
 /* ===================== INÍCIO ===================== */
 // Sincroniza se o dmaic.html for alterado em outra aba
-window.addEventListener('storage', e => { if (e.key === DMAIC_KEY && (currentPage === 'painel' || currentPage === 'tap')) RENDER[currentPage](); });
+window.addEventListener('storage', e => {
+  if (e.key !== DMAIC_KEY) return;
+  if (autoLinkDmaic(db, Store.dmaic())) persist();   // R3-A4
+  if (currentPage === 'painel' || currentPage === 'tap') RENDER[currentPage]();
+});
 applyTheme();
 renderProjectNav();
 refreshSelect();
