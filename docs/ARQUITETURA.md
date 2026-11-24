@@ -6,10 +6,10 @@ Três páginas estáticas publicadas no Vercel (ADR 10), mesma origem (o domíni
 | Página | Lê | Grava |
 | --- | --- | --- |
 | `index.html` (CEP) | — | — |
-| `dmaic.html` | `dmaic_projects`, `dmaic_last` | `dmaic_projects`, `dmaic_last` |
+| `dmaic.html` | `dmaic_projects`, `dmaic_last`, `atlas_db_v1` (só leitura, botão "Puxar do Enki", INT-01) | `dmaic_projects`, `dmaic_last` |
 | `gestao.html` (Enki) | `atlas_db_v1`, `dmaic_projects` | `atlas_db_v1`, `dmaic_last` (só para abrir um projeto no DMAIC) |
 
-O Enki **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um backup e confirma.
+O Enki **nunca grava** em `dmaic_projects`, exceto quando o usuário restaura um backup e confirma. O DMAIC **nunca grava** em `atlas_db_v1`: só lê, sob comando, para preencher campos vazios (ADR 17).
 
 Nome técnico (ADR 12): a ferramenta se chamava Atlas. A chave `atlas_db_v1`, os campos `app: 'atlas'` e `atlas` do backup e o nome dos testes temporários continuam como estão: são identificadores, não texto de tela. Trocar exigiria migração e quebraria a restauração de backups já feitos. Só o nome do arquivo baixado mudou (`enki-backup-AAAA-MM-DD.json`).
 
@@ -106,3 +106,4 @@ Nas telas de Processos a barra superior troca seletor/novo/excluir projeto por "
 | 14 | 23/11/2026 | Exceção ao gate: lista de verificação no item do Kanban e importação do arquivo Excel exportado pelo Microsoft Planner, lido no navegador sem biblioteca | Os projetos reais do dono estão no Planner; importar é o que traz uso real ao Enki e faz o gate andar. Decidido pelo dono | Manter o gate e recadastrar à mão; Microsoft Graph com login (fora do escopo, exige servidor e registro no Entra ID); SheetJS (npm parado; CDN seria dependência externa em tempo de execução) |
 | 15 | 23/11/2026 | Extensão da exceção do ADR 14: cartões recorrentes no Kanban; a próxima ocorrência nasce ao concluir o item (como no Planner), uma por item, com a lista desmarcada | Pedido explícito do dono, ciente do gate; o trabalho recorrente real (BI, "Importação" mensal com 13 relatórios) é o mesmo que a exceção do ADR 14 quer trazer ao Enki | Gerar ocorrências pelo calendário mesmo sem concluir (empilha cópias e infla o WIP); modelo de série com ocorrências virtuais, estilo calendário (complexo para uso pessoal) |
 | 16 | 23/11/2026 | Extensão da exceção do ADR 7: propósito e regras de negócio na ficha do processo, agrupados como etapa 1 do diagnóstico ("Diagnóstico de negócio"), antes da maturidade; regras como lista de textos | Pedido do dono; o propósito dá a referência que a avaliação de maturidade precisa e cabe no diagnóstico já aprovado | SIPOC completo agora (R3-B, atrás do gate); regras como objetos com código, tipo e fonte (estrutura sem uso ainda); propósito obrigatório ao salvar (bloquearia processos já cadastrados) |
+| 17 | 24/11/2026 | DMAIC lê `atlas_db_v1` (só leitura) e, sob comando ("Puxar do Enki"), preenche os campos vazios da fase Define com a TAP do projeto vinculado por `dmaicId` e o cliente do processo de mesmo nome | Pedido do dono ("tudo integrado"); escolha dele entre três opções; não sobrescreve o que foi escrito no DMAIC e mantém cada página dona dos próprios dados | Campos espelhados só leitura (duas telas para a mesma informação, bloqueia ajuste no DMAIC); sincronização automática nos dois sentidos (conflito de versões sem servidor) |

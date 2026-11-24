@@ -76,9 +76,10 @@ Especificação na seção 13 da ESPECIFICACAO.md. Pedido do dono em 23/11/2026.
 | --- | --- | --- | --- |
 | REC-01 ✓ | Campo `recorrencia` no item (`normalizeRecurrence`), "Repetir" no diálogo, etiqueta no cartão, próxima ocorrência ao concluir (`nextDue`, `nextOccurrence`, `spawnRecurrence`, chamada em `moveItem`) | Ver REC-01 a REC-04 | REC-01 a REC-04 (`tests/recorrencia.test.js`), DAD-03, CHK-03 |
 
-## Correções do DMAIC
+## DMAIC: correções e integração com o Enki
 | # | Tarefa | Critério de aceite | Teste |
 | --- | --- | --- | --- |
+| INT-01 ✓ | Botão "⇣ Puxar do Enki" na fase Define: lê `atlas_db_v1` (só leitura, `enkiData`), preenche vazios (`mergeFromEnki`, `ENKI_MAP`, `puxarDoEnki`); ADR 17 | Ver INT-01 a INT-03 | INT-01 a INT-03 (`tests/integracao-dmaic.test.js`) |
 | DMA-01 ✓ | `dmaic.html` sem projeto selecionado: aviso nas fases e campos bloqueados (`syncNoProject`, chamada em `loadProjects`, `loadProject` e `deleteProject`); dica na coluna vazia do SIPOC | Ver DMA-01 a DMA-03 | DMA-01 a DMA-03 (`tests/dmaic.test.js`) |
 
 ## Release 3-B — Ferramentas de processo (aguardando gate)
