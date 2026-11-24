@@ -888,7 +888,8 @@ const ENKI_MAP = [
 ];
 const vazio = v => v == null || String(v).trim() === '';
 // Função pura: devolve o Define com os vazios preenchidos e a lista do que mudou.
-// Processo do Enki casa pelo nome do campo "Processo a ser impactado" (sem diferença de maiúsculas).
+// Processo do Enki: o vinculado ao projeto (processoId, R3-A4); sem vínculo, casa pelo nome
+// do campo "Processo a ser impactado" (sem diferença de maiúsculas).
 function mergeFromEnki(define, enkiProj, processes) {
   const d = JSON.parse(JSON.stringify(define || {}));
   const filled = [];
@@ -896,8 +897,11 @@ function mergeFromEnki(define, enkiProj, processes) {
     const v = enkiProj ? get(enkiProj) : '';
     if (vazio(d[campo]) && !vazio(v)) { d[campo] = String(v); filled.push(campo); }
   });
+  const procs = processes || {};
   const alvo = String(d.processo || '').trim().toLowerCase();
-  const proc = alvo ? Object.values(processes || {}).find(pr => String(pr.nome || '').trim().toLowerCase() === alvo) : null;
+  const proc = (enkiProj && enkiProj.processoId && procs[enkiProj.processoId])
+    || (alvo ? Object.values(procs).find(pr => String(pr.nome || '').trim().toLowerCase() === alvo) : null);
+  if (proc && vazio(d.processo) && !vazio(proc.nome)) { d.processo = String(proc.nome); filled.push('processo'); }
   if (proc) {
     d.sipoc = d.sipoc || { s: [], i: [], p: [], o: [], c: [] };
     const c = (d.sipoc.c || []).filter(x => !vazio(x));
@@ -905,11 +909,40 @@ function mergeFromEnki(define, enkiProj, processes) {
   }
   return { define: d, filled, processo: proc ? proc.nome : null };
 }
-const ENKI_LABELS = { nome: 'Nome', patrocinador: 'Patrocinador', lider: 'Líder', inicio: 'Início', fim: 'Conclusão', contexto: 'Contexto', objetivos: 'Objetivos', escopoIn: 'Dentro do escopo', escopoOut: 'Fora do escopo', restricoes: 'Restrições', pressupostos: 'Pressupostos', riscos: 'Riscos', 'sipoc.c': 'SIPOC · Clientes' };
+const ENKI_LABELS = { processo: 'Processo', nome: 'Nome', patrocinador: 'Patrocinador', lider: 'Líder', inicio: 'Início', fim: 'Conclusão', contexto: 'Contexto', objetivos: 'Objetivos', escopoIn: 'Dentro do escopo', escopoOut: 'Fora do escopo', restricoes: 'Restrições', pressupostos: 'Pressupostos', riscos: 'Riscos', 'sipoc.c': 'SIPOC · Clientes' };
+// Projeto do Enki ligado a este DMAIC: pelo dmaicId do Enki ou pelo enkiId gravado aqui (R3-A4).
+function enkiProjectFor(db, dp) {
+  const list = Object.values(db.projects || {});
+  return list.find(p => p.dmaicId === dp.id) || (dp.define && dp.define.enkiId ? db.projects[dp.define.enkiId] : null) || null;
+}
+// R3-A4: dmaic.html?enki=<id> cria (uma vez) o projeto DMAIC do projeto do Enki, já preenchido.
+function openFromEnkiParam() {
+  const id = new URLSearchParams(location.search).get('enki');
+  if (!id) return;
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  const existente = Object.values(projects).find(p => p.define && p.define.enkiId === id);
+  if (existente) { loadProject(existente.id); return; }
+  const db = enkiData();
+  const enkiProj = db && db.projects[id];
+  if (!enkiProj) { alert('Projeto do Enki não encontrado neste navegador.'); return; }
+  const pid = 'proj_' + Date.now();
+  projects[pid] = { id: pid, createdAt: new Date().toISOString(),
+    define: { nome: enkiProj.nome, enkiId: id, status: 'todo', sipoc: { s: [], i: [], p: [], o: [], c: [] }, voc: [], ctc: [], vars: [], checklist: {} },
+    measure: { status: 'todo', tempos: [], paretoCats: '', paretoVals: '', obs: '' },
+    analyse: { status: 'todo', ishiEfeito: '', ishiCauses: {}, cincoRows: ['', '', '', '', ''], cincoRaiz: '', gut: [], ecrs: [], desc: [], conclusoes: '' },
+    improve: { status: 'todo', w5h2: [], pdsaPlan: '', pdsaDo: '', pdsaStudy: '', pdsaAct: '', resultados: '' },
+    control: { status: 'todo', ctrl: [], train: [], encerramento: {}, licoes: '' } };
+  projects[pid].define = mergeFromEnki(projects[pid].define, enkiProj, db.processes).define;
+  persistAll();
+  refreshProjectSelect();
+  loadProject(pid);
+  const nav = document.getElementById('nav-define');
+  if (nav) showPage('define', nav);
+}
 function puxarDoEnki() {
   if (!currentProject || !projects[currentProject]) return;
   const db = enkiData();
-  const enkiProj = db ? Object.values(db.projects).find(p => p.dmaicId === currentProject) : null;
+  const enkiProj = db ? enkiProjectFor(db, projects[currentProject]) : null;
   if (!enkiProj) { alert('Este projeto DMAIC não está vinculado a nenhum projeto do Enki.\n\nNo Enki, abra a TAP do projeto (abordagem DMAIC) e escolha este projeto em "Projeto no DMAIC", ou use "+ Portfólio" na lista de projetos DMAIC.'); return; }
   const r = mergeFromEnki(projects[currentProject].define, enkiProj, db.processes);
   if (!r.filled.length) { alert('Nada a puxar: os campos com dados no Enki já estão preenchidos aqui. O que já foi escrito no DMAIC é mantido.'); return; }
@@ -1497,6 +1530,7 @@ function esc(s) {
 window.addEventListener('load', () => {
   loadProjects();
   showPage('home', document.querySelector('.nav-item'));
+  openFromEnkiParam();   // R3-A4: dmaic.html?enki=<id>
 });
 window.addEventListener('resize', () => {
   renderPareto();

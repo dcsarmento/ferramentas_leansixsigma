@@ -71,7 +71,7 @@ Dimensão acima do nível 2 exige evidência escrita.
 | --- | --- |
 | PRC-01 | Criar processo exige nome; persiste após recarregar; edição e exclusão (com confirmação) funcionam |
 | PRC-02 | Menu tem a seção Processos; nela a barra esconde o seletor, "Novo projeto" e "Excluir" de projeto |
-| PRC-03 | Processo abre um projeto DMAIC no portfólio, vinculado por `processoId` |
+| PRC-03 | Processo abre um projeto DMAIC no portfólio, vinculado por `processoId` (ficha do processo → "+ Projeto DMAIC", que grava a ficha, cria o projeto e abre a TAP); a TAP mostra e edita o "Processo melhorado"; a ficha lista os projetos de melhoria do processo |
 | MAT-01 | Nível geral = menor nível das 5 dimensões da avaliação mais recente; sem avaliação = "não avaliado" |
 | MAT-02 | Dimensão acima de 2 sem evidência é recusada com mensagem |
 | MAT-03 | Nova avaliação entra no histórico sem apagar as anteriores; tendência compara com a penúltima |
@@ -295,9 +295,11 @@ Pedido do dono em 24/11/2026 ("a ideia é que tudo esteja integrado e que eles p
 | INT-01 | `mergeFromEnki(define, projetoEnki, processos)` é função pura: preenche só vazios, mantém o texto do DMAIC, junta os riscos por linha, casa o processo pelo nome e põe o cliente no SIPOC vazio; rodar de novo não muda nada |
 | INT-02 | O botão preenche a fase Define do projeto vinculado, avisa o que foi puxado e os dados persistem após recarregar |
 | INT-03 | Projeto DMAIC sem vínculo recebe aviso explicando como vincular e nada muda; o DMAIC nunca grava em `atlas_db_v1`; sem projeto selecionado o botão fica bloqueado |
+| INT-04 | (R3-A4, ADR 18) Na TAP de projeto DMAIC sem vínculo, "Criar no DMAIC ↗" abre `dmaic.html?enki=<id>`, que cria uma única vez o projeto DMAIC com `define.enkiId`, já preenchido pela regra da INT-01; o processo vem do `processoId` do projeto (nome casado só sem vínculo); abrir de novo não duplica |
+| INT-05 | (R3-A4, ADR 18) O Enki completa o próprio `dmaicId` a partir do `define.enkiId` (`autoLinkDmaic`), ao abrir e com a aba aberta (evento `storage`); projeto DMAIC já vinculado a outro não é reaproveitado |
 
 ### Fora desta fatia
-Sincronização automática ou campos espelhados; levar dados do DMAIC de volta ao Enki; vínculo formal processo ↔ projeto (`processoId`, fatia R3-A4); SIPOC completo do processo (R3-B, atrás do gate).
+Sincronização automática ou campos espelhados; levar dados do DMAIC de volta ao Enki; SIPOC completo do processo (R3-B, atrás do gate).
 
 ## 16. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).
