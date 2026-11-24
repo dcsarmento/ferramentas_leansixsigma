@@ -318,5 +318,22 @@ Pedido do dono em 24/11/2026: "o SIPOC precisa ser o SIPOC do processo", puxando
 ### Fora desta fatia
 Mapa do processo (BPMN), VSM e RACI; SIPOC com quantidades ou requisitos por saída; mesclar itens dentro de uma coluna já preenchida.
 
-## 17. Referências
+## 17. Roteiro do projeto (fatias GUI-01 a GUI-03, ADR 21)
+Pedido do dono em 24/11/2026: o Enki deve indicar como preencher cada projeto na ordem da metodologia (Iniciação: TAP; Define: ferramentas x, y…) para ninguém pular etapas essenciais. Dentro da R1: orienta o uso das telas existentes, sem função nova de gestão.
+
+**Resultado esperado.** Nas telas de projeto, uma barra "Próximo passo" mostra a primeira etapa sem registro, como preenchê-la e um botão "Ir"; "Ver roteiro" abre a lista inteira com dica por etapa, ✓ feito e ⚠ pulada (etapa vazia com etapa posterior já feita). Orienta, não bloqueia. No DMAIC, cada fase abre com "Como começar esta fase".
+
+**Ordem.** Iniciação (TAP: justificativa, objetivo, patrocinador) → Planejamento (escopo dentro e fora, partes interessadas, riscos, marcos com data — marcos fora de Scrum e Kanban) → Execução (Scrum: backlog e primeira sprint; Kanban: itens e limites de WIP; Preditiva e Híbrida: entregas no Kanban) → Melhoria, quando DMAIC ou com processo/DMAIC vinculado (processo com SIPOC, projeto criado no DMAIC, fases D-M-A-I-C finalizadas) → Encerramento (lições aprendidas).
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| GUI-01 | `projectRoadmap(p, processos, dmaic)` é função pura: etapas na ordem da abordagem, `atual` = primeira sem registro, `puladas` = vazias antes da última feita; fases DMAIC lidas do status no `dmaic.html` |
+| GUI-02 | A barra aparece só nas telas de projeto, mostra o próximo passo com "Ir", atualiza ao gravar e "Ver roteiro" lista as etapas com dica (title) e navegação |
+| GUI-03 | Cada fase do `dmaic.html` abre com "Como começar esta fase": entrada, primeira ação, ferramentas, saída e critério de passagem |
+
+### Fora desta fatia
+Bloquear o avanço de fase ou marcar atraso automaticamente; roteiro editável pelo usuário; roteiro da R2 (EAP, Gantt, EVM).
+
+## 18. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

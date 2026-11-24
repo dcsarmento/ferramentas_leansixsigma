@@ -108,6 +108,10 @@ table.dmaic-tbl td input:focus,table.dmaic-tbl td textarea:focus,table.dmaic-tbl
 /* SEM PROJETO (DMA-01): fases bloqueadas até criar ou selecionar um projeto */
 .no-project-banner{display:none;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem;padding:.7rem 1rem;border:1px solid var(--accent2);border-radius:6px;background:rgba(240,165,0,.08);color:var(--text);font-size:.8rem;}
 body.no-project .no-project-banner{display:flex;}
+/* Como começar esta fase (GUI-02) */
+.fase-guia{margin-bottom:1rem;padding:.8rem 1rem;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;background:var(--surface);font-size:.78rem;color:var(--muted2);line-height:1.6;}
+.fase-guia strong{color:var(--text);}
+.fase-guia .fg-title{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem;}
 body.no-project .page:not(#page-home) .card{opacity:.55;}
 
 /* PARETO CHART */
@@ -825,6 +829,27 @@ function deleteProject() {
   syncNoProject();
 }
 
+// GUI-02: "Como começar esta fase" no topo de cada fase (mesmo roteiro do Enki)
+const FASE_GUIA = {
+  define: ['TAP do Enki e SIPOC do processo', 'Revise o Contrato puxado do Enki e escreva o incômodo com número.', 'Contrato de Melhoria, SIPOC, VOC, árvore CTC, variáveis, checklist', 'Problema, escopo e CTCs com indicador', 'checklist da Define respondido e patrocinador de acordo'],
+  measure: ['CTCs e variáveis da Define', 'Monte o plano de coleta (o quê, onde, quem, quantos).', 'Tempos, Pareto, Ferramentas CEP', 'Linha de base do indicador', 'dados confiáveis e estabilidade vista no CEP'],
+  analyse: ['Linha de base e Pareto da Measure', 'Escolha o efeito (maior barra do Pareto) e monte o Ishikawa com a equipe.', 'Ishikawa, 5 porquês, GUT', 'Causas raiz', 'cada causa raiz tem evidência nos dados'],
+  improve: ['Causas raiz priorizadas', 'Gere soluções por causa raiz e priorize.', 'ECRS, 5W2H, PDSA', 'Solução testada em piloto', 'o piloto melhora o indicador contra a linha de base'],
+  control: ['Solução validada', 'Monte o plano de controle (indicador, frequência, responsável, reação).', 'Plano de controle, treinamento, encerramento', 'Processo padronizado', 'checklist de encerramento feito e SIPOC do processo atualizado no Enki']
+};
+function renderFaseGuia() {
+  Object.entries(FASE_GUIA).forEach(([fase, g]) => {
+    const pg = document.getElementById('page-' + fase);
+    if (!pg || pg.querySelector('.fase-guia')) return;
+    const box = document.createElement('div');
+    box.className = 'fase-guia';
+    box.id = 'guia-' + fase;
+    box.innerHTML = `<div class="fg-title">Como começar esta fase</div><strong>Entrada:</strong> ${esc(g[0])} · <strong>Primeira ação:</strong> ${esc(g[1])}<br><strong>Ferramentas:</strong> ${esc(g[2])} · <strong>Saída:</strong> ${esc(g[3])} · <strong>Passa quando:</strong> ${esc(g[4])}.`;
+    const head = pg.querySelector('.page-header');
+    if (head) head.after(box); else pg.prepend(box);
+  });
+}
+
 // DMA-01: sem projeto selecionado, as fases avisam e bloqueiam os campos,
 // em vez de aceitar digitação que não é gravada em lugar nenhum.
 function syncNoProject() {
@@ -1536,6 +1561,7 @@ function esc(s) {
 // ── INIT ──
 window.addEventListener('load', () => {
   loadProjects();
+  renderFaseGuia();
   showPage('home', document.querySelector('.nav-item'));
   openFromEnkiParam();   // R3-A4: dmaic.html?enki=<id>
 });
