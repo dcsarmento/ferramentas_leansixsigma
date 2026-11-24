@@ -282,5 +282,22 @@ Correção pedida pelo dono em 24/11/2026, fora do gate (conserta comportamento 
 | DMA-02 | Com projeto, o aviso some, a coluna vazia do SIPOC mostra a dica do "+ Adicionar" e as cinco colunas aceitam itens que persistem após recarregar |
 | DMA-03 | Excluir o projeto aberto volta a bloquear as fases |
 
-## 15. Referências
+## 15. DMAIC puxa dados do Enki (fatia INT-01, ADR 17)
+Pedido do dono em 24/11/2026 ("a ideia é que tudo esteja integrado e que eles puxem as informações dos campos que já foram preenchidos"). Cabe na R1: "integração DMAIC/CEP" está no escopo da TAP original; não antecipa o gate.
+
+**Problema.** A integração era de mão única: o Enki lê o DMAIC, mas o `dmaic.html` não lê nada do Enki, e o dono redigita TAP e processo no Contrato de Melhoria.
+**Objetivo.** No projeto DMAIC vinculado a um projeto do Enki (`dmaicId`), um botão "⇣ Puxar do Enki" na fase Define preenche os campos **vazios** com dados do Enki. O que já foi escrito no DMAIC nunca é sobrescrito.
+**Mapa.** Nome ← nome; Patrocinador ← patrocinador; Líder ← gerente; Início/Conclusão ← início/fim; Contexto ← justificativa; Objetivos ← objetivo; Dentro/Fora do escopo ← dentro/fora; Restrições ← restrições; Pressupostos ← premissas; Riscos ← descrições dos riscos, uma por linha. Se "Processo a ser impactado" tiver o mesmo nome de um processo cadastrado no Enki (sem diferença de maiúsculas), SIPOC · Clientes vazio ← cliente do processo.
+
+### Critérios de aceite
+| Código | Critério |
+| --- | --- |
+| INT-01 | `mergeFromEnki(define, projetoEnki, processos)` é função pura: preenche só vazios, mantém o texto do DMAIC, junta os riscos por linha, casa o processo pelo nome e põe o cliente no SIPOC vazio; rodar de novo não muda nada |
+| INT-02 | O botão preenche a fase Define do projeto vinculado, avisa o que foi puxado e os dados persistem após recarregar |
+| INT-03 | Projeto DMAIC sem vínculo recebe aviso explicando como vincular e nada muda; o DMAIC nunca grava em `atlas_db_v1`; sem projeto selecionado o botão fica bloqueado |
+
+### Fora desta fatia
+Sincronização automática ou campos espelhados; levar dados do DMAIC de volta ao Enki; vínculo formal processo ↔ projeto (`processoId`, fatia R3-A4); SIPOC completo do processo (R3-B, atrás do gate).
+
+## 16. Referências
 PMBOK Guide 8ª ed. (PMI, 2025) · Kanban Method (Anderson) · Scrum Guide 2020 · Mendelow (poder × interesse) · Lei de Little (lead time ≈ WIP ÷ vazão) · Microsoft Project, Primavera P6, Jira e Smartsheet (padrão "um conjunto de dados, várias visões") · Microsoft Planner, "Exportar um plano para o Excel" (suporte Microsoft) · Asana, Monday, ClickUp e Linear (padrão visual: tema claro, menu com ícones, cartões) · WCAG 2.2 (contraste mínimo 4,5:1) · OMG Business Process Maturity Model 1.0 (2008) · Hammer, "The Process Audit", HBR (2007) · CMMI (níveis de maturidade).

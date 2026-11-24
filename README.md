@@ -22,7 +22,7 @@ Os dados ficam no navegador e pertencem ao endereço: quem usava o DMAIC em `dcs
 - **Scrum:** backlog ordenado, sprints com meta, burndown, velocidade e retrospectiva. Os itens são os mesmos do Kanban.
 - **Riscos:** P × I, matriz 5×5, alerta para risco alto sem dono ou sem ação.
 - **Partes interessadas:** matriz poder × interesse com atitude (apoia/neutro/resiste).
-- **Integração LSS:** lê os projetos do `dmaic.html` (mesmo navegador), traz para o portfólio e acompanha as fases D-M-A-I-C.
+- **Integração LSS:** lê os projetos do `dmaic.html` (mesmo navegador), traz para o portfólio e acompanha as fases D-M-A-I-C. No DMAIC vinculado, "⇣ Puxar do Enki" (fase Define) preenche os campos vazios com a TAP e o cliente do processo.
 
 ## Enki — Seção Processos (R3-A, em construção)
 
