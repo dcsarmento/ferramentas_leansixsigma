@@ -140,3 +140,22 @@ test('INT-05 o Enki completa o dmaicId sozinho a partir do enkiId gravado pelo D
   assert.deepEqual(errors, []);
   await context.close();
 });
+
+test('INT-06 projeto de qualquer abordagem pode ter frente DMAIC sem mudar o progresso nem os demais dados', async () => {
+  const proj = { id: 'prj_h', nome: 'Projeto híbrido', abordagem: 'Híbrida', dmaicId: '',
+    items: [{ id: 'i1', titulo: 'Feito', col: 'c_done' }, { id: 'i2', titulo: 'Aberto', col: 'c_backlog' }] };
+  const seedDb = { ...enkiProc, meta: { current: 'prj_h', lastBackup: null }, projects: { prj_h: proj } };
+  const { page, context, errors } = await openPage(browser, srv.url + 'gestao.html', { seed: { atlas_db_v1: JSON.stringify(seedDb) } });
+  await page.click('.nav-item[data-page="tap"]');
+  assert.ok(await page.isVisible('#btn-criar-dmaic'), 'Criar no DMAIC aparece em projeto híbrido');
+  assert.match(await page.innerText('#tap-dmaic-hint'), /itens do Kanban/);
+  const antes = await page.evaluate(() => progress(cur()));
+  const dmPage = await context.newPage();
+  await dmPage.goto(srv.url + 'dmaic.html?enki=prj_h');
+  const dmId = await dmPage.evaluate(() => Object.keys(projects)[0]);
+  await page.waitForFunction(id => cur().dmaicId === id, dmId);
+  const depois = await page.evaluate(() => ({ prog: progress(cur()), ab: cur().abordagem, itens: cur().items.length }));
+  assert.deepEqual(depois, { prog: antes, ab: 'Híbrida', itens: 2 }, 'abordagem, itens e progresso intactos');
+  assert.deepEqual(errors, []);
+  await context.close();
+});
