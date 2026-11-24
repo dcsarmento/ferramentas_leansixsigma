@@ -296,6 +296,7 @@ Pedido do dono em 24/11/2026 ("a ideia é que tudo esteja integrado e que eles p
 | INT-02 | O botão preenche a fase Define do projeto vinculado, avisa o que foi puxado e os dados persistem após recarregar |
 | INT-03 | Projeto DMAIC sem vínculo recebe aviso explicando como vincular e nada muda; o DMAIC nunca grava em `atlas_db_v1`; sem projeto selecionado o botão fica bloqueado |
 | INT-04 | (R3-A4, ADR 18) Na TAP de projeto DMAIC sem vínculo, "Criar no DMAIC ↗" abre `dmaic.html?enki=<id>`, que cria uma única vez o projeto DMAIC com `define.enkiId`, já preenchido pela regra da INT-01; o processo vem do `processoId` do projeto (nome casado só sem vínculo); abrir de novo não duplica |
+| INT-06 | (ADR 19) "Projeto no DMAIC" e "Criar no DMAIC" aparecem na TAP de qualquer abordagem: um projeto híbrido pode ter uma frente DMAIC. Fora da abordagem DMAIC, abordagem, itens e progresso (pelos itens do Kanban) não mudam com o vínculo |
 | INT-05 | (R3-A4, ADR 18) O Enki completa o próprio `dmaicId` a partir do `define.enkiId` (`autoLinkDmaic`), ao abrir e com a aba aberta (evento `storage`); projeto DMAIC já vinculado a outro não é reaproveitado |
 
 ### Fora desta fatia
